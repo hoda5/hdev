@@ -14,6 +14,9 @@ var root = findRoot(process.cwd());
 console.log('xx');
 exports.config = __assign({}, loadConfig(), { root: function () {
         return root;
+    },
+    forEachPackage: function (fn) {
+        throw new Error('TODO');
     } });
 function findRoot(folder) {
     while (folder && folder != '/') {

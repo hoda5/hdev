@@ -8,7 +8,10 @@ export const config = {
     ...loadConfig(),
     root() {
         return root;
-    }
+    },
+    forEachPackage( fn: (packagName: string, folder: string) => void) {
+        throw new Error('TODO')
+    } 
 }
 
 function findRoot(folder: string) {

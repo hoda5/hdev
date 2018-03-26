@@ -10,20 +10,22 @@ commander.command('add <name> <url>')
     .action(cmd(cmd_add_1.cmd_add));
 commander.command('remove <name>')
     .description('Remove um repositorio')
-    .action(todo);
+    .action(cmd(todo));
 commander.command('publish [name]')
     .description('incrementa versao e publica pacotes')
-    .action(todo);
+    .action(cmd(todo));
 commander.command('pull [name]')
-    .action(todo);
+    .action(cmd(todo));
 commander.command('push [name]')
-    .action(todo);
+    .action(cmd(todo));
 commander.command('build [name]')
-    .action(todo);
+    .action(cmd(todo));
 commander.command('watch [name]')
-    .action(todo);
+    .action(cmd(todo));
 commander.command('upgrade')
-    .action(todo);
+    .action(cmd(todo));
+commander.command('link')
+    .action(cmd(todo));
 commander.parse(process.argv);
 if (!ok)
     commander.help();
@@ -38,7 +40,6 @@ function cmd(fn) {
     };
 }
 function todo() {
-    console.log('TODO: ');
-    console.dir(arguments);
+    console.log('TODO');
 }
 //# sourceMappingURL=multinpm.js.map
