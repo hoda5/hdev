@@ -28,6 +28,8 @@ commander.command('upgrade')
     .action(cmd(todo));
 commander.command('link')
     .action(cmd(todo));
+commander.command('login')
+    .action(cmd(todo));
 
 commander.parse(process.argv);
 if (!ok) commander.help();
