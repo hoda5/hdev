@@ -1,0 +1,26 @@
+{
+  "name": "@hoda5/multinpm",
+  "version": "1.0.0",
+  "description": "",
+  "bin": "dist/multinpm.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thr0w/multinpm.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/thr0w/multinpm/issues"
+  },
+  "homepage": "https://github.com/thr0w/multinpm#readme",
+  "devDependencies": {
+    "typescript": "^2.9.0-dev.20180325"
+  },
+  "dependencies": {
+    "@types/node": "^9.6.0",
+    "commander": "^2.15.1"
+  }
+}
