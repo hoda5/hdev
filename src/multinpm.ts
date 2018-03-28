@@ -1,18 +1,26 @@
 #!/usr/bin/env node
 import * as commander from 'commander';
+
+import { cmd_status } from './cmd_status';
 import { cmd_add } from './cmd_add';
-import { debug } from 'util';
+import { cmd_rm } from './cmd_rm';
+import { cmd_link } from './cmd_link';
 
 let ok = false;
 
 commander.version('1.0.0')
 
+commander.option('-v, --verbose')
+
+commander.command('status [name]')
+    .description('Status dos repositorios')
+    .action(cmd(cmd_status));
 commander.command('add <name> <url>')
     .description('Adiciona um repositorio')
     .action(cmd(cmd_add));
 commander.command('remove <name>')
     .description('Remove um repositorio')
-    .action(cmd(todo));
+    .action(cmd(cmd_rm));
 commander.command('publish [name]')
     .description('incrementa versao e publica pacotes')
     .action(cmd(todo));

@@ -1,0 +1,1 @@
+{"version":3,"file":"cmd_rm.js","sourceRoot":"","sources":["../src/cmd_rm.ts"],"names":[],"mappings":";;AAAA,mCAAiC;AAGjC,gBAAuB,IAAY;IAC/B,eAAM,CAAC,KAAK,CACR,KAAK,EAAE;QACH,WAAW;QACX,IAAI;QACJ,eAAM,CAAC,eAAe,CAAC,IAAI,CAAC;KAC/B,EACD;QACI,GAAG,EAAE,eAAM,CAAC,IAAI,EAAE,GAAG,WAAW;KACnC,CACJ,CAAC;AACN,CAAC;AAXD,wBAWC"}

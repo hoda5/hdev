@@ -13,4 +13,4 @@ function cmd_add(name, url) {
     config_1.config.getPackageJsonFor(name);
 }
 exports.cmd_add = cmd_add;
-//# sourceMappingURL=cmd_add.js.map
+//# sourceMappingURL=cmd_add.1.js.map

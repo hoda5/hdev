@@ -5,8 +5,7 @@
     "moduleResolution": "node",
     "outDir": "dist",            
     "sourceMap": true,
-    "declaration": true, 
-    "downlevelIteration": true,         
+    "declaration": false, 
     "strict": true,   
     "lib": [
       "es2017",

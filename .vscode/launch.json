@@ -9,8 +9,10 @@
             "request": "launch",
             "name": "multinpm",
             "program": "${workspaceFolder}/dist/multinpm.js",
+            // "cwd": "${workspaceFolder}/../prj",
+            "cwd": "${workspaceFolder}/../prj/tmp",
             "args": [
-                "add sas ass"
+                "status"
             ],
             "outFiles": [
                 "${workspaceFolder}/dist/**/*.js"

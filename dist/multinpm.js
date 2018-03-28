@@ -2,15 +2,21 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var commander = require("commander");
+var cmd_status_1 = require("./cmd_status");
 var cmd_add_1 = require("./cmd_add");
+var cmd_rm_1 = require("./cmd_rm");
 var ok = false;
 commander.version('1.0.0');
+commander.option('-v, --verbose');
+commander.command('status [name]')
+    .description('Status dos repositorios')
+    .action(cmd(cmd_status_1.cmd_status));
 commander.command('add <name> <url>')
     .description('Adiciona um repositorio')
     .action(cmd(cmd_add_1.cmd_add));
 commander.command('remove <name>')
     .description('Remove um repositorio')
-    .action(cmd(todo));
+    .action(cmd(cmd_rm_1.cmd_rm));
 commander.command('publish [name]')
     .description('incrementa versao e publica pacotes')
     .action(cmd(todo));
