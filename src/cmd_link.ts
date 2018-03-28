@@ -9,7 +9,7 @@ export function cmd_link(name: string, url: string) {
     function enable_link(packagName: string, folder: string) {
         allpackages.push(packagName);
         utils.shell(
-            'git', [
+            'npm', [
                 'link'
             ],
             {
@@ -27,7 +27,7 @@ export function cmd_link(name: string, url: string) {
         ].map((dep) => {
             if (allpackages.indexOf(dep) >= 0)
                 utils.shell(
-                    'git', [
+                    'npm', [
                         'link',
                         dep
                     ],

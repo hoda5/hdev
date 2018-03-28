@@ -32,7 +32,7 @@ exports.utils = {
     },
     forEachPackage: function (fn) {
         exports.utils.listPackages().forEach(function (p) {
-            fn(p, [root, 'packages', p].join('/'));
+            fn(p.replace('-', '/'), [root, 'packages', p].join('/'));
         });
     },
     getPackageJsonFor: function (packagName) {

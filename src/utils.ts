@@ -34,7 +34,7 @@ export const utils = {
     },
     forEachPackage(fn: (packagName: string, folder: string) => void) {
         utils.listPackages().forEach((p) => {
-            fn(p, [root, 'packages', p].join('/'));
+            fn(p.replace('-', '/'), [root, 'packages', p].join('/'));
         })
     },
     getPackageJsonFor(packagName: string) {

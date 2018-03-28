@@ -38,7 +38,7 @@ commander.command('watch [name]')
 commander.command('upgrade')
     .action(cmd(todo));
 commander.command('link')
-    .action(cmd(todo));
+    .action(cmd(cmd_link));
 commander.command('init')
     .description('Inicializa na pasta atual')
     .action(cmd(cmd_init, false));

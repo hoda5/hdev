@@ -35,7 +35,7 @@ fi
 
 $mnpm add @hoda5/somaapp https://github.com/thr0w/somaApp.git
 
-
+$mnpm 
 
 # $mnpm remove @hoda5/somalib 
 

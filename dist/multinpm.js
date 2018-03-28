@@ -7,6 +7,7 @@ var cmd_login_1 = require("./cmd_login");
 var cmd_status_1 = require("./cmd_status");
 var cmd_add_1 = require("./cmd_add");
 var cmd_rm_1 = require("./cmd_rm");
+var cmd_link_1 = require("./cmd_link");
 var utils_1 = require("./utils");
 var ok = false;
 commander.version('1.0.0');
@@ -34,7 +35,7 @@ commander.command('watch [name]')
 commander.command('upgrade')
     .action(cmd(todo));
 commander.command('link')
-    .action(cmd(todo));
+    .action(cmd(cmd_link_1.cmd_link));
 commander.command('init')
     .description('Inicializa na pasta atual')
     .action(cmd(cmd_init_1.cmd_init, false));
