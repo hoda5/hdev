@@ -1,4 +1,4 @@
-import { config } from "./config"
+import { config } from "./utils"
 
 export function cmd_add(name: string, url: string) {
     config.shell(

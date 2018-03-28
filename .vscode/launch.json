@@ -12,7 +12,8 @@
             // "cwd": "${workspaceFolder}/../prj",
             "cwd": "${workspaceFolder}/../prj/tmp",
             "args": [
-                "status"
+                // "status"
+                "add", "@hoda5/somalib", "https://github.com/thr0w/somalib.git"
             ],
             "outFiles": [
                 "${workspaceFolder}/dist/**/*.js"

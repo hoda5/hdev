@@ -1,13 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var config_1 = require("./config");
+var utils_1 = require("./utils");
 function cmd_rm(name) {
-    config_1.config.shell('git', [
+    utils_1.config.shell('git', [
         'submodule',
         'rm',
-        config_1.config.adaptFolderName(name),
+        utils_1.config.adaptFolderName(name),
     ], {
-        cwd: config_1.config.root() + '/packages'
+        cwd: utils_1.config.root() + '/packages'
     });
 }
 exports.cmd_rm = cmd_rm;

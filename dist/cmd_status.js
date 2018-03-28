@@ -1,10 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var config_1 = require("./config");
+var utils_1 = require("./utils");
 function cmd_status(name) {
     var ok = false;
-    config_1.config.forEachPackage(function (pkg, folder) {
-        config_1.config.shell('git', [
+    utils_1.config.forEachPackage(function (pkg, folder) {
+        utils_1.config.shell('git', [
             'status'
         ], {
             cwd: folder,
@@ -12,7 +12,7 @@ function cmd_status(name) {
         ok = true;
     });
     if (!ok)
-        config_1.config.throw('repositório vazio');
+        utils_1.config.throw('repositório vazio');
 }
 exports.cmd_status = cmd_status;
 //# sourceMappingURL=cmd_status.js.map

@@ -1,4 +1,4 @@
-import { config } from "./config"
+import { config } from "./utils"
 import { readFileSync } from "fs"
 
 export function cmd_link(name: string, url: string) {

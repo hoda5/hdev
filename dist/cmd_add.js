@@ -1,16 +1,16 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var config_1 = require("./config");
+var utils_1 = require("./utils");
 function cmd_add(name, url) {
-    config_1.config.shell('git', [
+    utils_1.config.shell('git', [
         'submodule',
         'add',
         url,
-        config_1.config.adaptFolderName(name),
+        utils_1.config.adaptFolderName(name),
     ], {
-        cwd: config_1.config.root() + '/packages',
+        cwd: utils_1.config.root() + '/packages',
     });
-    config_1.config.getPackageJsonFor(name);
+    utils_1.config.getPackageJsonFor(name);
 }
 exports.cmd_add = cmd_add;
 //# sourceMappingURL=cmd_add.js.map
