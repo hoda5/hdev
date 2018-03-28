@@ -3,6 +3,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var commander = require("commander");
 var cmd_init_1 = require("./cmd_init");
+var cmd_login_1 = require("./cmd_login");
 var cmd_status_1 = require("./cmd_status");
 var cmd_add_1 = require("./cmd_add");
 var cmd_rm_1 = require("./cmd_rm");
@@ -37,6 +38,9 @@ commander.command('link')
 commander.command('init')
     .description('Inicializa na pasta atual')
     .action(cmd(cmd_init_1.cmd_init, false));
+commander.command('login')
+    .description('autenticações')
+    .action(cmd(cmd_login_1.cmd_login, false));
 commander.parse(process.argv);
 if (!ok)
     commander.help();

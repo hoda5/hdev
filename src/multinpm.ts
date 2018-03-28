@@ -2,6 +2,7 @@
 import * as commander from 'commander';
 
 import { cmd_init } from './cmd_init';
+import { cmd_login } from './cmd_login';
 import { cmd_status } from './cmd_status';
 import { cmd_add } from './cmd_add';
 import { cmd_rm } from './cmd_rm';
@@ -41,6 +42,9 @@ commander.command('link')
 commander.command('init')
     .description('Inicializa na pasta atual')
     .action(cmd(cmd_init, false));
+commander.command('login')
+    .description('autenticações')
+    .action(cmd(cmd_login, false));
 
 commander.parse(process.argv);
 if (!ok) commander.help();

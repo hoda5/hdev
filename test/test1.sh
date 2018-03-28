@@ -33,11 +33,14 @@ else
   exit 1
 fi 
 
-$mnpm remove @hoda5/somalib 
+$mnpm add @hoda5/somaapp https://github.com/thr0w/somaApp.git
 
-if $mnpm status 
-then
-  echo status em repositório vazio deveria falhar
-  exit 1
-fi 
 
+
+# $mnpm remove @hoda5/somalib 
+
+# if $mnpm status 
+# then
+#   echo status em repositório vazio deveria falhar
+#   exit 1
+# fi 
