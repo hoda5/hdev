@@ -1,10 +1,12 @@
 #!/usr/bin/env node
 import * as commander from 'commander';
 
+import { cmd_init } from './cmd_init';
 import { cmd_status } from './cmd_status';
 import { cmd_add } from './cmd_add';
 import { cmd_rm } from './cmd_rm';
 import { cmd_link } from './cmd_link';
+import { utils } from './utils';
 
 let ok = false;
 
@@ -36,14 +38,17 @@ commander.command('upgrade')
     .action(cmd(todo));
 commander.command('link')
     .action(cmd(todo));
-commander.command('login')
-    .action(cmd(todo));
+commander.command('init')
+    .description('Inicializa na pasta atual')
+    .action(cmd(cmd_init, false));
 
 commander.parse(process.argv);
 if (!ok) commander.help();
 
-function cmd(fn: Function) {
+function cmd(fn: Function, showrep = true) {
     return function (...args: any[]) {
+        if (showrep)
+            console.log('repositorio: ' + utils.root);
         fn.apply(null, args);
         ok = true;
     }

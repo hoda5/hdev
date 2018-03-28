@@ -1,6 +1,7 @@
 import { readdirSync, readFileSync, existsSync } from "fs"
-import { dirname } from "path"
+import { dirname, basename } from "path"
 import { spawnSync } from "child_process"
+import { settings } from "cluster";
 
 const root = findRoot(process.cwd())
 export type PackageJSON = {
@@ -9,15 +10,22 @@ export type PackageJSON = {
     devDependencies?: string[],
     peerDependencies?: string[],
 }
+export type WorkspaceFile = {
+    "folders": { path: string }[],
+    settings: Object
+}
 
 export const utils = {
-    root() {
+    get root() {
         return root;
     },
+    get workspaceFile() {
+        return root + '/' + basename(root) + '.code-workspace';
+    },
     adaptFolderName(packageName: string) {
-        if (packageName.indexOf(' ') != -1)
+        if (packageName.indexOf('-') != -1)
             utils.throw('Invalid package name ' + packageName)
-        return packageName.replace('/', ' ');
+        return packageName.replace('/', '-');
     },
     listPackages() {
         const dir = root + '/packages';
@@ -32,7 +40,7 @@ export const utils = {
     getPackageJsonFor(packagName: string) {
         const json: PackageJSON = JSON.parse(
             readFileSync(
-                root + '/' + utils.adaptFolderName(packagName) + '/package.json',
+                root + '/packages/' + utils.adaptFolderName(packagName) + '/package.json',
                 { encoding: 'utf-8' }));
         if (json.name !== packagName)
             utils.throw(
@@ -62,9 +70,12 @@ export const utils = {
 function findRoot(folder: string) {
     while (folder && folder != '/') {
         const files = readdirSync(folder);
-        if (files.some((f) => /\.code-workspace$/g.test(f)))
+        const w = basename(folder) + '.code-workspace';
+        if (files.some((f) => f == w)) {
             return folder;
+        }
         folder = dirname(folder);
     }
-    utils.throw('no *.code-workspace file found')
+    utils.throw('no code-workspace file found')
+    return ''
 }

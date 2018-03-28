@@ -13,13 +13,16 @@ var path_1 = require("path");
 var child_process_1 = require("child_process");
 var root = findRoot(process.cwd());
 exports.utils = {
-    root: function () {
+    get root() {
         return root;
     },
+    get workspaceFile() {
+        return root + '/' + path_1.basename(root) + '.code-workspace';
+    },
     adaptFolderName: function (packageName) {
-        if (packageName.indexOf(' ') != -1)
+        if (packageName.indexOf('-') != -1)
             exports.utils.throw('Invalid package name ' + packageName);
-        return packageName.replace('/', ' ');
+        return packageName.replace('/', '-');
     },
     listPackages: function () {
         var dir = root + '/packages';
@@ -33,7 +36,7 @@ exports.utils = {
         });
     },
     getPackageJsonFor: function (packagName) {
-        var json = JSON.parse(fs_1.readFileSync(root + '/' + exports.utils.adaptFolderName(packagName) + '/package.json', { encoding: 'utf-8' }));
+        var json = JSON.parse(fs_1.readFileSync(root + '/packages/' + exports.utils.adaptFolderName(packagName) + '/package.json', { encoding: 'utf-8' }));
         if (json.name !== packagName)
             exports.utils.throw('Package name (' + packagName +
                 ') é diferente do que está em name do package.json (' +
@@ -52,12 +55,20 @@ exports.utils = {
     }
 };
 function findRoot(folder) {
-    while (folder && folder != '/') {
+    var _loop_1 = function () {
         var files = fs_1.readdirSync(folder);
-        if (files.some(function (f) { return /\.code-workspace$/g.test(f); }))
-            return folder;
+        var w = path_1.basename(folder) + '.code-workspace';
+        if (files.some(function (f) { return f == w; })) {
+            return { value: folder };
+        }
         folder = path_1.dirname(folder);
+    };
+    while (folder && folder != '/') {
+        var state_1 = _loop_1();
+        if (typeof state_1 === "object")
+            return state_1.value;
     }
-    exports.utils.throw('no *.code-workspace file found');
+    exports.utils.throw('no code-workspace file found');
+    return '';
 }
 //# sourceMappingURL=utils.js.map

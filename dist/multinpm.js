@@ -2,9 +2,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var commander = require("commander");
+var cmd_init_1 = require("./cmd_init");
 var cmd_status_1 = require("./cmd_status");
 var cmd_add_1 = require("./cmd_add");
 var cmd_rm_1 = require("./cmd_rm");
+var utils_1 = require("./utils");
 var ok = false;
 commander.version('1.0.0');
 commander.option('-v, --verbose');
@@ -32,17 +34,21 @@ commander.command('upgrade')
     .action(cmd(todo));
 commander.command('link')
     .action(cmd(todo));
-commander.command('login')
-    .action(cmd(todo));
+commander.command('init')
+    .description('Inicializa na pasta atual')
+    .action(cmd(cmd_init_1.cmd_init, false));
 commander.parse(process.argv);
 if (!ok)
     commander.help();
-function cmd(fn) {
+function cmd(fn, showrep) {
+    if (showrep === void 0) { showrep = true; }
     return function () {
         var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
             args[_i] = arguments[_i];
         }
+        if (showrep)
+            console.log('repositorio: ' + utils_1.utils.root);
         fn.apply(null, args);
         ok = true;
     };
