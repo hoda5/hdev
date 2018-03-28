@@ -1,9 +1,9 @@
-import { config } from "./utils"
+import { utils } from "./utils"
 
 export function cmd_status(name: string) {
     let ok = false;
-    config.forEachPackage((pkg, folder) => {
-        config.shell(
+    utils.forEachPackage((pkg, folder) => {
+        utils.shell(
             'git', [
                 'status'
             ],
@@ -14,5 +14,5 @@ export function cmd_status(name: string) {
         ok = true;
     });
     if (!ok)
-        config.throw('repositório vazio');
+        utils.throw('repositório vazio');
 }

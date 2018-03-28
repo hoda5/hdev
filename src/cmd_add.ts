@@ -1,16 +1,16 @@
-import { config } from "./utils"
+import { utils } from "./utils"
 
 export function cmd_add(name: string, url: string) {
-    config.shell(
+    utils.shell(
         'git', [
             'submodule',
             'add',
             url,
-            config.adaptFolderName(name),
+            utils.adaptFolderName(name),
         ],
         {
-            cwd: config.root() + '/packages',
+            cwd: utils.root() + '/packages',
         }
     );
-    config.getPackageJsonFor(name);
+    utils.getPackageJsonFor(name);
 }

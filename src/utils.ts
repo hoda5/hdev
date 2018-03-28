@@ -10,13 +10,13 @@ export type PackageJSON = {
     peerDependencies?: string[],
 }
 
-export const config = {
+export const utils = {
     root() {
         return root;
     },
     adaptFolderName(packageName: string) {
         if (packageName.indexOf(' ') != -1)
-            config.throw('Invalid package name ' + packageName)
+            utils.throw('Invalid package name ' + packageName)
         return packageName.replace('/', ' ');
     },
     listPackages() {
@@ -25,17 +25,17 @@ export const config = {
         return readdirSync(dir);
     },
     forEachPackage(fn: (packagName: string, folder: string) => void) {
-        config.listPackages().forEach((p) => {
+        utils.listPackages().forEach((p) => {
             fn(p, [root, 'packages', p].join('/'));
         })
     },
     getPackageJsonFor(packagName: string) {
         const json: PackageJSON = JSON.parse(
             readFileSync(
-                root + '/' + config.adaptFolderName(packagName) + '/package.json',
+                root + '/' + utils.adaptFolderName(packagName) + '/package.json',
                 { encoding: 'utf-8' }));
         if (json.name !== packagName)
-            config.throw(
+            utils.throw(
                 'Package name (' + packagName +
                 ') é diferente do que está em name do package.json (' +
                 json.name + ')');
@@ -66,5 +66,5 @@ function findRoot(folder: string) {
             return folder;
         folder = dirname(folder);
     }
-    config.throw('no *.code-workspace file found')
+    utils.throw('no *.code-workspace file found')
 }

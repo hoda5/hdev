@@ -1,15 +1,15 @@
-import { config } from "./utils"
+import { utils } from "./utils"
 
 
 export function cmd_rm(name: string) {
-    config.shell(
+    utils.shell(
         'git', [
             'submodule',
             'rm',
-            config.adaptFolderName(name),
+            utils.adaptFolderName(name),
         ],
         {
-            cwd: config.root() + '/packages'
+            cwd: utils.root() + '/packages'
         }
     );
 }
