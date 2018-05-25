@@ -2,7 +2,16 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var utils_1 = require("./utils");
 var fs_1 = require("fs");
-function cmd_add(name, url) {
+function cmd_add(url, name) {
+    if (!/^(http?|git).*\/.*\.git$/g.test(url))
+        utils_1.utils.throw('invalid url');
+    if (!name) {
+        var m = /([^/]*)\.git$/g.exec(url);
+        if (m)
+            name = m[1];
+        else
+            utils_1.utils.throw('invalid name');
+    }
     var afn = utils_1.utils.adaptFolderName(name);
     utils_1.utils.shell('git', [
         'submodule',

@@ -3,7 +3,6 @@ import { dirname, basename } from "path"
 import { spawnSync } from "child_process"
 import { settings } from "cluster";
 
-const root = findRoot(process.cwd())
 export type PackageJSON = {
     name: string;
     dependencies?: string[],
@@ -66,6 +65,7 @@ export const utils = {
             process.exit(1);
     }
 }
+const root = findRoot(process.cwd())
 
 function findRoot(folder: string) {
     while (folder && folder != '/') {

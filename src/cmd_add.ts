@@ -1,7 +1,20 @@
 import { utils, WorkspaceFile } from "./utils"
 import { existsSync, readFileSync, writeFileSync } from "fs"
 
-export function cmd_add(name: string, url: string) {
+export function cmd_add(url: string, name: string) {
+    if (!/^(http?|git).*\/.*\.git$/g.test(url))
+        utils.throw('invalid url');
+    if (!name) {
+        const m = /([^/]*)\/([^/]*)\.git$/g.exec(url);
+        if (m) {
+            if (m[1] === 'hoda5')
+                name = '@hoda5/' + m[2];
+            else
+                name = m[1];
+        }
+        else
+            utils.throw('invalid name');
+    }
     const afn = utils.adaptFolderName(name);
     utils.shell(
         'git', [

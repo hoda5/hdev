@@ -11,7 +11,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var fs_1 = require("fs");
 var path_1 = require("path");
 var child_process_1 = require("child_process");
-var root = findRoot(process.cwd());
 exports.utils = {
     get root() {
         return root;
@@ -54,6 +53,7 @@ exports.utils = {
             process.exit(1);
     }
 };
+var root = findRoot(process.cwd());
 function findRoot(folder) {
     var _loop_1 = function () {
         var files = fs_1.readdirSync(folder);

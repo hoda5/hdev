@@ -18,7 +18,7 @@ commander.option('-v, --verbose')
 commander.command('status [name]')
     .description('Status dos repositorios')
     .action(cmd(cmd_status));
-commander.command('add <name> <url>')
+commander.command('add <url> [name]')
     .description('Adiciona um repositorio')
     .action(cmd(cmd_add));
 commander.command('remove <name>')
