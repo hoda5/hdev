@@ -7,8 +7,8 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "multinpm",
-            "program": "${workspaceFolder}/dist/multinpm.js",
+            "name": "hdev",
+            "program": "${workspaceFolder}/dist/hdev.js",
             // "cwd": "${workspaceFolder}/../prj",
             "cwd": "${workspaceFolder}/../tmp",
             "args": [
