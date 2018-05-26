@@ -4,9 +4,9 @@ set -e
 
 cd `dirname $0`/..
 DIR=`pwd`
-TEMP=$DIR/../multinpm.tmp
+TEMP=$DIR/../hdev.tmp
 
-mnpm="node $DIR/dist/multinpm.js"
+mnpm="node $DIR/dist/hdev.js"
 
 rm -Rf $TEMP
 mkdir -p $TEMP
