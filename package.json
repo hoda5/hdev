@@ -1,21 +1,21 @@
 {
-  "name": "@hoda5/multinpm",
+  "name": "@hoda5/hdev",
   "version": "1.0.0",
   "description": "",
-  "bin": "dist/multinpm.js",
+  "bin": "dist/hdev.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/thr0w/multinpm.git"
+    "url": "git+https://github.com/hoda5/hdev.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/thr0w/multinpm/issues"
+    "url": "https://github.com/hoda5/hdev/issues"
   },
-  "homepage": "https://github.com/thr0w/multinpm#readme",
+  "homepage": "https://github.com/hoda5/hdev#readme",
   "devDependencies": {
     "typescript": "^2.9.0-dev.20180325"
   },
