@@ -3,6 +3,8 @@ import { dirname, basename } from "path"
 import { spawnSync } from "child_process"
 import { settings } from "cluster";
 
+import {red, blue} from "bash-color";
+
 export type PackageJSON = {
     name: string;
     dependencies?: string[],
@@ -53,7 +55,10 @@ export const utils = {
         process.exit(1)
     },
     shell(cmd: string, args: string[], opts: { cwd: string }) {
-        console.log([opts.cwd, '$ ', cmd, ' ', args.join(' ')].join(''))
+        console.log(
+            red(opts.cwd+ '$ ')+
+            blue(cmd+ ' '+ args.join(' '))
+        );
         const r = spawnSync(
             cmd, args,
             {

@@ -6,9 +6,13 @@ function cmd_add(url, name) {
     if (!/^(http?|git).*\/.*\.git$/g.test(url))
         utils_1.utils.throw('invalid url');
     if (!name) {
-        var m = /([^/]*)\.git$/g.exec(url);
-        if (m)
-            name = m[1];
+        var m = /([^/]*)\/([^/]*)\.git$/g.exec(url);
+        if (m) {
+            if (m[1] === 'hoda5')
+                name = '@hoda5/' + m[2];
+            else
+                name = m[1];
+        }
         else
             utils_1.utils.throw('invalid name');
     }
@@ -16,6 +20,7 @@ function cmd_add(url, name) {
     utils_1.utils.shell('git', [
         'submodule',
         'add',
+        '--force',
         url,
         afn,
     ], {
@@ -29,6 +34,11 @@ function cmd_add(url, name) {
     };
     wf.folders.push({ path: 'packages/' + afn });
     fs_1.writeFileSync(w, JSON.stringify(wf, null, 2), 'utf-8');
+    utils_1.utils.shell('npm', [
+        'install',
+    ], {
+        cwd: utils_1.utils.root + '/packages/' + afn,
+    });
 }
 exports.cmd_add = cmd_add;
 //# sourceMappingURL=cmd_add.js.map

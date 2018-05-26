@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@types/node": "^9.6.0",
+    "bash-color": "0.0.4",
     "commander": "^2.15.1",
     "dev": "^0.1.3"
   }

@@ -11,6 +11,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var fs_1 = require("fs");
 var path_1 = require("path");
 var child_process_1 = require("child_process");
+var bash_color_1 = require("bash-color");
 exports.utils = {
     get root() {
         return root;
@@ -47,7 +48,8 @@ exports.utils = {
         process.exit(1);
     },
     shell: function (cmd, args, opts) {
-        console.log([opts.cwd, '$ ', cmd, ' ', args.join(' ')].join(''));
+        console.log(bash_color_1.red(opts.cwd + '$ ') +
+            bash_color_1.blue(cmd + ' ' + args.join(' ')));
         var r = child_process_1.spawnSync(cmd, args, __assign({}, opts, { stdio: ['inherit', 'inherit', 'inherit'] }));
         if (r.status != 0)
             process.exit(1);

@@ -20,6 +20,7 @@ export function cmd_add(url: string, name: string) {
         'git', [
             'submodule',
             'add',
+            '--force',
             url,
             afn,
         ],
@@ -36,4 +37,12 @@ export function cmd_add(url: string, name: string) {
     };
     wf.folders.push({ path: 'packages/' + afn })
     writeFileSync(w, JSON.stringify(wf, null, 2), 'utf-8');
+    utils.shell(
+        'npm', [
+            'install',
+        ],
+        {
+            cwd: utils.root + '/packages/' + afn,
+        }
+    );
 }
