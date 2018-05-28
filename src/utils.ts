@@ -2,7 +2,7 @@ import { readdirSync, readFileSync, existsSync } from "fs"
 import { dirname, basename, join } from "path"
 import { spawnSync } from "child_process"
 import * as pm2 from 'pm2';
-import { red, blue } from "bash-color";
+import { purple, blue } from "bash-color";
 
 export type PackageJSON = {
     name: string;
@@ -15,12 +15,12 @@ export type WorkspaceFile = {
     settings: Object
 }
 
-pm2.connect(function (err) {
-    if (err) {
-        console.error(err);
-        process.exit(2);
-    }
-});
+// pm2.connect(function (err) {
+//     if (err) {
+//         console.error(err);
+//         process.exit(2);
+//     }
+// });
 
 export const utils = {
     get root() {
@@ -74,7 +74,7 @@ export const utils = {
     },
     exec(cmd: string, args: string[], opts: { cwd: string }) {
         console.log(
-            red(opts.cwd + '$ ') +
+            purple(opts.cwd + '$ ', true) +
             blue(cmd + ' ' + args.join(' '), true)
         );
         const r = spawnSync(

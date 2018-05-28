@@ -2,7 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var utils_1 = require("./utils");
 var buildTypeScript_1 = require("./build/buildTypeScript");
-function cmd_build(name) {
+function cmd_build(args) {
+    var name = args.name;
     var afn = utils_1.utils.adaptFolderName(name);
     if (name)
         buildTypeScript_1.buildTypeScript(name);

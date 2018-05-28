@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import * as commander from 'commander';
+import * as prog from 'caporal';
 
 import { cmd_init } from './cmd_init';
 import { cmd_login } from './cmd_login';
@@ -9,48 +9,47 @@ import { cmd_rm } from './cmd_rm';
 import { cmd_link } from './cmd_link';
 import { cmd_build } from './cmd_build';
 import { utils } from './utils';
- 
+
 let ok = false;
 
-commander.version('1.0.0')
+prog.version('1.0.0')
 
-commander.option('-v, --verbose')
-
-commander.command('status [name]')
-    .description('Status dos repositorios')
+prog.command('status', 'Status dos repositorios')
+    .argument('[name]', 'Nome do pacote')
     .action(cmd(cmd_status));
-commander.command('add <url> [name]')
-    .description('Adiciona um repositorio')
-    .action(cmd(cmd_add));
-commander.command('remove <name>')
-    .description('Remove um repositorio')
-    .action(cmd(cmd_rm));
-commander.command('publish [name]')
-    .description('incrementa versao e publica pacotes')
-    .action(cmd(todo));
-commander.command('pull [name]')
-    .action(cmd(todo));
-commander.command('push [name]')
-    .action(cmd(todo));
-commander.command('build [name]')
+// prog.command('add <url> [name]')
+//     .description('Adiciona um repositorio')
+//     .action(cmd(cmd_add));
+// prog.command('remove <name>')
+//     .description('Remove um repositorio')
+//     .action(cmd(cmd_rm));
+// prog.command('publish [name]')
+//     .description('incrementa versao e publica pacotes')
+//     .action(cmd(todo));
+// prog.command('pull [name]')
+//     .action(cmd(todo));
+// prog.command('push [name]')
+//     .action(cmd(todo));
+prog.command('build', 'build do pacote')
+    .argument('[name]', 'Nome do pacote')
     .action(cmd(cmd_build));
-commander.command('watch [name]')
-    .action(cmd(todo));
-commander.command('upgrade')
-    .action(cmd(todo));
-commander.command('link')
-    .action(cmd(cmd_link));
-commander.command('init')
-    .description('Inicializa na pasta atual')
-    .action(cmd(cmd_init, false));
-commander.command('login')
-    .description('autenticações')
-    .action(cmd(cmd_login, false));
+// prog.command('watch [name]')
+//     .action(cmd(todo));
+// prog.command('upgrade')
+//     .action(cmd(todo));
+// prog.command('link')
+//     .action(cmd(cmd_link));
+// prog.command('init')
+//     .description('Inicializa na pasta atual')
+//     .action(cmd(cmd_init, false));
+// prog.command('login <name> <email>')
+//     .description('autenticações')
+//     .action(cmd(cmd_login, false));
 
-commander.parse(process.argv);
-if (!ok) commander.help();
+prog.parse(process.argv);
+if (!ok) prog.help('hdev');
 
-function cmd(fn: Function, showrep = true) {
+function cmd(fn: ActionCallback, showrep = true) {
     return function (...args: any[]) {
         if (showrep)
             console.log('repositorio: ' + utils.root);

@@ -1,51 +1,46 @@
 #!/usr/bin/env node
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var commander = require("commander");
-var cmd_init_1 = require("./cmd_init");
-var cmd_login_1 = require("./cmd_login");
+var prog = require("caporal");
 var cmd_status_1 = require("./cmd_status");
-var cmd_add_1 = require("./cmd_add");
-var cmd_rm_1 = require("./cmd_rm");
-var cmd_link_1 = require("./cmd_link");
 var cmd_build_1 = require("./cmd_build");
 var utils_1 = require("./utils");
 var ok = false;
-commander.version('1.0.0');
-commander.option('-v, --verbose');
-commander.command('status [name]')
-    .description('Status dos repositorios')
+prog.version('1.0.0');
+prog.command('status', 'Status dos repositorios')
+    .argument('[name]', 'Nome do pacote')
     .action(cmd(cmd_status_1.cmd_status));
-commander.command('add <url> [name]')
-    .description('Adiciona um repositorio')
-    .action(cmd(cmd_add_1.cmd_add));
-commander.command('remove <name>')
-    .description('Remove um repositorio')
-    .action(cmd(cmd_rm_1.cmd_rm));
-commander.command('publish [name]')
-    .description('incrementa versao e publica pacotes')
-    .action(cmd(todo));
-commander.command('pull [name]')
-    .action(cmd(todo));
-commander.command('push [name]')
-    .action(cmd(todo));
-commander.command('build [name]')
+// prog.command('add <url> [name]')
+//     .description('Adiciona um repositorio')
+//     .action(cmd(cmd_add));
+// prog.command('remove <name>')
+//     .description('Remove um repositorio')
+//     .action(cmd(cmd_rm));
+// prog.command('publish [name]')
+//     .description('incrementa versao e publica pacotes')
+//     .action(cmd(todo));
+// prog.command('pull [name]')
+//     .action(cmd(todo));
+// prog.command('push [name]')
+//     .action(cmd(todo));
+prog.command('build', 'build do pacote')
+    .argument('[name]', 'Nome do pacote')
     .action(cmd(cmd_build_1.cmd_build));
-commander.command('watch [name]')
-    .action(cmd(todo));
-commander.command('upgrade')
-    .action(cmd(todo));
-commander.command('link')
-    .action(cmd(cmd_link_1.cmd_link));
-commander.command('init')
-    .description('Inicializa na pasta atual')
-    .action(cmd(cmd_init_1.cmd_init, false));
-commander.command('login')
-    .description('autenticações')
-    .action(cmd(cmd_login_1.cmd_login, false));
-commander.parse(process.argv);
+// prog.command('watch [name]')
+//     .action(cmd(todo));
+// prog.command('upgrade')
+//     .action(cmd(todo));
+// prog.command('link')
+//     .action(cmd(cmd_link));
+// prog.command('init')
+//     .description('Inicializa na pasta atual')
+//     .action(cmd(cmd_init, false));
+// prog.command('login <name> <email>')
+//     .description('autenticações')
+//     .action(cmd(cmd_login, false));
+prog.parse(process.argv);
 if (!ok)
-    commander.help();
+    prog.help('hdev');
 function cmd(fn, showrep) {
     if (showrep === void 0) { showrep = true; }
     return function () {

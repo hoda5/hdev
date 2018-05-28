@@ -1,18 +1,31 @@
 import { utils } from "./utils"
 
-export function cmd_status(name: string) {
+export function cmd_status(args: any) {
+    const name: string = args.name;
     let ok = false;
-    utils.forEachPackage((pkg, folder) => {
+    if (name) {
         utils.exec(
             'git', [
                 'status'
             ],
             {
-                cwd: folder,
+                cwd: utils.path(name),
             }
-        ); 
+        );
         ok = true;
-    });
+    }
+    else
+        utils.forEachPackage((pkg, folder) => {
+            utils.exec(
+                'git', [
+                    'status'
+                ],
+                {
+                    cwd: folder,
+                }
+            );
+            ok = true;
+        });
     if (!ok)
         utils.throw('repositório vazio');
 }
