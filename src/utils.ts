@@ -5,7 +5,8 @@ import * as pm2 from 'pm2';
 import { red, purple, blue } from "bash-color";
 
 export type PackageJSON = {
-    name: string;
+    name: string;    
+    main: string;    
     dependencies?: string[],
     devDependencies?: string[],
     peerDependencies?: string[],
@@ -61,7 +62,6 @@ export const utils = {
         return join(root, 'packages', utils.adaptFolderName(packageName), filename);
     },
     exists(packageName: string, filename: string): boolean {
-        console.log('exist ' + utils.path(packageName, filename))
         return existsSync(utils.path(packageName, filename));
     },
     readText(packageName: string, filename: string): string {

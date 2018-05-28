@@ -11,5 +11,5 @@ declare module "bash-color" {
 
 declare module "rollup-plugin-typescript" {
     var x: any;
-    export default x;
+    export = x;
 }

@@ -1,12 +1,14 @@
 import { utils } from "../utils"
 import { rollup, InputOptions, OutputOptions, RollupDirOptions, RollupFileOptions } from 'rollup';
-import plugin_typescript from 'rollup-plugin-typescript';
+import * as plugin_typescript from 'rollup-plugin-typescript';
 
 export async function buildTypeScript(name: string) {
     if (!utils.exists(name, 'tsconfig.json')) return;
+    const packageJSON = utils.getPackageJsonFor(name);
+    const main = packageJSON.main ? packageJSON.main.replace('dist', 'src').replace('.js', '.ts') : 'src/main.ts';
     return await utils.forEachPackage(async (pkg, folder) => {
         const opts: RollupFileOptions = {
-            input: utils.path(name, 'src/main.ts'),
+            input: utils.path(name, main),
             plugins: [
                 plugin_typescript()
             ]

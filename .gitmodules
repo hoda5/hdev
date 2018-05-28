@@ -1,0 +1,3 @@
+[submodule "tmp/packages/somalib"]
+	path = tmp/packages/somalib
+	url = https://github.com/thr0w/somalib.git

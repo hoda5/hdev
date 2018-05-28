@@ -1,7 +1,8 @@
 import { utils, WorkspaceFile } from "./utils"
 import { existsSync, readFileSync, writeFileSync } from "fs"
 
-export function cmd_rm(name: string) {
+export async function cmd_rm(args: any): Promise<boolean> {
+    const name: string = args.name;
     const afn = utils.adaptFolderName(name);
     utils.exec(
         'git', [
@@ -11,7 +12,7 @@ export function cmd_rm(name: string) {
         ],
         {
             cwd: utils.root + '/packages'
-        } 
+        }
     );
     const w = utils.workspaceFile;
     if (existsSync(w)) {
@@ -20,4 +21,5 @@ export function cmd_rm(name: string) {
         wf.folders = wf.folders.filter(f => f.path != path);
         writeFileSync(w, JSON.stringify(wf, null, 2), 'utf-8');
     }
+    return true;
 }

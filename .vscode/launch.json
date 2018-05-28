@@ -10,11 +10,11 @@
             "name": "hdev",
             "program": "${workspaceFolder}/dist/hdev.js",
             // "cwd": "${workspaceFolder}/../prj",
-            "cwd": "${workspaceFolder}/../tmp",
+            "cwd": "${workspaceFolder}/tmp",
             "args": [
                 // "status"
                 // "init"
-                "add", "@hoda5/somalib", "https://github.com/thr0w/somalib.git"
+                "add", "https://github.com/thr0w/somalib.git"
             ],
             "outFiles": [
                 "${workspaceFolder}/dist/**/*.js"

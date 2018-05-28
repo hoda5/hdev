@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/node
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -37,7 +37,10 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var prog = require("caporal");
+var cmd_init_1 = require("./cmd_init");
 var cmd_status_1 = require("./cmd_status");
+var cmd_add_1 = require("./cmd_add");
+var cmd_rm_1 = require("./cmd_rm");
 var cmd_build_1 = require("./cmd_build");
 var utils_1 = require("./utils");
 prog.version('1.0.0');
@@ -46,12 +49,14 @@ prog.command('status', 'Status dos repositorios')
     .argument('[name]', 'Nome do pacote')
     .complete(completeWithPackageName)
     .action(cmd(cmd_status_1.cmd_status));
-// prog.command('add <url> [name]')
-//     .description('Adiciona um repositorio')
-//     .action(cmd(cmd_add));
-// prog.command('remove <name>')
-//     .description('Remove um repositorio')
-//     .action(cmd(cmd_rm));
+prog.command('add', 'Adiciona um repositorio')
+    .argument('<url>', 'repositório git')
+    .argument('[name]', 'Nome do pacote')
+    .action(cmd(cmd_add_1.cmd_add));
+prog.command('remove', 'Remove um repositorio')
+    .argument('<name>', 'Nome do pacote')
+    .complete(completeWithPackageName)
+    .action(cmd(cmd_rm_1.cmd_rm));
 // prog.command('publish [name]')
 //     .description('incrementa versao e publica pacotes')
 //     .action(cmd(todo));
@@ -69,12 +74,14 @@ prog.command('build', 'build do pacote')
 //     .action(cmd(todo));
 // prog.command('link')
 //     .action(cmd(cmd_link));
-// prog.command('init')
-//     .description('Inicializa na pasta atual')
-//     .action(cmd(cmd_init, false));
+prog.command('init', 'Inicializa na pasta atual como area de trabalho')
+    .action(cmd(cmd_init_1.cmd_init));
 // prog.command('login <name> <email>')
 //     .description('autenticações')
 //     .action(cmd(cmd_login, false));
+prog.command('setup-completation', 'Configura para completar com tab')
+    //.argument('<shell>', 'bash/zsh/fish', ['bash', 'zsh', 'fish'])
+    .action(cmd_setup_completation);
 prog.parse(process.argv);
 function cmd(fn, showrep) {
     if (showrep === void 0) { showrep = true; }
@@ -82,7 +89,7 @@ function cmd(fn, showrep) {
         utils_1.utils.verbose = options.verbose;
         if (showrep)
             console.log('repositorio: ' + utils_1.utils.root);
-        fn.apply(null, args).then(function (ok) {
+        fn(args, options).then(function (ok) {
             if (!ok)
                 prog.help('hdev');
         }, console.log);
@@ -94,8 +101,15 @@ function todo() {
 function completeWithPackageName() {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
+            console.log('aksfhglaksfhglahflsk');
             return [2 /*return*/, Promise.resolve(utils_1.utils.listPackages())];
         });
+    });
+}
+function cmd_setup_completation(args) {
+    var shell = 'bash'; // args.shell
+    utils_1.utils.exec(process.argv[0], [process.argv[1], 'completion', shell], {
+        cwd: process.cwd(),
     });
 }
 //# sourceMappingURL=hdev.js.map

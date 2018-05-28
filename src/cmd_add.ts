@@ -1,7 +1,10 @@
 import { utils, WorkspaceFile } from "./utils"
 import { existsSync, readFileSync, writeFileSync } from "fs"
 
-export function cmd_add(url: string, name: string) {
+export async function cmd_add(args: any): Promise<boolean> {
+    let url: string = args.url;
+    let name: string = args.name;
+    if (url[0] == '@') url = 'https://github.com/' + url.substr(1) + '.git';
     if (!/^(http?|git).*\/.*\.git$/g.test(url))
         utils.throw('invalid url');
     if (!name) {
@@ -10,7 +13,7 @@ export function cmd_add(url: string, name: string) {
             if (m[1] === 'hoda5')
                 name = '@hoda5/' + m[2];
             else
-                name = m[1];
+                name = m[2];
         }
         else
             utils.throw('invalid name');
@@ -45,4 +48,5 @@ export function cmd_add(url: string, name: string) {
             cwd: utils.root + '/packages/' + afn,
         }
     );
+    return true;
 }

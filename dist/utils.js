@@ -60,7 +60,6 @@ exports.utils = {
         return path_1.join(root, 'packages', exports.utils.adaptFolderName(packageName), filename);
     },
     exists: function (packageName, filename) {
-        console.log('exist ' + exports.utils.path(packageName, filename));
         return fs_1.existsSync(exports.utils.path(packageName, filename));
     },
     readText: function (packageName, filename) {

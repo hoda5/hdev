@@ -37,24 +37,27 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var utils_1 = require("../utils");
 var rollup_1 = require("rollup");
-var rollup_plugin_typescript_1 = require("rollup-plugin-typescript");
+var plugin_typescript = require("rollup-plugin-typescript");
 function buildTypeScript(name) {
     return __awaiter(this, void 0, void 0, function () {
         var _this = this;
+        var packageJSON, main;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     if (!utils_1.utils.exists(name, 'tsconfig.json'))
                         return [2 /*return*/];
+                    packageJSON = utils_1.utils.getPackageJsonFor(name);
+                    main = packageJSON.main ? packageJSON.main.replace('dist', 'src').replace('.js', '.ts') : 'src/main.ts';
                     return [4 /*yield*/, utils_1.utils.forEachPackage(function (pkg, folder) { return __awaiter(_this, void 0, void 0, function () {
                             var opts, outputOptions, bundle, _a, code, map;
                             return __generator(this, function (_b) {
                                 switch (_b.label) {
                                     case 0:
                                         opts = {
-                                            input: utils_1.utils.path(name, 'src/main.ts'),
+                                            input: utils_1.utils.path(name, main),
                                             plugins: [
-                                                rollup_plugin_typescript_1.default()
+                                                plugin_typescript()
                                             ]
                                         };
                                         outputOptions = {

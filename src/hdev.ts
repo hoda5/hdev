@@ -1,4 +1,5 @@
-#!/usr/bin/env node
+#!/usr/bin/node
+
 import * as prog from 'caporal';
 
 import { cmd_init } from './cmd_init';
@@ -17,12 +18,15 @@ prog.command('status', 'Status dos repositorios')
     .argument('[name]', 'Nome do pacote')
     .complete(completeWithPackageName)
     .action(cmd(cmd_status));
-// prog.command('add <url> [name]')
-//     .description('Adiciona um repositorio')
-//     .action(cmd(cmd_add));
-// prog.command('remove <name>')
-//     .description('Remove um repositorio')
-//     .action(cmd(cmd_rm));
+
+prog.command('add', 'Adiciona um repositorio')
+    .argument('<url>', 'repositório git')
+    .argument('[name]', 'Nome do pacote')
+    .action(cmd(cmd_add));
+prog.command('remove', 'Remove um repositorio')
+    .argument('<name>', 'Nome do pacote')
+    .complete(completeWithPackageName)
+    .action(cmd(cmd_rm));
 // prog.command('publish [name]')
 //     .description('incrementa versao e publica pacotes')
 //     .action(cmd(todo));
@@ -40,24 +44,25 @@ prog.command('build', 'build do pacote')
 //     .action(cmd(todo));
 // prog.command('link')
 //     .action(cmd(cmd_link));
-// prog.command('init')
-//     .description('Inicializa na pasta atual')
-//     .action(cmd(cmd_init, false));
+prog.command('init', 'Inicializa na pasta atual como area de trabalho')
+    .action(cmd(cmd_init));
 // prog.command('login <name> <email>')
 //     .description('autenticações')
 //     .action(cmd(cmd_login, false));
 
+prog.command('setup-completation', 'Configura para completar com tab')
+    //.argument('<shell>', 'bash/zsh/fish', ['bash', 'zsh', 'fish'])
+    .action(cmd_setup_completation);
+
 prog.parse(process.argv);
 
-type ActionCallback = (args: { [k: string]: any },
-    options: { [k: string]: any },
-    logger: Logger) => Promise<boolean>;
+type ActionCallback = (args: any, options: any) => Promise<boolean>;
 function cmd(fn: ActionCallback, showrep = true) {
     return function (args: any, options: any) {
         utils.verbose = options.verbose;
         if (showrep)
             console.log('repositorio: ' + utils.root);
-        fn.apply(null, args).then((ok: boolean) => {
+        fn(args, options).then((ok: boolean) => {
             if (!ok) prog.help('hdev');
         }, console.log);
     }
@@ -68,5 +73,13 @@ function todo() {
 }
 
 async function completeWithPackageName() {
+    console.log('aksfhglaksfhglahflsk')
     return Promise.resolve(utils.listPackages());
+}
+
+function cmd_setup_completation(args: any) {
+    const shell = 'bash'; // args.shell
+    utils.exec(process.argv[0], [process.argv[1], 'completion', shell], {
+        cwd: process.cwd(),
+    });
 }
