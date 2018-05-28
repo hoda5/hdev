@@ -2,7 +2,7 @@ import { dirname, resolve, basename } from "path"
 import { existsSync, writeFileSync, mkdirSync } from "fs"
 import { utils, WorkspaceFile } from "./utils"
 
-export function cmd_init() {
+export function cmd_init() { 
     const d = resolve(process.cwd());
     const w = d + '/' + basename(d) + '.code-workspace';
     if (!existsSync(w)) {

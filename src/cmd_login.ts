@@ -5,7 +5,7 @@ import { existsSync, readFileSync, writeFileSync } from "fs"
 
 export function cmd_login(name: string, email: string) {
 
-    utils.shell(
+    utils.exec(
         'git', [
             'config',
             '--global',
@@ -16,7 +16,7 @@ export function cmd_login(name: string, email: string) {
             cwd: utils.root,
         }
     );
-    utils.shell(
+    utils.exec(
         'git', [
             'config',
             '--global',
@@ -27,7 +27,7 @@ export function cmd_login(name: string, email: string) {
             cwd: utils.root,
         }
     );
-    utils.shell(
+    utils.exec(
         'git', [
             'credential-cache',
             'exit'
@@ -36,7 +36,7 @@ export function cmd_login(name: string, email: string) {
             cwd: utils.root,
         }
     );
-    utils.shell(
+    utils.exec(
         'git', [
             "config",
             "credential.helper",
@@ -46,7 +46,7 @@ export function cmd_login(name: string, email: string) {
             cwd: utils.root,
         }
     );
-    utils.shell(
+    utils.exec(
         'git', [
             'credential',
             'fill'
@@ -56,3 +56,4 @@ export function cmd_login(name: string, email: string) {
         }
     );
 }
+ 

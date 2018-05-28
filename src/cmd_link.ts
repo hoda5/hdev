@@ -8,7 +8,7 @@ export function cmd_link(name: string, url: string) {
 
     function enable_link(packagName: string, folder: string) {
         allpackages.push(packagName);
-        utils.shell(
+        utils.exec(
             'npm', [
                 'link'
             ],
@@ -26,9 +26,9 @@ export function cmd_link(name: string, url: string) {
             ...json.devDependencies ? Object.keys(json.devDependencies) : [],
         ].map((dep) => {
             if (allpackages.indexOf(dep) >= 0)
-                utils.shell(
+                utils.exec(
                     'npm', [
-                        'link',
+                        'link', 
                         dep
                     ],
                     {

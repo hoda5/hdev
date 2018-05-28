@@ -4,7 +4,7 @@ var utils_1 = require("./utils");
 function cmd_status(name) {
     var ok = false;
     utils_1.utils.forEachPackage(function (pkg, folder) {
-        utils_1.utils.shell('git', [
+        utils_1.utils.exec('git', [
             'status'
         ], {
             cwd: folder,

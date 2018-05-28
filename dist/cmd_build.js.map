@@ -1,0 +1,1 @@
+{"version":3,"file":"cmd_build.js","sourceRoot":"","sources":["../src/cmd_build.ts"],"names":[],"mappings":";;AAAA,iCAA2D;AAE3D,2DAAyD;AAEzD,mBAA0B,IAAY;IAClC,IAAM,GAAG,GAAG,aAAK,CAAC,eAAe,CAAC,IAAI,CAAC,CAAC;IAExC,IAAI,IAAI;QACJ,iCAAe,CAAC,IAAI,CAAC,CAAC;;QAEtB,aAAK,CAAC,cAAc,CAAC,iCAAe,CAAC,CAAC;AAC9C,CAAC;AAPD,8BAOC"}

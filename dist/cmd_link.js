@@ -7,7 +7,7 @@ function cmd_link(name, url) {
     utils_1.utils.forEachPackage(link_packages);
     function enable_link(packagName, folder) {
         allpackages.push(packagName);
-        utils_1.utils.shell('npm', [
+        utils_1.utils.exec('npm', [
             'link'
         ], {
             cwd: folder
@@ -17,7 +17,7 @@ function cmd_link(name, url) {
         var json = utils_1.utils.getPackageJsonFor(packageName);
         (json.dependencies ? Object.keys(json.dependencies) : []).concat(json.peerDependencies ? Object.keys(json.peerDependencies) : [], json.devDependencies ? Object.keys(json.devDependencies) : []).map(function (dep) {
             if (allpackages.indexOf(dep) >= 0)
-                utils_1.utils.shell('npm', [
+                utils_1.utils.exec('npm', [
                     'link',
                     dep
                 ], {

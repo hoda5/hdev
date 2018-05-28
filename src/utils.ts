@@ -1,9 +1,8 @@
 import { readdirSync, readFileSync, existsSync } from "fs"
-import { dirname, basename } from "path"
+import { dirname, basename, join } from "path"
 import { spawnSync } from "child_process"
-import { settings } from "cluster";
-
-import {red, blue} from "bash-color";
+import * as pm2 from 'pm2';
+import { red, blue } from "bash-color";
 
 export type PackageJSON = {
     name: string;
@@ -16,12 +15,19 @@ export type WorkspaceFile = {
     settings: Object
 }
 
+pm2.connect(function (err) {
+    if (err) {
+        console.error(err);
+        process.exit(2);
+    }
+});
+
 export const utils = {
     get root() {
         return root;
     },
     get workspaceFile() {
-        return root + '/' + basename(root) + '.code-workspace';
+        return join(root, + basename(root) + '.code-workspace');
     },
     adaptFolderName(packageName: string) {
         if (packageName.indexOf('-') != -1)
@@ -39,10 +45,7 @@ export const utils = {
         })
     },
     getPackageJsonFor(packagName: string) {
-        const json: PackageJSON = JSON.parse(
-            readFileSync(
-                root + '/packages/' + utils.adaptFolderName(packagName) + '/package.json',
-                { encoding: 'utf-8' }));
+        const json = utils.readJSON<PackageJSON>(packagName, 'package.json');
         if (json.name !== packagName)
             utils.throw(
                 'Package name (' + packagName +
@@ -50,14 +53,29 @@ export const utils = {
                 json.name + ')');
         return json;
     },
+    path(packageName: string, filename = '') {
+        return join(root, 'packages', utils.adaptFolderName(packageName), filename);
+    },
+    exists(packageName: string, filename: string): boolean {
+        return existsSync(utils.path(packageName, filename));
+    },
+    readText(packageName: string, filename: string): string {
+        return readFileSync(
+            utils.path(packageName, filename),
+            { encoding: 'utf-8' }
+        );
+    },
+    readJSON<T>(packageName: string, filename: string): T {
+        return JSON.parse(utils.readText(packageName, filename)) as T;
+    },
     throw(msg: string) {
         console.log(msg)
         process.exit(1)
     },
-    shell(cmd: string, args: string[], opts: { cwd: string }) {
+    exec(cmd: string, args: string[], opts: { cwd: string }) {
         console.log(
-            red(opts.cwd+ '$ ')+
-            blue(cmd+ ' '+ args.join(' '))
+            red(opts.cwd + '$ ') +
+            blue(cmd + ' ' + args.join(' '), true)
         );
         const r = spawnSync(
             cmd, args,

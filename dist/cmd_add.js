@@ -17,7 +17,7 @@ function cmd_add(url, name) {
             utils_1.utils.throw('invalid name');
     }
     var afn = utils_1.utils.adaptFolderName(name);
-    utils_1.utils.shell('git', [
+    utils_1.utils.exec('git', [
         'submodule',
         'add',
         '--force',
@@ -34,7 +34,7 @@ function cmd_add(url, name) {
     };
     wf.folders.push({ path: 'packages/' + afn });
     fs_1.writeFileSync(w, JSON.stringify(wf, null, 2), 'utf-8');
-    utils_1.utils.shell('npm', [
+    utils_1.utils.exec('npm', [
         'install',
     ], {
         cwd: utils_1.utils.root + '/packages/' + afn,

@@ -3,7 +3,7 @@ import { existsSync, readFileSync, writeFileSync } from "fs"
 
 export function cmd_rm(name: string) {
     const afn = utils.adaptFolderName(name);
-    utils.shell(
+    utils.exec(
         'git', [
             'rm',
             '-f',
@@ -11,7 +11,7 @@ export function cmd_rm(name: string) {
         ],
         {
             cwd: utils.root + '/packages'
-        }
+        } 
     );
     const w = utils.workspaceFile;
     if (existsSync(w)) {

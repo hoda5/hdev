@@ -11,13 +11,20 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var fs_1 = require("fs");
 var path_1 = require("path");
 var child_process_1 = require("child_process");
+var pm2 = require("pm2");
 var bash_color_1 = require("bash-color");
+pm2.connect(function (err) {
+    if (err) {
+        console.error(err);
+        process.exit(2);
+    }
+});
 exports.utils = {
     get root() {
         return root;
     },
     get workspaceFile() {
-        return root + '/' + path_1.basename(root) + '.code-workspace';
+        return path_1.join(root, +path_1.basename(root) + '.code-workspace');
     },
     adaptFolderName: function (packageName) {
         if (packageName.indexOf('-') != -1)
@@ -36,20 +43,33 @@ exports.utils = {
         });
     },
     getPackageJsonFor: function (packagName) {
-        var json = JSON.parse(fs_1.readFileSync(root + '/packages/' + exports.utils.adaptFolderName(packagName) + '/package.json', { encoding: 'utf-8' }));
+        var json = exports.utils.readJSON(packagName, 'package.json');
         if (json.name !== packagName)
             exports.utils.throw('Package name (' + packagName +
                 ') é diferente do que está em name do package.json (' +
                 json.name + ')');
         return json;
     },
+    path: function (packageName, filename) {
+        if (filename === void 0) { filename = ''; }
+        return path_1.join(root, 'packages', exports.utils.adaptFolderName(packageName), filename);
+    },
+    exists: function (packageName, filename) {
+        return fs_1.existsSync(exports.utils.path(packageName, filename));
+    },
+    readText: function (packageName, filename) {
+        return fs_1.readFileSync(exports.utils.path(packageName, filename), { encoding: 'utf-8' });
+    },
+    readJSON: function (packageName, filename) {
+        return JSON.parse(exports.utils.readText(packageName, filename));
+    },
     throw: function (msg) {
         console.log(msg);
         process.exit(1);
     },
-    shell: function (cmd, args, opts) {
+    exec: function (cmd, args, opts) {
         console.log(bash_color_1.red(opts.cwd + '$ ') +
-            bash_color_1.blue(cmd + ' ' + args.join(' ')));
+            bash_color_1.blue(cmd + ' ' + args.join(' '), true));
         var r = child_process_1.spawnSync(cmd, args, __assign({}, opts, { stdio: ['inherit', 'inherit', 'inherit'] }));
         if (r.status != 0)
             process.exit(1);

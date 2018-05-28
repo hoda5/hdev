@@ -4,7 +4,7 @@ var utils_1 = require("./utils");
 var fs_1 = require("fs");
 function cmd_rm(name) {
     var afn = utils_1.utils.adaptFolderName(name);
-    utils_1.utils.shell('git', [
+    utils_1.utils.exec('git', [
         'rm',
         '-f',
         afn,
