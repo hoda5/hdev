@@ -36,55 +36,44 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var utils_1 = require("../utils");
-var rollup_1 = require("rollup");
-var plugin_typescript = require("rollup-plugin-typescript");
 function buildTypeScript(name) {
     return __awaiter(this, void 0, void 0, function () {
-        var _this = this;
-        var packageJSON, main;
         return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    if (!utils_1.utils.exists(name, 'tsconfig.json'))
-                        return [2 /*return*/];
-                    packageJSON = utils_1.utils.getPackageJsonFor(name);
-                    main = packageJSON.main ? packageJSON.main.replace('dist', 'src').replace('.js', '.ts') : 'src/main.ts';
-                    return [4 /*yield*/, utils_1.utils.forEachPackage(function (pkg, folder) { return __awaiter(_this, void 0, void 0, function () {
-                            var opts, outputOptions, bundle, _a, code, map;
-                            return __generator(this, function (_b) {
-                                switch (_b.label) {
-                                    case 0:
-                                        opts = {
-                                            input: utils_1.utils.path(name, main),
-                                            plugins: [
-                                                plugin_typescript()
-                                            ]
-                                        };
-                                        outputOptions = {
-                                            dir: utils_1.utils.path(name, 'dist2'),
-                                        };
-                                        return [4 /*yield*/, rollup_1.rollup(opts)];
-                                    case 1:
-                                        bundle = _b.sent();
-                                        console.log(bundle.imports); // an array of external dependencies
-                                        console.log(bundle.exports); // an array of names exported by the entry point
-                                        console.log(bundle.modules); // an array of module objects
-                                        return [4 /*yield*/, bundle.generate(outputOptions)];
-                                    case 2:
-                                        _a = _b.sent(), code = _a.code, map = _a.map;
-                                        // or write the bundle to disk
-                                        return [4 /*yield*/, bundle.write(outputOptions)];
-                                    case 3:
-                                        // or write the bundle to disk
-                                        _b.sent();
-                                        return [2 /*return*/];
-                                }
-                            });
-                        }); })];
-                case 1: return [2 /*return*/, _a.sent()];
-            }
+            if (!utils_1.utils.exists(name, 'tsconfig.json'))
+                return [2 /*return*/];
+            utils_1.utils.exec('npm', ['run', 'build'], { cwd: utils_1.utils.path(name) });
+            return [2 /*return*/];
         });
     });
 }
 exports.buildTypeScript = buildTypeScript;
+// export async function buildTypeScript(name: string) {
+//     if (!utils.exists(name, 'tsconfig.json')) return;
+//     let allDiagnostics: Diagnostic[] = [];
+//     await utils.forEachPackage(async (pkg, folder) => {
+//         allDiagnostics = allDiagnostics.concat(
+//             await compile([], {
+//                 project: utils.path(name),
+//             }));
+//     });
+//     allDiagnostics.forEach(diagnostic => {
+//         if (diagnostic.file) {
+//             let { line, character } = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start!);
+//             let message = flattenDiagnosticMessageText(diagnostic.messageText, '\n');
+//             console.log(`${diagnostic.file.fileName} (${line + 1},${character + 1}): ${message}`);
+//         }
+//         else {
+//             console.log(`${flattenDiagnosticMessageText(diagnostic.messageText, '\n')}`);
+//         }
+//     });
+//     return allDiagnostics;
+// }
+// async function compile(fileNames: string[], options: CompilerOptions): Promise<Diagnostic[]> {
+//     let program = createProgram(fileNames, options);
+//     let emitResult = program.emit();
+//     return getPreEmitDiagnostics(program).concat(emitResult.diagnostics);
+//     // let exitCode = emitResult.emitSkipped ? 1 : 0;
+//     // console.log(`Process exiting with code '${exitCode}'.`);
+//     // process.exit(exitCode);
+// }
 //# sourceMappingURL=buildTypeScript.js.map

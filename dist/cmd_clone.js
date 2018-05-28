@@ -37,7 +37,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var utils_1 = require("./utils");
 var fs_1 = require("fs");
-function cmd_add(args) {
+function cmd_clone(args) {
     return __awaiter(this, void 0, void 0, function () {
         var url, name, m, afn, w, wf;
         return __generator(this, function (_a) {
@@ -85,5 +85,5 @@ function cmd_add(args) {
         });
     });
 }
-exports.cmd_add = cmd_add;
+exports.cmd_clone = cmd_clone;
 //# sourceMappingURL=cmd_clone.js.map

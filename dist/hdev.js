@@ -39,7 +39,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var prog = require("caporal");
 var cmd_init_1 = require("./cmd_init");
 var cmd_status_1 = require("./cmd_status");
-var cmd_add_1 = require("./cmd_add");
+var cmd_clone_1 = require("./cmd_clone");
 var cmd_rm_1 = require("./cmd_rm");
 var cmd_build_1 = require("./cmd_build");
 var utils_1 = require("./utils");
@@ -49,10 +49,10 @@ prog.command('status', 'Status dos repositorios')
     .argument('[name]', 'Nome do pacote')
     .complete(completeWithPackageName)
     .action(cmd(cmd_status_1.cmd_status));
-prog.command('add', 'Adiciona um repositorio')
+prog.command('clone', 'Adiciona um repositorio')
     .argument('<url>', 'repositório git')
     .argument('[name]', 'Nome do pacote')
-    .action(cmd(cmd_add_1.cmd_add));
+    .action(cmd(cmd_clone_1.cmd_clone));
 prog.command('remove', 'Remove um repositorio')
     .argument('<name>', 'Nome do pacote')
     .complete(completeWithPackageName)

@@ -14,7 +14,8 @@
             "args": [
                 // "status"
                 // "init"
-                "add", "https://github.com/thr0w/somalib.git"
+                //"add", "https://github.com/thr0w/somalib.git"
+                "build"
             ],
             "outFiles": [
                 "${workspaceFolder}/dist/**/*.js"

@@ -5,8 +5,8 @@ import * as pm2 from 'pm2';
 import { red, purple, blue } from "bash-color";
 
 export type PackageJSON = {
-    name: string;    
-    main: string;    
+    name: string;
+    main: string;
     dependencies?: string[],
     devDependencies?: string[],
     peerDependencies?: string[],
@@ -47,7 +47,7 @@ export const utils = {
         return Promise.all(packages.map((p) => {
             if (utils.verbose) debug('forEachPackage');
             return fn(p.replace('-', '/'), [root, 'packages', p].join('/'));
-        })).then( () => true);
+        })).then(() => true);
     },
     getPackageJsonFor(packagName: string) {
         const json = utils.readJSON<PackageJSON>(packagName, 'package.json');
@@ -58,8 +58,8 @@ export const utils = {
                 json.name + ')');
         return json;
     },
-    path(packageName: string, filename = '') {
-        return join(root, 'packages', utils.adaptFolderName(packageName), filename);
+    path(packageName: string, ...names: string[]) {
+        return join(root, 'packages', utils.adaptFolderName(packageName), ...names);
     },
     exists(packageName: string, filename: string): boolean {
         return existsSync(utils.path(packageName, filename));

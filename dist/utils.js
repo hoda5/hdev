@@ -55,9 +55,12 @@ exports.utils = {
                 json.name + ')');
         return json;
     },
-    path: function (packageName, filename) {
-        if (filename === void 0) { filename = ''; }
-        return path_1.join(root, 'packages', exports.utils.adaptFolderName(packageName), filename);
+    path: function (packageName) {
+        var names = [];
+        for (var _i = 1; _i < arguments.length; _i++) {
+            names[_i - 1] = arguments[_i];
+        }
+        return path_1.join.apply(void 0, [root, 'packages', exports.utils.adaptFolderName(packageName)].concat(names));
     },
     exists: function (packageName, filename) {
         return fs_1.existsSync(exports.utils.path(packageName, filename));

@@ -8,8 +8,3 @@ declare module "bash-color" {
     function cyan(s: string, hi?: boolean): string;
     function white(s: string, hi?: boolean): string;
 }
-
-declare module "rollup-plugin-typescript" {
-    var x: any;
-    export = x;
-}

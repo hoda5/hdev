@@ -5,7 +5,7 @@ import * as prog from 'caporal';
 import { cmd_init } from './cmd_init';
 import { cmd_login } from './cmd_login';
 import { cmd_status } from './cmd_status';
-import { cmd_add } from './cmd_add';
+import { cmd_clone } from './cmd_clone';
 import { cmd_rm } from './cmd_rm';
 import { cmd_link } from './cmd_link';
 import { cmd_build } from './cmd_build';
@@ -19,14 +19,16 @@ prog.command('status', 'Status dos repositorios')
     .complete(completeWithPackageName)
     .action(cmd(cmd_status));
 
-prog.command('add', 'Adiciona um repositorio')
+prog.command('clone', 'Adiciona um repositorio')
     .argument('<url>', 'repositório git')
     .argument('[name]', 'Nome do pacote')
-    .action(cmd(cmd_add));
+    .action(cmd(cmd_clone));
+
 prog.command('remove', 'Remove um repositorio')
     .argument('<name>', 'Nome do pacote')
     .complete(completeWithPackageName)
     .action(cmd(cmd_rm));
+
 // prog.command('publish [name]')
 //     .description('incrementa versao e publica pacotes')
 //     .action(cmd(todo));
@@ -34,16 +36,19 @@ prog.command('remove', 'Remove um repositorio')
 //     .action(cmd(todo));
 // prog.command('push [name]')
 //     .action(cmd(todo));
+
 prog.command('build', 'build do pacote')
     .argument('[name]', 'Nome do pacote')
     .complete(completeWithPackageName)
     .action(cmd(cmd_build));
+    
 // prog.command('watch [name]')
 //     .action(cmd(todo));
 // prog.command('upgrade')
 //     .action(cmd(todo));
 // prog.command('link')
 //     .action(cmd(cmd_link));
+
 prog.command('init', 'Inicializa na pasta atual como area de trabalho')
     .action(cmd(cmd_init));
 // prog.command('login <name> <email>')

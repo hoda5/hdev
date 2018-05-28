@@ -1,7 +1,7 @@
 import { utils, WorkspaceFile } from "./utils"
 import { existsSync, readFileSync, writeFileSync } from "fs"
 
-export async function cmd_add(args: any): Promise<boolean> {
+export async function cmd_clone(args: any): Promise<boolean> {
     let url: string = args.url;
     let name: string = args.name;
     if (url[0] == '@') url = 'https://github.com/' + url.substr(1) + '.git';
