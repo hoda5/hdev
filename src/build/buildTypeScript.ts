@@ -5,6 +5,11 @@ export async function buildTypeScript(name: string) {
     utils.exec('npm', ['run', 'build'], { cwd: utils.path(name) });
 }
 
+export async function watchTypeScript(name: string) {
+    if (!utils.exists(name, 'tsconfig.json')) return;
+    utils.exec('npm', ['run', 'build'], { cwd: utils.path(name) });
+}
+
 // export async function buildTypeScript(name: string) {
 //     if (!utils.exists(name, 'tsconfig.json')) return;
 //     let allDiagnostics: Diagnostic[] = [];

@@ -29,6 +29,16 @@ prog.command('remove', 'Remove um repositorio')
     .complete(completeWithPackageName)
     .action(cmd(cmd_rm));
 
+prog.command('build', 'build do pacote')
+    .argument('[name]', 'Nome do pacote')
+    .complete(completeWithPackageName)
+    .action(cmd(cmd_build));
+
+    prog.command('login', 'configura login do git/github')
+    .argument('<name>', 'Nome de usuario no servidor')
+    .argument('<email>', 'email')
+    .action(cmd(cmd_login, false));
+
 // prog.command('publish [name]')
 //     .description('incrementa versao e publica pacotes')
 //     .action(cmd(todo));
@@ -36,12 +46,6 @@ prog.command('remove', 'Remove um repositorio')
 //     .action(cmd(todo));
 // prog.command('push [name]')
 //     .action(cmd(todo));
-
-prog.command('build', 'build do pacote')
-    .argument('[name]', 'Nome do pacote')
-    .complete(completeWithPackageName)
-    .action(cmd(cmd_build));
-    
 // prog.command('watch [name]')
 //     .action(cmd(todo));
 // prog.command('upgrade')
@@ -51,9 +55,6 @@ prog.command('build', 'build do pacote')
 
 prog.command('init', 'Inicializa na pasta atual como area de trabalho')
     .action(cmd(cmd_init));
-// prog.command('login <name> <email>')
-//     .description('autenticações')
-//     .action(cmd(cmd_login, false));
 
 prog.command('setup-completation', 'Configura para completar com tab')
     //.argument('<shell>', 'bash/zsh/fish', ['bash', 'zsh', 'fish'])

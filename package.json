@@ -2,7 +2,9 @@
   "name": "@hoda5/hdev",
   "version": "1.0.0",
   "description": "",
-  "bin": "dist/hdev.js",
+  "bin": {
+    "hdev": "dist/hdev.js"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

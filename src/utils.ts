@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync, existsSync } from "fs"
+import { readdirSync, readFileSync, existsSync, watch } from "fs"
 import { dirname, basename, join } from "path"
 import { spawnSync } from "child_process"
 import * as pm2 from 'pm2';
@@ -91,6 +91,22 @@ export const utils = {
         );
         if (r.status != 0)
             process.exit(1);
+    },
+    spwan(cmd: string, args: string[], opts: { name: string, cwd: string, watch: boolean | string[] }) {
+        pm2.start({
+            name: opts.name,
+            script: cmd,
+            args,
+            cwd: opts.cwd,
+            watch: opts.watch,
+            // source_map_support: true,
+        }, (err, proc) => {
+            if (err) utils.throw(err.message);
+            //  proc.
+        });
+        setInterval( ()=> {
+// pm2.reloadLogs()
+        },1000)
     }
 }
 const root = findRoot(process.cwd())

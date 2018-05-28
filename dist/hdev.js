@@ -38,6 +38,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var prog = require("caporal");
 var cmd_init_1 = require("./cmd_init");
+var cmd_login_1 = require("./cmd_login");
 var cmd_status_1 = require("./cmd_status");
 var cmd_clone_1 = require("./cmd_clone");
 var cmd_rm_1 = require("./cmd_rm");
@@ -57,6 +58,14 @@ prog.command('remove', 'Remove um repositorio')
     .argument('<name>', 'Nome do pacote')
     .complete(completeWithPackageName)
     .action(cmd(cmd_rm_1.cmd_rm));
+prog.command('build', 'build do pacote')
+    .argument('[name]', 'Nome do pacote')
+    .complete(completeWithPackageName)
+    .action(cmd(cmd_build_1.cmd_build));
+prog.command('login', 'configura login do git/github')
+    .argument('<name>', 'Nome de usuario no servidor')
+    .argument('<email>', 'email')
+    .action(cmd(cmd_login_1.cmd_login, false));
 // prog.command('publish [name]')
 //     .description('incrementa versao e publica pacotes')
 //     .action(cmd(todo));
@@ -64,10 +73,6 @@ prog.command('remove', 'Remove um repositorio')
 //     .action(cmd(todo));
 // prog.command('push [name]')
 //     .action(cmd(todo));
-prog.command('build', 'build do pacote')
-    .argument('[name]', 'Nome do pacote')
-    .complete(completeWithPackageName)
-    .action(cmd(cmd_build_1.cmd_build));
 // prog.command('watch [name]')
 //     .action(cmd(todo));
 // prog.command('upgrade')
@@ -76,9 +81,6 @@ prog.command('build', 'build do pacote')
 //     .action(cmd(cmd_link));
 prog.command('init', 'Inicializa na pasta atual como area de trabalho')
     .action(cmd(cmd_init_1.cmd_init));
-// prog.command('login <name> <email>')
-//     .description('autenticações')
-//     .action(cmd(cmd_login, false));
 prog.command('setup-completation', 'Configura para completar com tab')
     //.argument('<shell>', 'bash/zsh/fish', ['bash', 'zsh', 'fish'])
     .action(cmd_setup_completation);

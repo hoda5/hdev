@@ -1,10 +1,9 @@
 import { utils, WorkspaceFile } from "./utils"
 import { existsSync, readFileSync, writeFileSync } from "fs"
 
-
-
-export function cmd_login(name: string, email: string) {
-
+export async function cmd_login(args: any): Promise<boolean> {
+    const name: string = args.name;
+    const email: string = args.email;
     utils.exec(
         'git', [
             'config',
@@ -46,14 +45,14 @@ export function cmd_login(name: string, email: string) {
             cwd: utils.root,
         }
     );
-    utils.exec(
-        'git', [
-            'credential',
-            'fill'
-        ],
-        {
-            cwd: utils.root,
-        }
-    );
+    // utils.exec(
+    //     'git', [
+    //         'credential',
+    //         'fill'
+    //     ],
+    //     {
+    //         cwd: utils.root,
+    //     }
+    // );
+    return true;
 }
- 

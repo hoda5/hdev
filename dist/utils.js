@@ -11,6 +11,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var fs_1 = require("fs");
 var path_1 = require("path");
 var child_process_1 = require("child_process");
+var pm2 = require("pm2");
 var bash_color_1 = require("bash-color");
 // pm2.connect(function (err) {
 //     if (err) {
@@ -81,6 +82,22 @@ exports.utils = {
         var r = child_process_1.spawnSync(cmd, args, __assign({}, opts, { stdio: ['inherit', 'inherit', 'inherit'] }));
         if (r.status != 0)
             process.exit(1);
+    },
+    spwan: function (cmd, args, opts) {
+        pm2.start({
+            name: opts.name,
+            script: cmd,
+            args: args,
+            cwd: opts.cwd,
+            watch: opts.watch,
+        }, function (err, proc) {
+            if (err)
+                exports.utils.throw(err.message);
+            //  proc.
+        });
+        setInterval(function () {
+            // pm2.reloadLogs()
+        }, 1000);
     }
 };
 var root = findRoot(process.cwd());

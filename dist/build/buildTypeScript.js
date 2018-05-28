@@ -47,6 +47,17 @@ function buildTypeScript(name) {
     });
 }
 exports.buildTypeScript = buildTypeScript;
+function watchTypeScript(name) {
+    return __awaiter(this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            if (!utils_1.utils.exists(name, 'tsconfig.json'))
+                return [2 /*return*/];
+            utils_1.utils.exec('npm', ['run', 'build'], { cwd: utils_1.utils.path(name) });
+            return [2 /*return*/];
+        });
+    });
+}
+exports.watchTypeScript = watchTypeScript;
 // export async function buildTypeScript(name: string) {
 //     if (!utils.exists(name, 'tsconfig.json')) return;
 //     let allDiagnostics: Diagnostic[] = [];
