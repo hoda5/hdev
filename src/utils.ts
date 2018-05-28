@@ -2,7 +2,7 @@ import { readdirSync, readFileSync, existsSync } from "fs"
 import { dirname, basename, join } from "path"
 import { spawnSync } from "child_process"
 import * as pm2 from 'pm2';
-import { purple, blue } from "bash-color";
+import { red, purple, blue } from "bash-color";
 
 export type PackageJSON = {
     name: string;
@@ -23,6 +23,7 @@ export type WorkspaceFile = {
 // });
 
 export const utils = {
+    verbose: false,
     get root() {
         return root;
     },
@@ -39,10 +40,13 @@ export const utils = {
         if (!existsSync(dir)) return [];
         return readdirSync(dir);
     },
-    forEachPackage(fn: (packagName: string, folder: string) => void) {
-        utils.listPackages().forEach((p) => {
-            fn(p.replace('-', '/'), [root, 'packages', p].join('/'));
-        })
+    forEachPackage(fn: (packageName: string, folder: string) => Promise<void>) {
+        const packages = utils.listPackages();
+        if (utils.verbose) debug('forEachPackage', packages.join());
+        return Promise.all(packages.map((p) => {
+            if (utils.verbose) debug('forEachPackage');
+            return fn(p.replace('-', '/'), [root, 'packages', p].join('/'));
+        })).then( () => true);
     },
     getPackageJsonFor(packagName: string) {
         const json = utils.readJSON<PackageJSON>(packagName, 'package.json');
@@ -57,6 +61,7 @@ export const utils = {
         return join(root, 'packages', utils.adaptFolderName(packageName), filename);
     },
     exists(packageName: string, filename: string): boolean {
+        console.log('exist ' + utils.path(packageName, filename))
         return existsSync(utils.path(packageName, filename));
     },
     readText(packageName: string, filename: string): string {
@@ -101,4 +106,11 @@ function findRoot(folder: string) {
     }
     utils.throw('no code-workspace file found')
     return ''
+}
+
+function debug(title: string, ...args: any[]) {
+    console.log(
+        red(title + ': ', true) +
+        blue(args.join(' '), false)
+    );
 }

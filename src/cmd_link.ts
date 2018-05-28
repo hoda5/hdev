@@ -6,7 +6,7 @@ export function cmd_link(name: string, url: string) {
     utils.forEachPackage(enable_link);
     utils.forEachPackage(link_packages);
 
-    function enable_link(packagName: string, folder: string) {
+    async function enable_link(packagName: string, folder: string) {
         allpackages.push(packagName);
         utils.exec(
             'npm', [
@@ -18,7 +18,7 @@ export function cmd_link(name: string, url: string) {
         );
     }
 
-    function link_packages(packageName: string, folder: string) {
+    async function link_packages(packageName: string, folder: string) {
         const json = utils.getPackageJsonFor(packageName);
         [
             ...json.dependencies ? Object.keys(json.dependencies) : [],

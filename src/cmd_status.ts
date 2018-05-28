@@ -1,6 +1,6 @@
 import { utils } from "./utils"
 
-export function cmd_status(args: any) {
+export async function cmd_status(args: any): Promise<boolean> {
     const name: string = args.name;
     let ok = false;
     if (name) {
@@ -15,7 +15,7 @@ export function cmd_status(args: any) {
         ok = true;
     }
     else
-        utils.forEachPackage((pkg, folder) => {
+        await utils.forEachPackage(async (pkg, folder) => {
             utils.exec(
                 'git', [
                     'status'
@@ -28,4 +28,5 @@ export function cmd_status(args: any) {
         });
     if (!ok)
         utils.throw('repositório vazio');
+    return ok;
 }

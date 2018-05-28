@@ -19,6 +19,7 @@ var bash_color_1 = require("bash-color");
 //     }
 // });
 exports.utils = {
+    verbose: false,
     get root() {
         return root;
     },
@@ -37,9 +38,14 @@ exports.utils = {
         return fs_1.readdirSync(dir);
     },
     forEachPackage: function (fn) {
-        exports.utils.listPackages().forEach(function (p) {
-            fn(p.replace('-', '/'), [root, 'packages', p].join('/'));
-        });
+        var packages = exports.utils.listPackages();
+        if (exports.utils.verbose)
+            debug('forEachPackage', packages.join());
+        return Promise.all(packages.map(function (p) {
+            if (exports.utils.verbose)
+                debug('forEachPackage');
+            return fn(p.replace('-', '/'), [root, 'packages', p].join('/'));
+        })).then(function () { return true; });
     },
     getPackageJsonFor: function (packagName) {
         var json = exports.utils.readJSON(packagName, 'package.json');
@@ -54,6 +60,7 @@ exports.utils = {
         return path_1.join(root, 'packages', exports.utils.adaptFolderName(packageName), filename);
     },
     exists: function (packageName, filename) {
+        console.log('exist ' + exports.utils.path(packageName, filename));
         return fs_1.existsSync(exports.utils.path(packageName, filename));
     },
     readText: function (packageName, filename) {
@@ -91,5 +98,13 @@ function findRoot(folder) {
     }
     exports.utils.throw('no code-workspace file found');
     return '';
+}
+function debug(title) {
+    var args = [];
+    for (var _i = 1; _i < arguments.length; _i++) {
+        args[_i - 1] = arguments[_i];
+    }
+    console.log(bash_color_1.red(title + ': ', true) +
+        bash_color_1.blue(args.join(' '), false));
 }
 //# sourceMappingURL=utils.js.map
