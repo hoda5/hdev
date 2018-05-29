@@ -75,4 +75,4 @@ function cmd_start(args) {
     });
 }
 exports.cmd_start = cmd_start;
-//# sourceMappingURL=cmd_watch.js.map
+//# sourceMappingURL=cmd_start.js.map
