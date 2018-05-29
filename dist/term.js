@@ -2,42 +2,19 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var watchers_1 = require("./watchers");
 var blessed = require("blessed");
+var utils_1 = require("./utils");
 var term;
 function refreshTerm() {
     if (!term)
-        init();
+        utils_1.utils.throw('UI not initialized');
     term.refreshTerm();
 }
 exports.refreshTerm = refreshTerm;
-function init() {
-    var screen = blessed.screen({
-        smartCSR: true
-    });
-    screen.title = 'hdev';
-    screen.key(['escape', 'q', 'C-c'], function (ch, key) {
-        return process.exit(0);
-    });
-    var box = blessed.textbox({
-        top: 'center',
-        left: 'center',
-        width: '100%',
-        height: '100%',
-        content: 'HDEV',
-        tags: true,
-        border: {
-            type: 'line'
-        },
-        keys: true,
-        vi: true,
-        style: {
-            fg: 'white',
-            bg: 'black',
-            border: {
-                fg: '#f0f0f0'
-            },
-        }
-    });
-    screen.append(box);
+function initUi(logMode) {
+    var screen;
+    var box;
+    if (!logMode)
+        initBox();
     var building = [];
     watchers_1.listenWatchEvent('building', refreshTerm);
     watchers_1.listenWatchEvent('testing', refreshTerm);
@@ -104,11 +81,46 @@ function init() {
                 }
                 if (content.length == 0)
                     content.push('watching');
-                box.content = content.join('\n');
-                box.focus();
-                screen.render();
+                if (logMode)
+                    console.log(content.join('\n'));
+                else {
+                    box.content = content.join('\n');
+                    box.focus();
+                    screen.render();
+                }
             }, 1);
         }
     };
+    function initBox() {
+        screen = blessed.screen({
+            smartCSR: true
+        });
+        screen.title = 'hdev';
+        screen.key(['escape', 'q', 'C-c'], function (ch, key) {
+            return utils_1.utils.exit(0);
+        });
+        box = blessed.textbox({
+            top: 'center',
+            left: 'center',
+            width: '100%',
+            height: '100%',
+            content: 'HDEV',
+            tags: true,
+            border: {
+                type: 'line'
+            },
+            keys: true,
+            vi: true,
+            style: {
+                fg: 'white',
+                bg: 'black',
+                border: {
+                    fg: '#f0f0f0'
+                },
+            }
+        });
+        screen.append(box);
+    }
 }
+exports.initUi = initUi;
 //# sourceMappingURL=term.js.map

@@ -17,14 +17,9 @@ export async function watchTypeScript(packageName: string): Promise<Watcher | un
     let coverage: number | undefined;
     let procTest: SpawnedProcess | undefined;
     const procName = 'ts_' + utils.displayFolderName(packageName);
-    try {
-        await utils.stopProcess(procName);
-    }
-    catch (e) { }
     const procBuild = await utils.spawn('npm', ['run', 'watch'], {
         name: procName,
-        cwd: utils.path(packageName),
-        once: false,
+        cwd: utils.path(packageName),        
         // watch: [utils.path(name, 'src')],        
     });
     procBuild.on('line', (line: string) => {
@@ -95,8 +90,7 @@ export async function watchTypeScript(packageName: string): Promise<Watcher | un
         testing = true;
         const pt = await utils.spawn('npm', ['test'], {
             name: procName + 'test',
-            cwd: utils.path(packageName),
-            once: true,
+            cwd: utils.path(packageName),            
         })
         // pt.on('line', (s)=>console.log(s));
         pt.on('exit', () => {
@@ -108,7 +102,7 @@ export async function watchTypeScript(packageName: string): Promise<Watcher | un
                     errors.push({
                         file: '?',
                         row: 0, col: 0,
-                        msg: ['Cobertura do código por testes está abaixo de ', coverage, '%'].join('');
+                        msg: ['Cobertura do código por testes está abaixo de ', coverage, '%'].join(''),
                     })
             }
             else {

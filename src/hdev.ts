@@ -9,7 +9,7 @@ import { cmd_clone } from './cmd_clone';
 import { cmd_rm } from './cmd_rm';
 import { cmd_link } from './cmd_link';
 import { cmd_build } from './cmd_build';
-import { cmd_start } from './cmd_watch';
+import { cmd_start } from './cmd_start';
 import { utils } from './utils';
 import { wrap } from 'bash-color';
 
@@ -37,8 +37,15 @@ prog.command('build', 'build')
     .action(cmd(cmd_build));
 
 prog.command('start', 'inicia o servidor de desenvolvimento')
-    .complete(completeWithPackageName)
-    .action(cmd(cmd_start));
+    .option('--log-mode', 'log mode')
+    .option('--no-service', 'não inicia como serviço')
+    .action(cmd(cmd_start, false));
+
+prog.command('stop', 'para o servidor de desenvolvimento')
+    .action(cmd(async () =>{
+        utils.exit(0);
+        return Promise.resolve(true);
+    }, false));
 
 prog.command('login', 'configura login do git/github')
     .argument('<name>', 'Nome de usuario no servidor')
@@ -74,8 +81,8 @@ function cmd(fn: ActionCallback, showrep = true) {
         utils.verbose = options.verbose;
         if (showrep)
             console.log(
-                wrap('repositorio: ', "GREEN", "background")+
-                wrap(utils.root, "GREEN", "background")                 
+                wrap('repositorio: ', "GREEN", "background") +
+                wrap(utils.root, "GREEN", "background")
             );
         fn(args, options).then((ok: boolean) => {
             if (!ok) prog.help('hdev');

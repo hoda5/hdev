@@ -35,6 +35,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var _this = this;
 Object.defineProperty(exports, "__esModule", { value: true });
 var prog = require("caporal");
 var cmd_init_1 = require("./cmd_init");
@@ -43,7 +44,7 @@ var cmd_status_1 = require("./cmd_status");
 var cmd_clone_1 = require("./cmd_clone");
 var cmd_rm_1 = require("./cmd_rm");
 var cmd_build_1 = require("./cmd_build");
-var cmd_watch_1 = require("./cmd_watch");
+var cmd_start_1 = require("./cmd_start");
 var utils_1 = require("./utils");
 var bash_color_1 = require("bash-color");
 prog.version('1.0.0');
@@ -65,8 +66,16 @@ prog.command('build', 'build')
     .complete(completeWithPackageName)
     .action(cmd(cmd_build_1.cmd_build));
 prog.command('start', 'inicia o servidor de desenvolvimento')
-    .complete(completeWithPackageName)
-    .action(cmd(cmd_watch_1.cmd_start));
+    .option('--log-mode', 'log mode')
+    .option('--no-service', 'não inicia como serviço')
+    .action(cmd(cmd_start_1.cmd_start, false));
+prog.command('stop', 'para o servidor de desenvolvimento')
+    .action(cmd(function () { return __awaiter(_this, void 0, void 0, function () {
+    return __generator(this, function (_a) {
+        utils_1.utils.exit(0);
+        return [2 /*return*/, Promise.resolve(true)];
+    });
+}); }, false));
 prog.command('login', 'configura login do git/github')
     .argument('<name>', 'Nome de usuario no servidor')
     .argument('<email>', 'email')

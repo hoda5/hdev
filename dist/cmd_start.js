@@ -38,38 +38,41 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var utils_1 = require("./utils");
 var buildTypeScript_1 = require("./build/buildTypeScript");
 var term_1 = require("./term");
-function cmd_start(args) {
+var pm2_1 = require("pm2");
+function cmd_start(args, opts) {
     return __awaiter(this, void 0, void 0, function () {
         var _this = this;
-        var name, ok;
+        var ok;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    name = args.name;
                     ok = false;
-                    if (!name) return [3 /*break*/, 2];
-                    return [4 /*yield*/, buildTypeScript_1.watchTypeScript(name)];
+                    if (!opts.noService) return [3 /*break*/, 2];
+                    return [4 /*yield*/, utils_1.utils.forEachPackage(function (pkg) { return __awaiter(_this, void 0, void 0, function () {
+                            return __generator(this, function (_a) {
+                                switch (_a.label) {
+                                    case 0: return [4 /*yield*/, buildTypeScript_1.watchTypeScript(pkg)];
+                                    case 1:
+                                        if (_a.sent())
+                                            ok = true;
+                                        return [2 /*return*/];
+                                }
+                            });
+                        }); })];
                 case 1:
-                    if (_a.sent())
-                        ok = true;
-                    return [3 /*break*/, 4];
-                case 2: return [4 /*yield*/, utils_1.utils.forEachPackage(function (pkg) { return __awaiter(_this, void 0, void 0, function () {
-                        return __generator(this, function (_a) {
-                            switch (_a.label) {
-                                case 0: return [4 /*yield*/, buildTypeScript_1.watchTypeScript(pkg)];
-                                case 1:
-                                    if (_a.sent())
-                                        ok = true;
-                                    return [2 /*return*/];
-                            }
-                        });
-                    }); })];
-                case 3:
                     _a.sent();
-                    _a.label = 4;
-                case 4:
-                    term_1.refreshTerm();
-                    return [2 /*return*/, ok];
+                    term_1.initUi(opts.logMode);
+                    return [3 /*break*/, 3];
+                case 2:
+                    pm2_1.start({
+                        name: 'hdev',
+                        script: process.argv[0],
+                        args: ['start', '--no-service', '--log-mode'],
+                        watch: true
+                    }, function () { });
+                    setTimeout(function () { return process.exit(0); }, 2000);
+                    _a.label = 3;
+                case 3: return [2 /*return*/, ok];
             }
         });
     });

@@ -1,21 +1,25 @@
 import { utils, WorkspaceFile, PackageJSON } from "./utils"
 import { existsSync, readFileSync, writeFileSync } from "fs"
 import { watchTypeScript } from "./build/buildTypeScript"
-import { refreshTerm } from "./term";
+import { initUi } from "./term";
+import { start } from "pm2";
 
-export async function cmd_start(args: any): Promise<boolean> {
-    const name: string = args.name;
+export async function cmd_start(args: any, opts: any): Promise<boolean> {
     let ok = false;
-    if (name) {
-        if (await watchTypeScript(name))
-            ok = true;
-    }
-    else {
+    if (opts.noService) {
         await utils.forEachPackage(async (pkg) => {
             if (await watchTypeScript(pkg))
                 ok = true;
         });
+        initUi(opts.logMode);
+    } else {
+        start({
+            name: 'hdev',
+            script: process.argv[0],
+            args: ['start', '--no-service', '--log-mode'],
+            watch: true
+        }, () => { });
+        setTimeout(() => process.exit(0), 2000);
     }
-    refreshTerm();
     return ok;
 }

@@ -8,48 +8,15 @@ let term: {
 };
 
 export function refreshTerm() {
-    if (!term) init();
+    if (!term) utils.throw('UI not initialized');
     term.refreshTerm();
 }
 
-function init() {
+export function initUi(logMode: boolean) {
 
-    let screen: blessed.Widgets.Screen = blessed.screen({
-        smartCSR: true
-    });
-
-    screen.title = 'hdev';
-
-    screen.key(['escape', 'q', 'C-c'], function (ch, key) {
-        return process.exit(0);
-    });
-
-    var box = blessed.textbox({
-        top: 'center',
-        left: 'center',
-        width: '100%',
-        height: '100%',
-        content: 'HDEV',
-        tags: true,
-        border: {
-            type: 'line'
-        },
-        keys: true,
-        vi: true,
-        style: {
-            fg: 'white',
-            bg: 'black',
-            border: {
-                fg: '#f0f0f0'
-            },
-            // hover: {
-            //     bg: 'green'
-            // }
-        }
-    });
-
-    screen.append(box);
-
+    let screen: blessed.Widgets.Screen;
+    let box: blessed.Widgets.TextboxElement;
+    if (!logMode) initBox();
     const building: string[] = [];
 
     listenWatchEvent('building', refreshTerm);
@@ -111,10 +78,51 @@ function init() {
                         })
                 }
                 if (content.length == 0) content.push('watching');
-                box.content = content.join('\n');
-                box.focus();
-                screen.render();
+                if (logMode)
+                    console.log(content.join('\n'))
+                else {
+                    box.content = content.join('\n');
+                    box.focus();
+                    screen.render();
+                }
             }, 1);
         }
+    }
+    function initBox() {
+        screen = blessed.screen({
+            smartCSR: true
+        });
+
+        screen.title = 'hdev';
+
+        screen.key(['escape', 'q', 'C-c'], function (ch, key) {
+            return utils.exit(0);
+        });
+
+        box = blessed.textbox({
+            top: 'center',
+            left: 'center',
+            width: '100%',
+            height: '100%',
+            content: 'HDEV',
+            tags: true,
+            border: {
+                type: 'line'
+            },
+            keys: true,
+            vi: true,
+            style: {
+                fg: 'white',
+                bg: 'black',
+                border: {
+                    fg: '#f0f0f0'
+                },
+                // hover: {
+                //     bg: 'green'
+                // }
+            }
+        });
+
+        screen.append(box);
     }
 }

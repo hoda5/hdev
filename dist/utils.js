@@ -38,47 +38,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var fs_1 = require("fs");
 var path_1 = require("path");
 var child_process_1 = require("child_process");
-var pm2 = require("pm2");
 var bash_color_1 = require("bash-color");
-// pm2.connect(function (err) {
-//     if (err) {
-//         console.error(err);
-//         process.exit(2);
-//     }
-// });
-var pm2_bus_ctrl = {
-    refs: 0,
-    p: null,
-    get: function () {
-        if (!pm2_bus_ctrl.p)
-            pm2_bus_ctrl.p = new Promise(function (resolve, reject) {
-                pm2.launchBus(function (err, bus) {
-                    if (err)
-                        return reject(err);
-                    resolve(bus);
-                });
-            });
-        return pm2_bus_ctrl.p;
-    },
-    on: function (event, fn) {
-        var t;
-        var closed = false;
-        pm2_bus_ctrl.get().then(function (b) {
-            t = b.on(event, fn);
-            if (closed)
-                t.close();
-        });
-        return {
-            close: function () {
-                if (t) {
-                    t.close();
-                    t = null;
-                }
-                closed = true;
-            }
-        };
-    }
-};
+var events_1 = require("events");
 exports.utils = {
     verbose: false,
     get root() {
@@ -167,38 +128,44 @@ exports.utils = {
     },
     spawn: function (cmd, args, opts) {
         return __awaiter(this, void 0, void 0, function () {
-            var eventHandlers, r;
+            function start() {
+                var spawnOpts = {
+                    cwd: opts.cwd,
+                    detached: false,
+                };
+                var proc = child_process_1.spawn(cmd, args, spawnOpts);
+                proc.stdout.on('data', parseLines);
+                proc.stderr.on('data', parseLines);
+                proc.on('exit', function (code) {
+                    emitter.emit('exit', code);
+                });
+                return proc;
+                function parseLines(data) {
+                    var s = data
+                        .toString()
+                        .replace(/\u001bc/g, '')
+                        .replace(/\u001b\[\d{0,2}m/g, '');
+                    var lines = s.split('\n');
+                    lines.forEach(function (l) { return emitter.emit('line', l); });
+                }
+            }
+            var proc, emitter, r;
             return __generator(this, function (_a) {
-                eventHandlers = [];
+                proc = start();
+                emitter = new events_1.EventEmitter();
                 r = {
                     get name() {
                         return opts.name;
                     },
                     on: function (event, handler) {
-                        var t;
-                        if (event === 'line')
-                            t = pm2_bus_ctrl.on('log:out', function (d) {
-                                if (d.process.name == opts.name) {
-                                    handler(d.data, d.at);
-                                }
-                            });
-                        else if (event === 'exit')
-                            t = pm2_bus_ctrl.on('process:event', function (d) {
-                                if (d.event === 'exit' && d.process.name == opts.name) {
-                                    handler();
-                                }
-                            });
-                        eventHandlers.push(t);
+                        emitter.on(event, handler);
                     },
                     restart: function () {
                         return __awaiter(this, void 0, void 0, function () {
                             return __generator(this, function (_a) {
+                                proc.kill();
                                 return [2 /*return*/, new Promise(function (resolve, reject) {
-                                        pm2.restart(opts.name, function (err) {
-                                            if (err)
-                                                return reject(err);
-                                            resolve();
-                                        });
+                                        proc = start();
                                     })];
                             });
                         });
@@ -206,65 +173,21 @@ exports.utils = {
                     stop: function () {
                         return __awaiter(this, void 0, void 0, function () {
                             return __generator(this, function (_a) {
-                                return [2 /*return*/, new Promise(function (resolve, reject) {
-                                        eventHandlers.forEach(function (t) { return t.close(); });
-                                        eventHandlers = [];
-                                        pm2.stop(opts.name, function (err) {
-                                            if (err)
-                                                return reject(err);
-                                            resolve();
-                                        });
-                                    })];
+                                proc.kill();
+                                return [2 /*return*/];
                             });
                         });
                     },
-                    delete: function () {
-                        return __awaiter(this, void 0, void 0, function () {
-                            return __generator(this, function (_a) {
-                                return [2 /*return*/, new Promise(function (resolve, reject) {
-                                        eventHandlers.forEach(function (t) { return t.close(); });
-                                        eventHandlers = [];
-                                        pm2.delete(opts.name, function (err) {
-                                            if (err)
-                                                return reject(err);
-                                            resolve();
-                                        });
-                                    })];
-                            });
-                        });
-                    }
                 };
-                return [2 /*return*/, new Promise(function (resolve, reject) {
-                        var pm2_opts = {
-                            name: opts.name,
-                            script: cmd,
-                            args: args,
-                            cwd: opts.cwd,
-                            autorestart: !opts.once,
-                            watch: opts.watch,
-                            source_map_support: true,
-                        };
-                        pm2.start(pm2_opts, function (err, proc) {
-                            if (err)
-                                return reject(err);
-                            resolve(r);
-                        });
-                    })];
+                return [2 /*return*/, Promise.resolve(r)];
             });
         });
     },
-    stopProcess: function (name) {
-        return __awaiter(this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                return [2 /*return*/, new Promise(function (resolve, reject) {
-                        pm2.stop(name, function (err, proc) {
-                            if (err)
-                                reject(err);
-                            resolve(proc);
-                        });
-                    })];
-            });
-        });
+    exit: function (code) {
+        // pm2.stop('hdev', (err, proc) => {
+        //     //
+        // });
+        setTimeout(function () { return process.exit(code); }, 200);
     }
 };
 var root = findRoot(process.cwd());
@@ -293,4 +216,29 @@ function debug(title) {
     console.log(bash_color_1.wrap(title + ': ', "PURPLE", 'background') +
         bash_color_1.wrap(args.join(' '), "BLUE", 'background'));
 }
+// function parseLines(data) {
+//     buffer = [buffer, data.toString()].join('');
+//     let buffer_start = buffer_end - 1;
+//     let changed = false;
+//     while (buffer_end < buffer.length) {
+//         const c1 = buffer.charAt(buffer_end - 1);
+//         const c2 = buffer.charAt(buffer_end);
+//         if (c1 === '\r') {
+//             const line = buffer.substring(buffer_start, buffer_end - 1);
+//             emitter.emit('line', line);
+//             if (c2 === '\n') buffer_end++;
+//             buffer_start = buffer_end;
+//             changed = true;
+//         }
+//         else if (c1 === '\n') {
+//             const line = buffer.substring(buffer_start, buffer_end - 1);
+//             emitter.emit('line', line);
+//             if (c2 === '\r') buffer_end++;
+//             buffer_start = buffer_end;
+//             changed = true;
+//         }
+//     }
+//     if (changed)
+//         buffer = buffer.substr(buffer_start);
+// }
 //# sourceMappingURL=utils.js.map

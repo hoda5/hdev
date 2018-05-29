@@ -64,7 +64,6 @@ function watchTypeScript(packageName) {
                             return [4 /*yield*/, utils_1.utils.spawn('npm', ['test'], {
                                     name: procName + 'test',
                                     cwd: utils_1.utils.path(packageName),
-                                    once: true,
                                 })
                                 // pt.on('line', (s)=>console.log(s));
                             ];
@@ -80,7 +79,7 @@ function watchTypeScript(packageName) {
                                         errors.push({
                                             file: '?',
                                             row: 0, col: 0,
-                                            msg: ['Cobertura do código por testes está abaixo de ', coverage, '%'].join('')
+                                            msg: ['Cobertura do código por testes está abaixo de ', coverage, '%'].join(''),
                                         });
                                 }
                                 else {
@@ -116,7 +115,7 @@ function watchTypeScript(packageName) {
                 });
             });
         }
-        var events, warnings, errors, building, testing, coverage, procTest, procName, e_1, procBuild, watcher;
+        var events, warnings, errors, building, testing, coverage, procTest, procName, procBuild, watcher;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -127,22 +126,11 @@ function watchTypeScript(packageName) {
                     building = false;
                     testing = false;
                     procName = 'ts_' + utils_1.utils.displayFolderName(packageName);
-                    _a.label = 1;
+                    return [4 /*yield*/, utils_1.utils.spawn('npm', ['run', 'watch'], {
+                            name: procName,
+                            cwd: utils_1.utils.path(packageName),
+                        })];
                 case 1:
-                    _a.trys.push([1, 3, , 4]);
-                    return [4 /*yield*/, utils_1.utils.stopProcess(procName)];
-                case 2:
-                    _a.sent();
-                    return [3 /*break*/, 4];
-                case 3:
-                    e_1 = _a.sent();
-                    return [3 /*break*/, 4];
-                case 4: return [4 /*yield*/, utils_1.utils.spawn('npm', ['run', 'watch'], {
-                        name: procName,
-                        cwd: utils_1.utils.path(packageName),
-                        once: false,
-                    })];
-                case 5:
                     procBuild = _a.sent();
                     procBuild.on('line', function (line) {
                         if (/Starting .*compilation/g.test(line)) {

@@ -1,9 +1,9 @@
 import { readdirSync, readFileSync, existsSync, watch } from "fs"
 import { dirname, basename, join } from "path"
-import { spawnSync } from "child_process"
-import * as pm2 from 'pm2';
+import { spawnSync, spawn, ChildProcess, SpawnOptions } from "child_process"
 import { wrap } from "bash-color";
 import * as stringify from "json-stringify-safe";
+import { EventEmitter } from "events";
 
 export type PackageJSON = {
     name: string;
@@ -18,55 +18,11 @@ export type WorkspaceFile = {
 }
 export interface SpawnedProcess {
     readonly name: string;
-    on(event: 'line', handler: (s: string, ts: number) => void): void;
-    on(event: 'exit', handler: () => void): void;
+    on(event: 'line', handler: (s: string) => void): void;
+    on(event: 'exit', handler: (code: number) => void): void;
     restart(): Promise<void>
     stop(): Promise<void>
-    delete(): Promise<void>
 }
-
-// pm2.connect(function (err) {
-//     if (err) {
-//         console.error(err);
-//         process.exit(2);
-//     }
-// });
-
-const pm2_bus_ctrl = {
-    refs: 0,
-    p: null as any as Promise<any>,
-    get() {
-        if (!pm2_bus_ctrl.p)
-            pm2_bus_ctrl.p = new Promise<any>((resolve, reject) => {
-                pm2.launchBus((err, bus) => {
-                    if (err) return reject(err);
-                    resolve(bus);
-                });
-            });
-        return pm2_bus_ctrl.p;
-    },
-    on(event: string, fn: (...args: any[]) => void) {
-        let t: any;
-        let closed = false;
-        pm2_bus_ctrl.get().then(
-            (b) => {
-                t = b.on(event, fn);
-                if (closed) t.close();
-            }
-        );
-        return {
-            close() {
-                if (t) {
-                    t.close();
-                    t = null;
-                }
-                closed = true;
-            }
-        }
-    }
-}
-
-
 
 export const utils = {
     verbose: false,
@@ -159,84 +115,59 @@ export const utils = {
     async spawn(cmd: string, args: string[],
         opts: {
             name: string,
-            cwd: string,
-            once: boolean,
-            watch?: boolean | string[],
+            cwd: string
         }): Promise<SpawnedProcess> {
 
-        let eventHandlers: Array<{ close(): void }> = [];
+        let proc = start();
+        const emitter = new EventEmitter();
+
+        function start() {
+            const spawnOpts: SpawnOptions = {
+                cwd: opts.cwd,
+                detached: false,
+            }
+            const proc = spawn(cmd, args, spawnOpts);
+            proc.stdout.on('data', parseLines);
+            proc.stderr.on('data', parseLines);
+            proc.on('exit', function (code) {
+                emitter.emit('exit', code);
+            });
+            return proc;
+
+            function parseLines(data: any) {
+                const s: string = data
+                    .toString()
+                    .replace(/\u001bc/g, '')
+                    .replace(/\u001b\[\d{0,2}m/g, '');
+                const lines = s.split('\n');
+                lines.forEach((l) => emitter.emit('line', l));
+            }
+        }
+
         let r: SpawnedProcess = {
             get name() {
                 return opts.name;
             },
             on(event: string, handler: (...args: any[]) => void) {
-                let t: any;
-                if (event === 'line')
-                    t = pm2_bus_ctrl.on('log:out', function (d: any) {
-                        if (d.process.name == opts.name) {
-                            handler(d.data, d.at);
-                        }
-                    });
-                else if (event === 'exit')
-                    t = pm2_bus_ctrl.on('process:event', function (d: any) {
-                        if (d.event === 'exit' && d.process.name == opts.name) {
-                            handler();
-                        }
-                    });
-                eventHandlers.push(t);
+                emitter.on(event, handler);
             },
             async restart() {
+                proc.kill();
                 return new Promise<void>((resolve, reject) => {
-                    pm2.restart(opts.name, (err) => {
-                        if (err) return reject(err);
-                        resolve();
-                    });
+                    proc = start();
                 });
             },
             async stop() {
-                return new Promise<void>((resolve, reject) => {
-                    eventHandlers.forEach((t) => t.close());
-                    eventHandlers = [];
-                    pm2.stop(opts.name, (err) => {
-                        if (err) return reject(err);
-                        resolve();
-                    });
-                });
+                proc.kill();
             },
-            async delete() {
-                return new Promise<void>((resolve, reject) => {
-                    eventHandlers.forEach((t) => t.close());
-                    eventHandlers = [];
-                    pm2.delete(opts.name, (err) => {
-                        if (err) return reject(err);
-                        resolve();
-                    });
-                });
-            }
         };
-        return new Promise<SpawnedProcess>((resolve, reject) => {
-            const pm2_opts = {
-                name: opts.name,
-                script: cmd,
-                args,
-                cwd: opts.cwd,
-                autorestart: !opts.once,
-                watch: opts.watch,
-                source_map_support: true,
-            };
-            pm2.start(pm2_opts, (err, proc) => {
-                if (err) return reject(err);
-                resolve(r);
-            });
-        });
+        return Promise.resolve(r);
     },
-    async stopProcess(name: string) {
-        return new Promise<pm2.Proc>((resolve, reject) => {
-            pm2.stop(name, (err, proc) => {
-                if (err) reject(err);
-                resolve(proc);
-            });
-        });
+    exit(code: number) {
+        // pm2.stop('hdev', (err, proc) => {
+        //     //
+        // });
+        setTimeout(() => process.exit(code), 200);
     }
 }
 const root = findRoot(process.cwd())
@@ -260,3 +191,30 @@ function debug(title: string, ...args: any[]) {
         wrap(args.join(' '), "BLUE", 'background')
     );
 }
+
+
+// function parseLines(data) {
+//     buffer = [buffer, data.toString()].join('');
+//     let buffer_start = buffer_end - 1;
+//     let changed = false;
+//     while (buffer_end < buffer.length) {
+//         const c1 = buffer.charAt(buffer_end - 1);
+//         const c2 = buffer.charAt(buffer_end);
+//         if (c1 === '\r') {
+//             const line = buffer.substring(buffer_start, buffer_end - 1);
+//             emitter.emit('line', line);
+//             if (c2 === '\n') buffer_end++;
+//             buffer_start = buffer_end;
+//             changed = true;
+//         }
+//         else if (c1 === '\n') {
+//             const line = buffer.substring(buffer_start, buffer_end - 1);
+//             emitter.emit('line', line);
+//             if (c2 === '\r') buffer_end++;
+//             buffer_start = buffer_end;
+//             changed = true;
+//         }
+//     }
+//     if (changed)
+//         buffer = buffer.substr(buffer_start);
+// }
