@@ -50,7 +50,7 @@ var pm2_bus_ctrl = {
     refs: 0,
     p: null,
     get: function () {
-        if (pm2_bus_ctrl.p)
+        if (!pm2_bus_ctrl.p)
             pm2_bus_ctrl.p = new Promise(function (resolve, reject) {
                 pm2.launchBus(function (err, bus) {
                     if (err)
@@ -127,14 +127,26 @@ exports.utils = {
         }
         return path_1.join.apply(void 0, [root, 'packages', exports.utils.adaptFolderName(packageName)].concat(names));
     },
-    exists: function (packageName, filename) {
-        return fs_1.existsSync(exports.utils.path(packageName, filename));
+    exists: function (packageName) {
+        var names = [];
+        for (var _i = 1; _i < arguments.length; _i++) {
+            names[_i - 1] = arguments[_i];
+        }
+        return fs_1.existsSync(exports.utils.path.apply(exports.utils, [packageName].concat(names)));
     },
     readText: function (packageName, filename) {
         return fs_1.readFileSync(exports.utils.path(packageName, filename), { encoding: 'utf-8' });
     },
     readJSON: function (packageName, filename) {
         return JSON.parse(exports.utils.readText(packageName, filename));
+    },
+    readCoverageSummary: function (packageName) {
+        var cov = 'coverage/coverage-summary.json';
+        var error = true;
+        if (exports.utils.exists(packageName, cov)) {
+            var summary = exports.utils.readJSON(packageName, cov);
+            return summary.total;
+        }
     },
     throw: function (msg) {
         console.log(msg);
@@ -155,17 +167,28 @@ exports.utils = {
     },
     spawn: function (cmd, args, opts) {
         return __awaiter(this, void 0, void 0, function () {
-            var t, r;
+            var eventHandlers, r;
             return __generator(this, function (_a) {
-                if (opts.onLine)
-                    t = pm2_bus_ctrl.on('log:out', function (d) {
-                        if (opts.onLine && d.process.name == opts.name) {
-                            opts.onLine(d.data, d.at);
-                        }
-                    });
+                eventHandlers = [];
                 r = {
                     get name() {
                         return opts.name;
+                    },
+                    on: function (event, handler) {
+                        var t;
+                        if (event === 'line')
+                            t = pm2_bus_ctrl.on('log:out', function (d) {
+                                if (d.process.name == opts.name) {
+                                    handler(d.data, d.at);
+                                }
+                            });
+                        else if (event === 'exit')
+                            t = pm2_bus_ctrl.on('process:event', function (d) {
+                                if (d.event === 'exit' && d.process.name == opts.name) {
+                                    handler();
+                                }
+                            });
+                        eventHandlers.push(t);
                     },
                     restart: function () {
                         return __awaiter(this, void 0, void 0, function () {
@@ -180,12 +203,27 @@ exports.utils = {
                             });
                         });
                     },
-                    kill: function () {
+                    stop: function () {
                         return __awaiter(this, void 0, void 0, function () {
                             return __generator(this, function (_a) {
                                 return [2 /*return*/, new Promise(function (resolve, reject) {
-                                        if (t)
-                                            t.close();
+                                        eventHandlers.forEach(function (t) { return t.close(); });
+                                        eventHandlers = [];
+                                        pm2.stop(opts.name, function (err) {
+                                            if (err)
+                                                return reject(err);
+                                            resolve();
+                                        });
+                                    })];
+                            });
+                        });
+                    },
+                    delete: function () {
+                        return __awaiter(this, void 0, void 0, function () {
+                            return __generator(this, function (_a) {
+                                return [2 /*return*/, new Promise(function (resolve, reject) {
+                                        eventHandlers.forEach(function (t) { return t.close(); });
+                                        eventHandlers = [];
                                         pm2.delete(opts.name, function (err) {
                                             if (err)
                                                 return reject(err);
@@ -197,13 +235,16 @@ exports.utils = {
                     }
                 };
                 return [2 /*return*/, new Promise(function (resolve, reject) {
-                        pm2.start({
+                        var pm2_opts = {
                             name: opts.name,
                             script: cmd,
                             args: args,
                             cwd: opts.cwd,
+                            autorestart: !opts.once,
                             watch: opts.watch,
-                        }, function (err, proc) {
+                            source_map_support: true,
+                        };
+                        pm2.start(pm2_opts, function (err, proc) {
                             if (err)
                                 return reject(err);
                             resolve(r);

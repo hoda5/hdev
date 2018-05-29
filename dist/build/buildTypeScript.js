@@ -48,18 +48,85 @@ function buildTypeScript(name) {
     });
 }
 exports.buildTypeScript = buildTypeScript;
-function watchTypeScript(name) {
+function watchTypeScript(packageName) {
     return __awaiter(this, void 0, void 0, function () {
-        var events, warnings, errors, building, procName, e_1, p, watcher;
+        function runTests() {
+            return __awaiter(this, void 0, void 0, function () {
+                var pt;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0:
+                            coverage = undefined;
+                            return [4 /*yield*/, abortTesting()];
+                        case 1:
+                            _a.sent();
+                            testing = true;
+                            return [4 /*yield*/, utils_1.utils.spawn('npm', ['test'], {
+                                    name: procName + 'test',
+                                    cwd: utils_1.utils.path(packageName),
+                                    once: true,
+                                })
+                                // pt.on('line', (s)=>console.log(s));
+                            ];
+                        case 2:
+                            pt = _a.sent();
+                            // pt.on('line', (s)=>console.log(s));
+                            pt.on('exit', function () {
+                                var summary = utils_1.utils.readCoverageSummary(packageName);
+                                testing = false;
+                                if (summary) {
+                                    coverage = Math.min(summary.lines.pct, summary.statements.pct, summary.functions.pct, summary.branches.pct);
+                                    if (coverage < 80)
+                                        errors.push({
+                                            file: '?',
+                                            row: 0, col: 0,
+                                            msg: ['Cobertura do código por testes está abaixo de ', coverage, '%'].join('')
+                                        });
+                                }
+                                else {
+                                    coverage = undefined;
+                                    errors.push({
+                                        file: '?',
+                                        row: 0, col: 0,
+                                        msg: 'Teste não gerou relatório de cobertura de código'
+                                    });
+                                }
+                                if (events)
+                                    events.onFinished(watcher);
+                            });
+                            return [2 /*return*/];
+                    }
+                });
+            });
+        }
+        function abortTesting() {
+            return __awaiter(this, void 0, void 0, function () {
+                var old;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0:
+                            old = procTest;
+                            procTest = undefined;
+                            testing = false;
+                            if (!old) return [3 /*break*/, 2];
+                            return [4 /*yield*/, old.stop()];
+                        case 1: return [2 /*return*/, _a.sent()];
+                        case 2: return [2 /*return*/];
+                    }
+                });
+            });
+        }
+        var events, warnings, errors, building, testing, coverage, procTest, procName, e_1, procBuild, watcher;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    if (!utils_1.utils.exists(name, 'tsconfig.json'))
+                    if (!utils_1.utils.exists(packageName, 'tsconfig.json'))
                         return [2 /*return*/];
                     warnings = [];
                     errors = [];
                     building = false;
-                    procName = 'ts_' + utils_1.utils.displayFolderName(name);
+                    testing = false;
+                    procName = 'ts_' + utils_1.utils.displayFolderName(packageName);
                     _a.label = 1;
                 case 1:
                     _a.trys.push([1, 3, , 4]);
@@ -72,66 +139,74 @@ function watchTypeScript(name) {
                     return [3 /*break*/, 4];
                 case 4: return [4 /*yield*/, utils_1.utils.spawn('npm', ['run', 'watch'], {
                         name: procName,
-                        cwd: utils_1.utils.path(name),
-                        // watch: [utils.path(name, 'src')],
-                        onLine: function (line) {
-                            if (/Starting .*compilation/g.test(line)) {
-                                warnings = [];
-                                errors = [];
-                                building = true;
-                                if (events)
-                                    events.onStartBuild(watcher);
-                            }
-                            else if (/Compilation complete/g.test(line)) {
-                                building = false;
-                                if (events)
-                                    events.onFinishBuild(watcher);
-                            }
-                            else {
-                                var m = /^([^\(]+)\((\d+),(\d+)\)\:\s*(\w*)\s+([^:]+):\s*(.*)/g.exec(line);
-                                if (m) {
-                                    var type = m[4];
-                                    var msg = {
-                                        file: m[1],
-                                        row: parseInt(m[2]),
-                                        col: parseInt(m[3]),
-                                        msg: m[6] + m[5]
-                                    };
-                                    if (type === 'warning')
-                                        warnings.push(msg);
-                                    else
-                                        errors.push(msg);
-                                }
-                                // else {
-                                //     line = line.replace(/\x1bc/g, '')
-                                //     if (line)
-                                //         console.log(line);
-                                // }
-                            }
-                        }
+                        cwd: utils_1.utils.path(packageName),
+                        once: false,
                     })];
                 case 5:
-                    p = _a.sent();
+                    procBuild = _a.sent();
+                    procBuild.on('line', function (line) {
+                        if (/Starting .*compilation/g.test(line)) {
+                            warnings = [];
+                            errors = [];
+                            building = true;
+                            abortTesting();
+                            if (events)
+                                events.onBuilding(watcher);
+                        }
+                        else if (/Compilation complete/g.test(line)) {
+                            building = false;
+                            if (events)
+                                events.onTesting(watcher);
+                            runTests();
+                        }
+                        else {
+                            var m = /^([^\(]+)\((\d+),(\d+)\)\:\s*(\w*)\s+([^:]+):\s*(.*)/g.exec(line);
+                            if (m) {
+                                var type = m[4];
+                                var msg = {
+                                    file: m[1],
+                                    row: parseInt(m[2]),
+                                    col: parseInt(m[3]),
+                                    msg: m[6] + m[5]
+                                };
+                                if (type === 'warning')
+                                    warnings.push(msg);
+                                else
+                                    errors.push(msg);
+                            }
+                            // else {
+                            //     line = line.replace(/\x1bc/g, '')
+                            //     if (line)
+                            //         console.log(line);
+                            // }
+                        }
+                    });
                     watcher = {
                         get packageName() {
-                            return name;
+                            return packageName;
                         },
                         get building() {
                             return building;
                         },
+                        get testing() {
+                            return testing;
+                        },
                         get warnings() {
                             return warnings;
+                        },
+                        get coverage() {
+                            return coverage;
                         },
                         get errors() {
                             return errors;
                         },
                         restart: function () {
-                            return p.restart();
+                            return procBuild.restart();
                         },
-                        kill: function () {
+                        stop: function () {
                             warnings = [];
                             errors = [{ file: '', row: 0, col: 0, msg: 'stopped' }];
-                            return p.kill();
+                            return procBuild.stop();
                         }
                     };
                     events = watchers_1.addWatcher(watcher);

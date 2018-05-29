@@ -12,3 +12,14 @@ declare module "bash-color" {
     function white(s: string, hi?: boolean): string;
     function wrap(s: string, color: Color, style: Style): string
 }
+
+declare interface CoverageResult {
+        lines: { total: number, covered: number, skipped: number, pct: number },
+        statements: { total: number, covered: number, skipped: number, pct: number },
+        functions: { total: number, covered: number, skipped: number, pct: number },
+        branches: { total: number, covered: number, skipped: number, pct: number },    
+}
+
+declare interface CoverageResults {
+    [name: string]: CoverageResult    
+}

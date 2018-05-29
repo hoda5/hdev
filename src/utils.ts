@@ -18,8 +18,11 @@ export type WorkspaceFile = {
 }
 export interface SpawnedProcess {
     readonly name: string;
-    restart: () => Promise<void>
-    kill: () => Promise<void>
+    on(event: 'line', handler: (s: string, ts: number) => void): void;
+    on(event: 'exit', handler: () => void): void;
+    restart(): Promise<void>
+    stop(): Promise<void>
+    delete(): Promise<void>
 }
 
 // pm2.connect(function (err) {
@@ -33,7 +36,7 @@ const pm2_bus_ctrl = {
     refs: 0,
     p: null as any as Promise<any>,
     get() {
-        if (pm2_bus_ctrl.p)
+        if (!pm2_bus_ctrl.p)
             pm2_bus_ctrl.p = new Promise<any>((resolve, reject) => {
                 pm2.launchBus((err, bus) => {
                     if (err) return reject(err);
@@ -109,8 +112,8 @@ export const utils = {
     path(packageName: string, ...names: string[]) {
         return join(root, 'packages', utils.adaptFolderName(packageName), ...names);
     },
-    exists(packageName: string, filename: string): boolean {
-        return existsSync(utils.path(packageName, filename));
+    exists(packageName: string, ...names: string[]): boolean {
+        return existsSync(utils.path(packageName, ...names));
     },
     readText(packageName: string, filename: string): string {
         return readFileSync(
@@ -120,6 +123,14 @@ export const utils = {
     },
     readJSON<T>(packageName: string, filename: string): T {
         return JSON.parse(utils.readText(packageName, filename)) as T;
+    },
+    readCoverageSummary(packageName: string): CoverageResult | undefined {
+        const cov = 'coverage/coverage-summary.json';
+        let error = true;
+        if (utils.exists(packageName, cov)) {
+            const summary = utils.readJSON<CoverageResults>(packageName, cov);
+            return summary.total;
+        }
     },
     throw(msg: string) {
         console.log(msg)
@@ -149,21 +160,30 @@ export const utils = {
         opts: {
             name: string,
             cwd: string,
+            once: boolean,
             watch?: boolean | string[],
-            onLine?(line: string, ts: number): void,
         }): Promise<SpawnedProcess> {
 
-        let t: any;
-        if (opts.onLine)
-            t = pm2_bus_ctrl.on('log:out', function (d: any) {
-                if (opts.onLine && d.process.name == opts.name) {
-                    opts.onLine(d.data, d.at);
-                }
-            });
-
+        let eventHandlers: Array<{ close(): void }> = [];
         let r: SpawnedProcess = {
             get name() {
                 return opts.name;
+            },
+            on(event: string, handler: (...args: any[]) => void) {
+                let t: any;
+                if (event === 'line')
+                    t = pm2_bus_ctrl.on('log:out', function (d: any) {
+                        if (d.process.name == opts.name) {
+                            handler(d.data, d.at);
+                        }
+                    });
+                else if (event === 'exit')
+                    t = pm2_bus_ctrl.on('process:event', function (d: any) {
+                        if (d.event === 'exit' && d.process.name == opts.name) {
+                            handler();
+                        }
+                    });
+                eventHandlers.push(t);
             },
             async restart() {
                 return new Promise<void>((resolve, reject) => {
@@ -173,9 +193,20 @@ export const utils = {
                     });
                 });
             },
-            async kill() {
+            async stop() {
                 return new Promise<void>((resolve, reject) => {
-                    if (t) t.close();
+                    eventHandlers.forEach((t) => t.close());
+                    eventHandlers = [];
+                    pm2.stop(opts.name, (err) => {
+                        if (err) return reject(err);
+                        resolve();
+                    });
+                });
+            },
+            async delete() {
+                return new Promise<void>((resolve, reject) => {
+                    eventHandlers.forEach((t) => t.close());
+                    eventHandlers = [];
                     pm2.delete(opts.name, (err) => {
                         if (err) return reject(err);
                         resolve();
@@ -184,14 +215,16 @@ export const utils = {
             }
         };
         return new Promise<SpawnedProcess>((resolve, reject) => {
-            pm2.start({
+            const pm2_opts = {
                 name: opts.name,
                 script: cmd,
                 args,
                 cwd: opts.cwd,
+                autorestart: !opts.once,
                 watch: opts.watch,
-                // source_map_support: true,
-            }, (err, proc) => {
+                source_map_support: true,
+            };
+            pm2.start(pm2_opts, (err, proc) => {
                 if (err) return reject(err);
                 resolve(r);
             });

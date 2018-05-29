@@ -2,10 +2,12 @@ import { EventEmitter } from 'events';
 export interface Watcher {
     readonly packageName: string;
     readonly building: boolean;
+    readonly testing: boolean;
     readonly warnings: SrcMessage[];
     readonly errors: SrcMessage[];
+    readonly coverage: number | undefined;
     restart(): Promise<void>;
-    kill(): Promise<void>;
+    stop(): Promise<void>;
 }
 export interface SrcMessage {
     file: string;
@@ -17,13 +19,13 @@ export interface SrcMessage {
 export const watchers: Watcher[] = [];
 export const watchEmitter = new EventEmitter();
 
-export function listenWatchEvent(event: 'startBuild' | 'finishBuild', listenner: (watcher: Watcher) => void): void;
+export function listenWatchEvent(event: 'building' | 'testing' | 'finished', listenner: (watcher: Watcher) => void): void;
 export function listenWatchEvent(event: 'reload', listenner: () => void): void;
 export function listenWatchEvent(event: string, listenner: (...args: any[]) => void): void {
     watchEmitter.on(event, listenner);
 }
 
-export function unlistenWatchEvent(event: 'startBuild' | 'finishBuild', listenner: (watcher: Watcher) => void): void;
+export function unlistenWatchEvent(event: 'building' | 'testing' | 'finished', listenner: (watcher: Watcher) => void): void;
 export function unlistenWatchEvent(event: 'reload', listenner: () => void): void;
 export function unlistenWatchEvent(event: string, listenner: (...args: any[]) => void): void {
     watchEmitter.removeListener(event, listenner);
@@ -32,26 +34,31 @@ export function unlistenWatchEvent(event: string, listenner: (...args: any[]) =>
 let tm_reload: NodeJS.Timer;
 
 export interface WatcherEvents {
-    onStartBuild(watcher: Watcher): void
-    onFinishBuild(watcher: Watcher): void
+    onBuilding(watcher: Watcher): void
+    onTesting(watcher: Watcher): void
+    onFinished(watcher: Watcher): void
 }
 
-function onStartBuild(watcher: Watcher) {
+function onBuilding(watcher: Watcher) {
     if (tm_reload) clearTimeout(tm_reload);
-    watchEmitter.emit('startBuild', watcher);
+    watchEmitter.emit('building', watcher);
 }
 
-function onFinishBuild(watcher: Watcher) {
+function onTesting(watcher: Watcher) {
     if (tm_reload) clearTimeout(tm_reload);
-    watchEmitter.emit('finishBuild', watcher);
+    watchEmitter.emit('testing', watcher);
     tm_reload = setTimeout(() => {
         watchEmitter.emit('reload');
     }, 500);
 }
 
+function onFinished(watcher: Watcher) {
+    watchEmitter.emit('finished', watcher);
+}
+
 export function addWatcher(watcher: Watcher): WatcherEvents {
     watchers.push(watcher);
-    return { onStartBuild, onFinishBuild }
+    return { onBuilding, onTesting, onFinished }
 }
 
 export function hasWarnings(): boolean {

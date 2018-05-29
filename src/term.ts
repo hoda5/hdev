@@ -52,8 +52,9 @@ function init() {
 
     const building: string[] = [];
 
-    listenWatchEvent('startBuild', refreshTerm);
-    listenWatchEvent('finishBuild', refreshTerm);
+    listenWatchEvent('building', refreshTerm);
+    listenWatchEvent('testing', refreshTerm);
+    listenWatchEvent('finished', refreshTerm);
 
     let tm_refreshTerm: NodeJS.Timer;
 
@@ -62,15 +63,18 @@ function init() {
             if (tm_refreshTerm) clearTimeout(tm_refreshTerm);
             tm_refreshTerm = setTimeout(() => {
                 const building: string[] = [];
+                const testing: string[] = [];
                 const warnings: Watcher[] = [];
                 const errors: Watcher[] = [];
                 watchers.forEach((w) => {
                     if (w.building) building.push(w.packageName);
+                    if (w.testing) testing.push(w.packageName);
                     else if (w.errors.length) errors.push(w);
                     else if (w.warnings.length) warnings.push(w);
                 });
                 const content: string[] = [];
                 if (building.length) content.push('Building: ' + building.join());
+                if (testing.length) content.push('Testing: ' + testing.join());
                 if (errors.length) {
                     content.push('Error(s): ');
                     errors.forEach((w) => {

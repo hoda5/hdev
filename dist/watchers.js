@@ -12,22 +12,25 @@ function unlistenWatchEvent(event, listenner) {
 }
 exports.unlistenWatchEvent = unlistenWatchEvent;
 var tm_reload;
-function onStartBuild(watcher) {
+function onBuilding(watcher) {
     if (tm_reload)
         clearTimeout(tm_reload);
-    exports.watchEmitter.emit('startBuild', watcher);
+    exports.watchEmitter.emit('building', watcher);
 }
-function onFinishBuild(watcher) {
+function onTesting(watcher) {
     if (tm_reload)
         clearTimeout(tm_reload);
-    exports.watchEmitter.emit('finishBuild', watcher);
+    exports.watchEmitter.emit('testing', watcher);
     tm_reload = setTimeout(function () {
         exports.watchEmitter.emit('reload');
     }, 500);
 }
+function onFinished(watcher) {
+    exports.watchEmitter.emit('finished', watcher);
+}
 function addWatcher(watcher) {
     exports.watchers.push(watcher);
-    return { onStartBuild: onStartBuild, onFinishBuild: onFinishBuild };
+    return { onBuilding: onBuilding, onTesting: onTesting, onFinished: onFinished };
 }
 exports.addWatcher = addWatcher;
 function hasWarnings() {

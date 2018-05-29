@@ -1,82 +1,135 @@
-import { utils } from "../utils"
+import { utils, SpawnedProcess } from "../utils"
 import { addWatcher, Watcher, WatcherEvents, SrcMessage } from "../watchers"
 import { watch } from "fs";
 
 export async function buildTypeScript(name: string) {
     if (!utils.exists(name, 'tsconfig.json')) return;
-    utils.exec('npm', ['run', 'build'], { cwd: utils.path(name), title: 'building: '+name });
+    utils.exec('npm', ['run', 'build'], { cwd: utils.path(name), title: 'building: ' + name });
 }
 
-export async function watchTypeScript(name: string): Promise<Watcher | undefined> {
-    if (!utils.exists(name, 'tsconfig.json')) return;
+export async function watchTypeScript(packageName: string): Promise<Watcher | undefined> {
+    if (!utils.exists(packageName, 'tsconfig.json')) return;
     let events: WatcherEvents;
     let warnings: SrcMessage[] = [];
     let errors: SrcMessage[] = [];
     let building = false;
-    const procName = 'ts_' + utils.displayFolderName(name);
+    let testing = false;
+    let coverage: number | undefined;
+    let procTest: SpawnedProcess | undefined;
+    const procName = 'ts_' + utils.displayFolderName(packageName);
     try {
         await utils.stopProcess(procName);
     }
     catch (e) { }
-    const p = await utils.spawn('npm', ['run', 'watch'], {
+    const procBuild = await utils.spawn('npm', ['run', 'watch'], {
         name: procName,
-        cwd: utils.path(name),
-        // watch: [utils.path(name, 'src')],
-        onLine(line: string) {
-            if (/Starting .*compilation/g.test(line)) {
-                warnings = [];
-                errors = [];
-                building = true;
-                if (events) events.onStartBuild(watcher);
-            }
-            else if (/Compilation complete/g.test(line)) {
-                building = false;
-                if (events) events.onFinishBuild(watcher);
-            } else {
-                const m = /^([^\(]+)\((\d+),(\d+)\)\:\s*(\w*)\s+([^:]+):\s*(.*)/g.exec(line);
-                if (m) {
-                    const type = m[4];
-                    const msg: SrcMessage = {
-                        file: m[1],
-                        row: parseInt(m[2]),
-                        col: parseInt(m[3]),
-                        msg: m[6] + m[5]
-                    }
-                    if (type === 'warning') warnings.push(msg)
-                    else errors.push(msg)
+        cwd: utils.path(packageName),
+        once: false,
+        // watch: [utils.path(name, 'src')],        
+    });
+    procBuild.on('line', (line: string) => {
+        if (/Starting .*compilation/g.test(line)) {
+            warnings = [];
+            errors = [];
+            building = true;
+            abortTesting();
+            if (events) events.onBuilding(watcher);
+        }
+        else if (/Compilation complete/g.test(line)) {
+            building = false;
+            if (events) events.onTesting(watcher);
+            runTests();
+        } else {
+            const m = /^([^\(]+)\((\d+),(\d+)\)\:\s*(\w*)\s+([^:]+):\s*(.*)/g.exec(line);
+            if (m) {
+                const type = m[4];
+                const msg: SrcMessage = {
+                    file: m[1],
+                    row: parseInt(m[2]),
+                    col: parseInt(m[3]),
+                    msg: m[6] + m[5]
                 }
-                // else {
-                //     line = line.replace(/\x1bc/g, '')
-                //     if (line)
-                //         console.log(line);
-                // }
+                if (type === 'warning') warnings.push(msg)
+                else errors.push(msg)
             }
+            // else {
+            //     line = line.replace(/\x1bc/g, '')
+            //     if (line)
+            //         console.log(line);
+            // }
         }
     });
     const watcher: Watcher = {
         get packageName() {
-            return name;
+            return packageName;
         },
         get building() {
             return building;
         },
+        get testing() {
+            return testing;
+        },
         get warnings() {
             return warnings;
+        },
+        get coverage() {
+            return coverage;
         },
         get errors() {
             return errors;
         },
         restart() {
-            return p.restart();
+            return procBuild.restart();
         },
-        kill() {
+        stop() {
             warnings = [];
             errors = [{ file: '', row: 0, col: 0, msg: 'stopped' }];
-            return p.kill();
+            return procBuild.stop();
         }
     }
     events = addWatcher(watcher);
     return watcher;
+    async function runTests() {
+        coverage = undefined;
+        await abortTesting();
+        testing = true;
+        const pt = await utils.spawn('npm', ['test'], {
+            name: procName + 'test',
+            cwd: utils.path(packageName),
+            once: true,
+        })
+        // pt.on('line', (s)=>console.log(s));
+        pt.on('exit', () => {
+            const summary = utils.readCoverageSummary(packageName);
+            testing = false;
+            if (summary) {
+                coverage = Math.min(summary.lines.pct, summary.statements.pct, summary.functions.pct, summary.branches.pct);
+                if (coverage < 80)
+                    errors.push({
+                        file: '?',
+                        row: 0, col: 0,
+                        msg: ['Cobertura do código por testes está abaixo de ', coverage, '%'].join('');
+                    })
+            }
+            else {
+                coverage = undefined;
+                errors.push({
+                    file: '?',
+                    row: 0, col: 0,
+                    msg: 'Teste não gerou relatório de cobertura de código'
+                })
+            }
+            if (events) events.onFinished(watcher);
+        });
+    }
+    async function abortTesting() {
+        const old = procTest;
+        procTest = undefined;
+        testing = false;
+        if (old) {
+            return await old.stop();
+        }
+    }
 }
 
 // export async function buildTypeScript(name: string) {
