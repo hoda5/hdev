@@ -18,7 +18,9 @@ export async function cmd_status(args: any): Promise<boolean> {
         await utils.forEachPackage(async (pkg, folder) => {
             utils.exec(
                 'git', [
-                    'status'
+                    'status',
+                    '-b',
+                    '--porcelain'
                 ],
                 {
                     cwd: folder,

@@ -127,8 +127,8 @@ export const utils = {
     },
     exec(cmd: string, args: string[], opts: { cwd: string }) {
         console.log(
-            wrap(opts.cwd + '$ ', "PURPLE", 'hi_background') +
-            wrap(cmd + ' ' + args.join(' '), "BLUE", 'hi_background') 
+            wrap(opts.cwd + '$ ', "BLUE", 'hi_background') +
+            wrap(cmd + ' ' + args.join(' '), "RED", 'hi_background') 
         );
         const r = spawnSync(
             cmd, args,

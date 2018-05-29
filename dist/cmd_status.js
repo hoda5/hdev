@@ -56,7 +56,9 @@ function cmd_status(args) {
                 case 1: return [4 /*yield*/, utils_1.utils.forEachPackage(function (pkg, folder) { return __awaiter(_this, void 0, void 0, function () {
                         return __generator(this, function (_a) {
                             utils_1.utils.exec('git', [
-                                'status'
+                                'status',
+                                '-b',
+                                '--porcelain'
                             ], {
                                 cwd: folder,
                             });

@@ -149,8 +149,8 @@ exports.utils = {
         process.exit(1);
     },
     exec: function (cmd, args, opts) {
-        console.log(bash_color_1.wrap(opts.cwd + '$ ', "PURPLE", 'hi_background') +
-            bash_color_1.wrap(cmd + ' ' + args.join(' '), "BLUE", 'hi_background'));
+        console.log(bash_color_1.wrap(opts.cwd + '$ ', "BLUE", 'hi_background') +
+            bash_color_1.wrap(cmd + ' ' + args.join(' '), "RED", 'hi_background'));
         var r = child_process_1.spawnSync(cmd, args, __assign({}, opts, { stdio: ['inherit', 'inherit', 'inherit'] }));
         if (r.status != 0)
             process.exit(1);
