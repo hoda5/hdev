@@ -1,7 +1,7 @@
 import { utils, WorkspaceFile, PackageJSON } from "./utils"
 import { existsSync, readFileSync, writeFileSync } from "fs"
 import { watchTypeScript } from "./build/buildTypeScript"
-import { initUi } from "./term";
+import { initUi } from "./ui";
 import { start } from "pm2";
 
 export async function cmd_start(args: any, opts: any): Promise<boolean> {
@@ -11,7 +11,8 @@ export async function cmd_start(args: any, opts: any): Promise<boolean> {
             if (await watchTypeScript(pkg))
                 ok = true;
         });
-        initUi(opts.logMode);
+        if (ok)
+            initUi(opts.logMode);
     } else {
         start({
             name: 'hdev',

@@ -123,4 +123,4 @@ function initUi(logMode) {
     }
 }
 exports.initUi = initUi;
-//# sourceMappingURL=term.js.map
+//# sourceMappingURL=ui.js.map

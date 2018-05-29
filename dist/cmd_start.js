@@ -37,7 +37,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var utils_1 = require("./utils");
 var buildTypeScript_1 = require("./build/buildTypeScript");
-var term_1 = require("./term");
+var ui_1 = require("./ui");
 var pm2_1 = require("pm2");
 function cmd_start(args, opts) {
     return __awaiter(this, void 0, void 0, function () {
@@ -61,7 +61,8 @@ function cmd_start(args, opts) {
                         }); })];
                 case 1:
                     _a.sent();
-                    term_1.initUi(opts.logMode);
+                    if (ok)
+                        ui_1.initUi(opts.logMode);
                     return [3 /*break*/, 3];
                 case 2:
                     pm2_1.start({
