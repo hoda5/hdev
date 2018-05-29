@@ -5,7 +5,7 @@ import { utils, WorkspaceFile } from "./utils"
 export async function cmd_init(): Promise<boolean> {
     const d = resolve(process.cwd());
     if (readdirSync(d).length)
-        utils.throw("diretório não está vazio");
+        utils.throw("diretório não está vazio: "+d);
     const w = d + '/' + basename(d) + '.code-workspace';
     if (!existsSync(w)) {
         const empty: WorkspaceFile = {

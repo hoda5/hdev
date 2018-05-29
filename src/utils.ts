@@ -36,15 +36,12 @@ export const utils = {
         return root;
     },
     get workspaceFile() {
-        return join(root, + basename(root) + '.code-workspace');
-    },
-    adaptFolderName(packageName: string) {
-        if (packageName.indexOf('-') != -1)
-            return packageName;
-        return packageName.replace('/', '-');
+        const ws = join(root, basename(root) + '.code-workspace');
+        if (utils.verbose) utils.debug('workspaceFile', ws);
+        return ws;
     },
     displayFolderName(packageName: string) {
-        const m = /(?:@([^-]+))?-(.*)$/g.exec(utils.adaptFolderName(packageName));
+        const m = /(?:@([^\/]+))?\/(.*)$/g.exec(packageName);
         return m ? (
             m[1] ? (m[2] + '@' + m[1]) : m[2]
         ) : packageName;
@@ -52,13 +49,23 @@ export const utils = {
     listPackages() {
         const dir = root + '/packages';
         if (!existsSync(dir)) return [];
-        return readdirSync(dir);
+        const l1 = readdirSync(dir);
+        const r: string[] = [];
+        l1.forEach((f1) => {
+            if (f1[0] == '@') {
+                readdirSync(dir + '/' + f1).forEach((f2) => {
+                    r.push(f1 + '/' + f2);
+                })
+            }
+            else r.push(f1);
+        });
+        return r;
     },
     forEachPackage(fn: (packageName: string, folder: string) => Promise<void>) {
         const packages = utils.listPackages();
         if (utils.verbose) utils.debug('forEachPackage', packages.join());
         return Promise.all(packages.map((p) => {
-            return fn(p.replace('-', '/'), [root, 'packages', p].join('/'));
+            return fn(p, [root, 'packages', p].join('/'));
         })).then(() => true);
     },
     getPackageJsonFor(packagName: string) {
@@ -71,7 +78,7 @@ export const utils = {
         return json;
     },
     path(packageName: string, ...names: string[]) {
-        return join(root, 'packages', utils.adaptFolderName(packageName), ...names);
+        return join(root, 'packages', packageName, ...names);
     },
     exists(packageName: string, ...names: string[]): boolean {
         return existsSync(utils.path(packageName, ...names));

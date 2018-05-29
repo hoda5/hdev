@@ -95,6 +95,7 @@ prog.command('login', 'configura login do git/github')
 // prog.command('link')
 //     .action(cmd(cmd_link));
 prog.command('init', 'Inicializa na pasta atual como area de trabalho')
+    .option('--subws', 'usado apenas para teste')
     .action(cmd(cmd_init_1.cmd_init));
 prog.command('setup-completation', 'Configura para completar com tab')
     //.argument('<shell>', 'bash/zsh/fish', ['bash', 'zsh', 'fish'])

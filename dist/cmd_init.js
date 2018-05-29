@@ -44,7 +44,7 @@ function cmd_init() {
         return __generator(this, function (_a) {
             d = path_1.resolve(process.cwd());
             if (fs_1.readdirSync(d).length)
-                utils_1.utils.throw("diretório não está vazio");
+                utils_1.utils.throw("diretório não está vazio: " + d);
             w = d + '/' + path_1.basename(d) + '.code-workspace';
             if (!fs_1.existsSync(w)) {
                 empty = {

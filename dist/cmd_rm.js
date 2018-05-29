@@ -39,14 +39,13 @@ var utils_1 = require("./utils");
 var fs_1 = require("fs");
 function cmd_rm(args) {
     return __awaiter(this, void 0, void 0, function () {
-        var name, afn, w, wf, path_1;
+        var packageName, w, wf, path_1;
         return __generator(this, function (_a) {
-            name = args.name;
-            afn = utils_1.utils.adaptFolderName(name);
+            packageName = args.name;
             utils_1.utils.exec('git', [
                 'rm',
                 '-f',
-                afn,
+                packageName,
             ], {
                 cwd: utils_1.utils.root + '/packages',
                 title: ''
@@ -54,7 +53,7 @@ function cmd_rm(args) {
             w = utils_1.utils.workspaceFile;
             if (fs_1.existsSync(w)) {
                 wf = JSON.parse(fs_1.readFileSync(w, 'utf-8'));
-                path_1 = 'packages/' + afn;
+                path_1 = 'packages/' + packageName;
                 wf.folders = wf.folders.filter(function (f) { return f.path != path_1; });
                 fs_1.writeFileSync(w, JSON.stringify(wf, null, 2), 'utf-8');
             }

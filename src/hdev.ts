@@ -68,6 +68,7 @@ prog.command('login', 'configura login do git/github')
 //     .action(cmd(cmd_link));
 
 prog.command('init', 'Inicializa na pasta atual como area de trabalho')
+    .option('--subws', 'usado apenas para teste')
     .action(cmd(cmd_init));
 
 prog.command('setup-completation', 'Configura para completar com tab')

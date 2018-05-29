@@ -46,29 +46,38 @@ exports.utils = {
         return root;
     },
     get workspaceFile() {
-        return path_1.join(root, +path_1.basename(root) + '.code-workspace');
-    },
-    adaptFolderName: function (packageName) {
-        if (packageName.indexOf('-') != -1)
-            return packageName;
-        return packageName.replace('/', '-');
+        var ws = path_1.join(root, path_1.basename(root) + '.code-workspace');
+        if (exports.utils.verbose)
+            exports.utils.debug('workspaceFile', ws);
+        return ws;
     },
     displayFolderName: function (packageName) {
-        var m = /(?:@([^-]+))?-(.*)$/g.exec(exports.utils.adaptFolderName(packageName));
+        var m = /(?:@([^\/]+))?\/(.*)$/g.exec(packageName);
         return m ? (m[1] ? (m[2] + '@' + m[1]) : m[2]) : packageName;
     },
     listPackages: function () {
         var dir = root + '/packages';
         if (!fs_1.existsSync(dir))
             return [];
-        return fs_1.readdirSync(dir);
+        var l1 = fs_1.readdirSync(dir);
+        var r = [];
+        l1.forEach(function (f1) {
+            if (f1[0] == '@') {
+                fs_1.readdirSync(dir + '/' + f1).forEach(function (f2) {
+                    r.push(f1 + '/' + f2);
+                });
+            }
+            else
+                r.push(f1);
+        });
+        return r;
     },
     forEachPackage: function (fn) {
         var packages = exports.utils.listPackages();
         if (exports.utils.verbose)
             exports.utils.debug('forEachPackage', packages.join());
         return Promise.all(packages.map(function (p) {
-            return fn(p.replace('-', '/'), [root, 'packages', p].join('/'));
+            return fn(p, [root, 'packages', p].join('/'));
         })).then(function () { return true; });
     },
     getPackageJsonFor: function (packagName) {
@@ -84,7 +93,7 @@ exports.utils = {
         for (var _i = 1; _i < arguments.length; _i++) {
             names[_i - 1] = arguments[_i];
         }
-        return path_1.join.apply(void 0, [root, 'packages', exports.utils.adaptFolderName(packageName)].concat(names));
+        return path_1.join.apply(void 0, [root, 'packages', packageName].concat(names));
     },
     exists: function (packageName) {
         var names = [];
