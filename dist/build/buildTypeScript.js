@@ -36,6 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var utils_1 = require("../utils");
+var watchers_1 = require("../watchers");
 function buildTypeScript(name) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
@@ -49,11 +50,93 @@ function buildTypeScript(name) {
 exports.buildTypeScript = buildTypeScript;
 function watchTypeScript(name) {
     return __awaiter(this, void 0, void 0, function () {
+        var events, warnings, errors, building, procName, e_1, p, watcher;
         return __generator(this, function (_a) {
-            if (!utils_1.utils.exists(name, 'tsconfig.json'))
-                return [2 /*return*/];
-            utils_1.utils.exec('npm', ['run', 'build'], { cwd: utils_1.utils.path(name) });
-            return [2 /*return*/];
+            switch (_a.label) {
+                case 0:
+                    if (!utils_1.utils.exists(name, 'tsconfig.json'))
+                        return [2 /*return*/];
+                    warnings = [];
+                    errors = [];
+                    building = false;
+                    procName = 'ts_' + utils_1.utils.displayFolderName(name);
+                    _a.label = 1;
+                case 1:
+                    _a.trys.push([1, 3, , 4]);
+                    return [4 /*yield*/, utils_1.utils.stopProcess(procName)];
+                case 2:
+                    _a.sent();
+                    return [3 /*break*/, 4];
+                case 3:
+                    e_1 = _a.sent();
+                    return [3 /*break*/, 4];
+                case 4: return [4 /*yield*/, utils_1.utils.spawn('npm', ['run', 'watch'], {
+                        name: procName,
+                        cwd: utils_1.utils.path(name),
+                        // watch: [utils.path(name, 'src')],
+                        onLine: function (line) {
+                            if (/Starting .*compilation/g.test(line)) {
+                                warnings = [];
+                                errors = [];
+                                building = true;
+                                if (events)
+                                    events.onStartBuild(watcher);
+                            }
+                            else if (/Compilation complete/g.test(line)) {
+                                building = false;
+                                if (events)
+                                    events.onFinishBuild(watcher);
+                            }
+                            else {
+                                var m = /^([^\(]+)\((\d+),(\d+)\)\:\s*(\w*)\s+([^:]+):\s*(.*)/g.exec(line);
+                                if (m) {
+                                    var type = m[4];
+                                    var msg = {
+                                        file: m[1],
+                                        row: parseInt(m[2]),
+                                        col: parseInt(m[3]),
+                                        msg: m[6] + m[5]
+                                    };
+                                    if (type === 'warning')
+                                        warnings.push(msg);
+                                    else
+                                        errors.push(msg);
+                                }
+                                // else {
+                                //     line = line.replace(/\x1bc/g, '')
+                                //     if (line)
+                                //         console.log(line);
+                                // }
+                            }
+                        }
+                    })];
+                case 5:
+                    p = _a.sent();
+                    watcher = {
+                        get packageName() {
+                            return name;
+                        },
+                        get building() {
+                            return building;
+                        },
+                        get warnings() {
+                            return warnings;
+                        },
+                        get errors() {
+                            return errors;
+                        },
+                        restart: function () {
+                            return p.restart();
+                        },
+                        kill: function () {
+                            warnings = [];
+                            errors = [{ file: '', row: 0, col: 0, msg: 'stopped' }];
+                            return p.kill();
+                        }
+                    };
+                    events = watchers_1.addWatcher(watcher);
+                    return [2 /*return*/, watcher];
+            }
         });
     });
 }

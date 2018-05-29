@@ -43,6 +43,7 @@ var cmd_status_1 = require("./cmd_status");
 var cmd_clone_1 = require("./cmd_clone");
 var cmd_rm_1 = require("./cmd_rm");
 var cmd_build_1 = require("./cmd_build");
+var cmd_watch_1 = require("./cmd_watch");
 var utils_1 = require("./utils");
 prog.version('1.0.0');
 prog.option('-v, --verbose', 'Modo deputação');
@@ -58,10 +59,14 @@ prog.command('remove', 'Remove um repositorio')
     .argument('<name>', 'Nome do pacote')
     .complete(completeWithPackageName)
     .action(cmd(cmd_rm_1.cmd_rm));
-prog.command('build', 'build do pacote')
-    .argument('[name]', 'Nome do pacote')
+prog.command('build', 'build')
+    .argument('[name]', 'Nome do pacote - se não tiver o nome constroi todos')
     .complete(completeWithPackageName)
     .action(cmd(cmd_build_1.cmd_build));
+prog.command('watch', 'constroi o/os pacotes')
+    .argument('[name]', 'Nome do pacote - se não tiver o nome constroi todos')
+    .complete(completeWithPackageName)
+    .action(cmd(cmd_watch_1.cmd_watch));
 prog.command('login', 'configura login do git/github')
     .argument('<name>', 'Nome de usuario no servidor')
     .argument('<email>', 'email')

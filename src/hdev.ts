@@ -9,6 +9,7 @@ import { cmd_clone } from './cmd_clone';
 import { cmd_rm } from './cmd_rm';
 import { cmd_link } from './cmd_link';
 import { cmd_build } from './cmd_build';
+import { cmd_watch } from './cmd_watch';
 import { utils } from './utils';
 
 prog.version('1.0.0')
@@ -29,12 +30,17 @@ prog.command('remove', 'Remove um repositorio')
     .complete(completeWithPackageName)
     .action(cmd(cmd_rm));
 
-prog.command('build', 'build do pacote')
-    .argument('[name]', 'Nome do pacote')
+prog.command('build', 'build')
+    .argument('[name]', 'Nome do pacote - se não tiver o nome constroi todos')
     .complete(completeWithPackageName)
     .action(cmd(cmd_build));
 
-    prog.command('login', 'configura login do git/github')
+prog.command('watch', 'constroi o/os pacotes')
+    .argument('[name]', 'Nome do pacote - se não tiver o nome constroi todos')
+    .complete(completeWithPackageName)
+    .action(cmd(cmd_watch));
+
+prog.command('login', 'configura login do git/github')
     .argument('<name>', 'Nome de usuario no servidor')
     .argument('<email>', 'email')
     .action(cmd(cmd_login, false));

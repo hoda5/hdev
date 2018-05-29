@@ -3,6 +3,7 @@ import { dirname, basename, join } from "path"
 import { spawnSync } from "child_process"
 import * as pm2 from 'pm2';
 import { red, purple, blue } from "bash-color";
+import * as stringify from "json-stringify-safe";
 
 export type PackageJSON = {
     name: string;
@@ -15,6 +16,11 @@ export type WorkspaceFile = {
     "folders": { path: string }[],
     settings: Object
 }
+export interface SpawnedProcess {
+    readonly name: string;
+    restart: () => Promise<void>
+    kill: () => Promise<void>
+}
 
 // pm2.connect(function (err) {
 //     if (err) {
@@ -22,6 +28,13 @@ export type WorkspaceFile = {
 //         process.exit(2);
 //     }
 // });
+
+const pm2_bus = new Promise<any>((resolve, reject) => {
+    pm2.launchBus((err, bus) => {
+        if (err) return reject(err);
+        resolve(bus);
+    });
+});
 
 export const utils = {
     verbose: false,
@@ -35,6 +48,12 @@ export const utils = {
         if (packageName.indexOf('-') != -1)
             utils.throw('Invalid package name ' + packageName)
         return packageName.replace('/', '-');
+    },
+    displayFolderName(packageName: string) {
+        const m = /(?:@([^-]+))?-(.*)$/g.exec(utils.adaptFolderName(packageName));
+        return m ? (
+            m[1] ? (m[2] + '@' + m[1]) : m[2]
+        ) : packageName;
     },
     listPackages() {
         const dir = root + '/packages';
@@ -92,21 +111,67 @@ export const utils = {
         if (r.status != 0)
             process.exit(1);
     },
-    spwan(cmd: string, args: string[], opts: { name: string, cwd: string, watch: boolean | string[] }) {
-        pm2.start({
-            name: opts.name,
-            script: cmd,
-            args,
-            cwd: opts.cwd,
-            watch: opts.watch,
-            // source_map_support: true,
-        }, (err, proc) => {
-            if (err) utils.throw(err.message);
-            //  proc.
+    async spawn(cmd: string, args: string[],
+        opts: {
+            name: string,
+            cwd: string,
+            watch?: boolean | string[],
+            onLine?(line: string, ts: number): void,
+        }): Promise<SpawnedProcess> {
+
+        let t: any;
+        if (opts.onLine)
+            pm2_bus.then((bus) => {
+                t = bus.on('log:out', function (d: any) {
+                    if (opts.onLine && d.process.name == opts.name) {
+                        opts.onLine(d.data, d.at);
+                    }
+                });
+            });
+
+        let r: SpawnedProcess = {
+            get name() {
+                return opts.name;
+            },
+            async restart() {
+                return new Promise<void>((resolve, reject) => {
+                    pm2.restart(opts.name, (err) => {
+                        if (err) return reject(err);
+                        resolve();
+                    });
+                });
+            },
+            async kill() {
+                return new Promise<void>((resolve, reject) => {
+                    if (t) t.close();
+                    pm2.delete(opts.name, (err) => {
+                        if (err) return reject(err);
+                        resolve();
+                    });
+                });
+            }
+        };
+        return new Promise<SpawnedProcess>((resolve, reject) => {
+            pm2.start({
+                name: opts.name,
+                script: cmd,
+                args,
+                cwd: opts.cwd,
+                watch: opts.watch,
+                // source_map_support: true,
+            }, (err, proc) => {
+                if (err) return reject(err);
+                resolve(r);
+            });
         });
-        setInterval( ()=> {
-// pm2.reloadLogs()
-        },1000)
+    },
+    async stopProcess(name: string) {
+        return new Promise<pm2.Proc>((resolve, reject) => {
+            pm2.stop(name, (err, proc) => {
+                if (err) reject(err);
+                resolve(proc);
+            });
+        });
     }
 }
 const root = findRoot(process.cwd())
