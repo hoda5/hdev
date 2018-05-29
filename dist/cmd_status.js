@@ -50,6 +50,7 @@ function cmd_status(args) {
                         'status'
                     ], {
                         cwd: utils_1.utils.path(name),
+                        title: name
                     });
                     ok = true;
                     return [3 /*break*/, 3];
@@ -61,6 +62,7 @@ function cmd_status(args) {
                                 '--porcelain'
                             ], {
                                 cwd: folder,
+                                title: pkg
                             });
                             ok = true;
                             return [2 /*return*/];

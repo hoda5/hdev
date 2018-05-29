@@ -13,6 +13,7 @@ export async function cmd_login(args: any): Promise<boolean> {
         ],
         {
             cwd: utils.root,
+            title: ''
         }
     );
     utils.exec(
@@ -24,6 +25,7 @@ export async function cmd_login(args: any): Promise<boolean> {
         ],
         {
             cwd: utils.root,
+            title: ''
         }
     );
     utils.exec(
@@ -33,6 +35,7 @@ export async function cmd_login(args: any): Promise<boolean> {
         ],
         {
             cwd: utils.root,
+            title: ''
         }
     );
     utils.exec(
@@ -43,6 +46,7 @@ export async function cmd_login(args: any): Promise<boolean> {
         ],
         {
             cwd: utils.root,
+            title: ''
         }
     );
     // utils.exec(

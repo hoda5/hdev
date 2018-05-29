@@ -42,7 +42,7 @@ function buildTypeScript(name) {
         return __generator(this, function (_a) {
             if (!utils_1.utils.exists(name, 'tsconfig.json'))
                 return [2 /*return*/];
-            utils_1.utils.exec('npm', ['run', 'build'], { cwd: utils_1.utils.path(name) });
+            utils_1.utils.exec('npm', ['run', 'build'], { cwd: utils_1.utils.path(name), title: 'building: ' + name });
             return [2 /*return*/];
         });
     });

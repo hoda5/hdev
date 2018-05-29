@@ -19,6 +19,6 @@ export async function cmd_init(): Promise<boolean> {
     const p = d + '/packages';
     if (!existsSync(p))
         mkdirSync(p);
-    utils.exec('git', ['init'], { cwd: process.cwd() })
+    utils.exec('git', ['init'], { cwd: process.cwd(), title: '' })
     return true;
 }

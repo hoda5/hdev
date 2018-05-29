@@ -11,6 +11,7 @@ import { cmd_link } from './cmd_link';
 import { cmd_build } from './cmd_build';
 import { cmd_watch } from './cmd_watch';
 import { utils } from './utils';
+import { wrap } from 'bash-color';
 
 prog.version('1.0.0')
 prog.option('-v, --verbose', 'Modo deputação')
@@ -73,7 +74,10 @@ function cmd(fn: ActionCallback, showrep = true) {
     return function (args: any, options: any) {
         utils.verbose = options.verbose;
         if (showrep)
-            console.log('repositorio: ' + utils.root);
+            console.log(
+                wrap('repositorio: ', "GREEN", "background")+
+                wrap(utils.root, "GREEN", "background")                 
+            );
         fn(args, options).then((ok: boolean) => {
             if (!ok) prog.help('hdev');
         }, console.log);
@@ -93,5 +97,6 @@ function cmd_setup_completation(args: any) {
     const shell = 'bash'; // args.shell
     utils.exec(process.argv[0], [process.argv[1], 'completion', shell], {
         cwd: process.cwd(),
+        title: '',
     });
 }

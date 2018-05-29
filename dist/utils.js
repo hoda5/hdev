@@ -1,12 +1,4 @@
 "use strict";
-var __assign = (this && this.__assign) || Object.assign || function(t) {
-    for (var s, i = 1, n = arguments.length; i < n; i++) {
-        s = arguments[i];
-        for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-            t[p] = s[p];
-    }
-    return t;
-};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -149,9 +141,15 @@ exports.utils = {
         process.exit(1);
     },
     exec: function (cmd, args, opts) {
-        console.log(bash_color_1.wrap(opts.cwd + '$ ', "BLUE", 'hi_background') +
-            bash_color_1.wrap(cmd + ' ' + args.join(' '), "RED", 'hi_background'));
-        var r = child_process_1.spawnSync(cmd, args, __assign({}, opts, { stdio: ['inherit', 'inherit', 'inherit'] }));
+        if (opts.title)
+            console.log(bash_color_1.wrap(opts.title, "RED", 'background'));
+        else
+            console.log(bash_color_1.wrap(opts.cwd + '$ ', "BLUE", 'background') +
+                bash_color_1.wrap(cmd + ' ' + args.join(' '), "RED", 'background'));
+        var r = child_process_1.spawnSync(cmd, args, {
+            cwd: opts.cwd,
+            stdio: ['inherit', 'inherit', 'inherit']
+        });
         if (r.status != 0)
             process.exit(1);
     },

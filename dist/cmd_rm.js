@@ -48,7 +48,8 @@ function cmd_rm(args) {
                 '-f',
                 afn,
             ], {
-                cwd: utils_1.utils.root + '/packages'
+                cwd: utils_1.utils.root + '/packages',
+                title: ''
             });
             w = utils_1.utils.workspaceFile;
             if (fs_1.existsSync(w)) {

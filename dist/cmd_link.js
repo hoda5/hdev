@@ -47,7 +47,8 @@ function cmd_link(name, url) {
                 utils_1.utils.exec('npm', [
                     'link'
                 ], {
-                    cwd: folder
+                    cwd: folder,
+                    title: ''
                 });
                 return [2 /*return*/];
             });
@@ -64,7 +65,8 @@ function cmd_link(name, url) {
                             'link',
                             dep
                         ], {
-                            cwd: folder
+                            cwd: folder,
+                            title: ''
                         });
                 });
                 return [2 /*return*/];

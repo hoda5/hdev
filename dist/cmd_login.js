@@ -49,6 +49,7 @@ function cmd_login(args) {
                 name
             ], {
                 cwd: utils_1.utils.root,
+                title: ''
             });
             utils_1.utils.exec('git', [
                 'config',
@@ -57,12 +58,14 @@ function cmd_login(args) {
                 email
             ], {
                 cwd: utils_1.utils.root,
+                title: ''
             });
             utils_1.utils.exec('git', [
                 'credential-cache',
                 'exit'
             ], {
                 cwd: utils_1.utils.root,
+                title: ''
             });
             utils_1.utils.exec('git', [
                 "config",
@@ -70,6 +73,7 @@ function cmd_login(args) {
                 "'cache --timeout=300'"
             ], {
                 cwd: utils_1.utils.root,
+                title: ''
             });
             // utils.exec(
             //     'git', [

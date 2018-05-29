@@ -4,7 +4,7 @@ import { watch } from "fs";
 
 export async function buildTypeScript(name: string) {
     if (!utils.exists(name, 'tsconfig.json')) return;
-    utils.exec('npm', ['run', 'build'], { cwd: utils.path(name) });
+    utils.exec('npm', ['run', 'build'], { cwd: utils.path(name), title: 'building: '+name });
 }
 
 export async function watchTypeScript(name: string): Promise<Watcher | undefined> {

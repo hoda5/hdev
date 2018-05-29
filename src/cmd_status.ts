@@ -10,6 +10,7 @@ export async function cmd_status(args: any): Promise<boolean> {
             ],
             {
                 cwd: utils.path(name),
+                title: name
             }
         );
         ok = true;
@@ -24,6 +25,7 @@ export async function cmd_status(args: any): Promise<boolean> {
                 ],
                 {
                     cwd: folder,
+                    title: pkg
                 }
             );
             ok = true;

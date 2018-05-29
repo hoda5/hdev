@@ -57,7 +57,7 @@ function cmd_init() {
             p = d + '/packages';
             if (!fs_1.existsSync(p))
                 fs_1.mkdirSync(p);
-            utils_1.utils.exec('git', ['init'], { cwd: process.cwd() });
+            utils_1.utils.exec('git', ['init'], { cwd: process.cwd(), title: '' });
             return [2 /*return*/, true];
         });
     });

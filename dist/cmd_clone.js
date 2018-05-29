@@ -67,6 +67,7 @@ function cmd_clone(args) {
                 afn,
             ], {
                 cwd: utils_1.utils.root + '/packages',
+                title: ''
             });
             utils_1.utils.getPackageJsonFor(name);
             w = utils_1.utils.workspaceFile;
@@ -80,6 +81,7 @@ function cmd_clone(args) {
                 'install',
             ], {
                 cwd: utils_1.utils.root + '/packages/' + afn,
+                title: ''
             });
             return [2 /*return*/, true];
         });

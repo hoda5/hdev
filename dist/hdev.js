@@ -45,6 +45,7 @@ var cmd_rm_1 = require("./cmd_rm");
 var cmd_build_1 = require("./cmd_build");
 var cmd_watch_1 = require("./cmd_watch");
 var utils_1 = require("./utils");
+var bash_color_1 = require("bash-color");
 prog.version('1.0.0');
 prog.option('-v, --verbose', 'Modo deputação');
 prog.command('status', 'Status dos repositorios')
@@ -95,7 +96,8 @@ function cmd(fn, showrep) {
     return function (args, options) {
         utils_1.utils.verbose = options.verbose;
         if (showrep)
-            console.log('repositorio: ' + utils_1.utils.root);
+            console.log(bash_color_1.wrap('repositorio: ', "GREEN", "background") +
+                bash_color_1.wrap(utils_1.utils.root, "GREEN", "background"));
         fn(args, options).then(function (ok) {
             if (!ok)
                 prog.help('hdev');
@@ -117,6 +119,7 @@ function cmd_setup_completation(args) {
     var shell = 'bash'; // args.shell
     utils_1.utils.exec(process.argv[0], [process.argv[1], 'completion', shell], {
         cwd: process.cwd(),
+        title: '',
     });
 }
 //# sourceMappingURL=hdev.js.map

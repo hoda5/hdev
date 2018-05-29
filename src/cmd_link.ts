@@ -13,7 +13,8 @@ export function cmd_link(name: string, url: string) {
                 'link'
             ],
             {
-                cwd: folder
+                cwd: folder,
+                title: ''
             }
         );
     }
@@ -32,7 +33,8 @@ export function cmd_link(name: string, url: string) {
                         dep
                     ],
                     {
-                        cwd: folder
+                        cwd: folder,
+                        title: ''
                     }
                 );
         })

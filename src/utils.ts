@@ -125,15 +125,20 @@ export const utils = {
         console.log(msg)
         process.exit(1)
     },
-    exec(cmd: string, args: string[], opts: { cwd: string }) {
-        console.log(
-            wrap(opts.cwd + '$ ', "BLUE", 'hi_background') +
-            wrap(cmd + ' ' + args.join(' '), "RED", 'hi_background') 
-        );
+    exec(cmd: string, args: string[], opts: { cwd: string, title: string }) {
+        if (opts.title)
+            console.log(
+                wrap(opts.title, "RED", 'background')
+            );
+        else
+            console.log(
+                wrap(opts.cwd + '$ ', "BLUE", 'background') +
+                wrap(cmd + ' ' + args.join(' '), "RED", 'background')
+            );
         const r = spawnSync(
             cmd, args,
             {
-                ...opts,
+                cwd: opts.cwd,
                 stdio: ['inherit', 'inherit', 'inherit']
             }
         );
@@ -219,6 +224,6 @@ function findRoot(folder: string) {
 function debug(title: string, ...args: any[]) {
     console.log(
         wrap(title + ': ', "PURPLE", 'background') +
-        wrap(args.join(' '), "BLUE", 'background') 
+        wrap(args.join(' '), "BLUE", 'background')
     );
 }

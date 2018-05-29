@@ -29,6 +29,7 @@ export async function cmd_clone(args: any): Promise<boolean> {
         ],
         {
             cwd: utils.root + '/packages',
+            title: ''
         }
     );
     utils.getPackageJsonFor(name);
@@ -46,6 +47,7 @@ export async function cmd_clone(args: any): Promise<boolean> {
         ],
         {
             cwd: utils.root + '/packages/' + afn,
+            title: ''
         }
     );
     return true;

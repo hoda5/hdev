@@ -11,7 +11,8 @@ export async function cmd_rm(args: any): Promise<boolean> {
             afn,
         ],
         {
-            cwd: utils.root + '/packages'
+            cwd: utils.root + '/packages',
+            title: ''
         }
     );
     const w = utils.workspaceFile;
