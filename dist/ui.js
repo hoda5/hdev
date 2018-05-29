@@ -15,14 +15,12 @@ function initUi(logMode) {
     if (!logMode)
         initBox();
     var building = [];
-    var refresh = utils_1.utils.limiter(200, no_limited_refresh);
+    var refresh = utils_1.utils.limiteSync({ ms: 200, fn: no_limited_refresh });
     watchers_1.listenWatchEvent('building', refresh);
     watchers_1.listenWatchEvent('testing', refresh);
     watchers_1.listenWatchEvent('finished', refresh);
     watchers_1.listenWatchEvent('reload', reload);
     ui = { refresh: refresh };
-    web.reload();
-    ui.refresh();
     function no_limited_refresh() {
         var building = [];
         var testing = [];
@@ -147,7 +145,7 @@ function initUi(logMode) {
             },
             refresh: function (content) {
                 send('hdev-refresh', content);
-            }
+            },
         };
         function send(event) {
             var args = [];

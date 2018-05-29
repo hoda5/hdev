@@ -40,10 +40,12 @@ var buildTypeScript_1 = require("./build/buildTypeScript");
 var ui_1 = require("./ui");
 var pm2_1 = require("pm2");
 var chokidar_1 = require("chokidar");
+var path_1 = require("path");
 function cmd_start(args, opts) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
-            console.dir({ start: process.argv });
+            if (utils_1.utils.verbose)
+                console.dir({ start_with_args: process.argv });
             if (opts.noService)
                 return [2 /*return*/, start_no_service(opts.logMode)];
             else
@@ -83,86 +85,175 @@ function start_no_service(logMode) {
 }
 function start_as_service(follow) {
     return __awaiter(this, void 0, void 0, function () {
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0: return [4 /*yield*/, start_service()];
-                case 1:
-                    _a.sent();
-                    if (follow)
-                        follow_service();
-                    else
-                        setTimeout(function () { return process.exit(0); }, 2000);
-                    return [2 /*return*/, true];
-            }
-        });
-    });
-}
-function start_service() {
-    console.log('starting');
-    return new Promise(function (resolve, reject) {
-        return pm2_1.start({
-            name: 'hdev',
-            script: process.argv[1],
-            args: ['start', '--no-service', '--log-mode'],
-            restartDelay: 100,
-            watch: false
-        }, function (err) {
-            console.log('started');
-            if (err)
-                reject(err);
-            else
-                resolve();
-        });
-    });
-}
-function stop_service() {
-    console.log('stoppingx');
-    return new Promise(function (resolve, reject) {
-        return pm2_1.stop('hdev', function (err) {
-            console.log('stopped');
-            if (err)
-                reject(err);
-            else
-                resolve();
-        });
-    });
-}
-function follow_service() {
-    var _this = this;
-    var restart_service = utils_1.utils.limiter(1500, function () { return __awaiter(_this, void 0, void 0, function () {
+        function start_service() {
+            if (utils_1.utils.verbose)
+                console.log('starting hdev');
+            return new Promise(function (fn_resolve, fn_reject) {
+                var args = ['start', '--no-service', '--log-mode'];
+                if (utils_1.utils.verbose)
+                    args.push('--verbose');
+                var script = process.argv[1];
+                if (hdev_no_ws)
+                    script = utils_1.utils.path('@hoda5-hdev', 'dist/hdev.js');
+                else if (tmp_ws)
+                    script = path_1.resolve(path_1.join(utils_1.utils.root, '../dist/hdev.js'));
+                pm2_1.start({
+                    name: 'hdev',
+                    script: script,
+                    args: args,
+                    restartDelay: 100,
+                    watch: false
+                }, function (err) {
+                    if (err)
+                        fn_reject(err);
+                    else {
+                        setTimeout(function () {
+                            fn_resolve();
+                            if (utils_1.utils.verbose)
+                                console.log('hdev started!');
+                        }, 1);
+                    }
+                });
+            });
+        }
+        function stop_service() {
+            if (utils_1.utils.verbose)
+                console.log('stopping hdev');
+            return new Promise(function (resolve, reject) {
+                return pm2_1.stop('hdev', function (err) {
+                    if (utils_1.utils.verbose)
+                        console.log('hdev stopped');
+                    resolve();
+                });
+            });
+        }
+        function follow_service() {
+            return __awaiter(this, void 0, void 0, function () {
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0:
+                            if (utils_1.utils.verbose)
+                                console.dir({ follow_service: { hdev_no_ws: hdev_no_ws, tmp_ws: tmp_ws } });
+                            if (!(hdev_no_ws || tmp_ws))
+                                utils_1.utils.throw('hdev precisa estar no workspace para poder ser reconstruido');
+                            if (!!hdev_no_ws) return [3 /*break*/, 2];
+                            return [4 /*yield*/, watch_hdev_for_rebuild()];
+                        case 1:
+                            _a.sent();
+                            _a.label = 2;
+                        case 2: return [4 /*yield*/, watch_dist()];
+                        case 3:
+                            _a.sent();
+                            follow_logs();
+                            monitor_SIGINT();
+                            return [2 /*return*/];
+                    }
+                });
+            });
+        }
+        function watch_hdev_for_rebuild() {
+            return __awaiter(this, void 0, void 0, function () {
+                var p;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0: return [4 /*yield*/, utils_1.utils.spawn('npm', ['run', 'watch'], {
+                                cwd: path_1.resolve(path_1.join(__dirname, '..')),
+                                name: 'rebuild-hdev'
+                            })];
+                        case 1:
+                            p = _a.sent();
+                            return [2 /*return*/, new Promise(function (resolve) {
+                                    p.on('line', function (line) {
+                                        if (/Compilation complete/g.test(line)) {
+                                            console.log('hdev rebuilded');
+                                            if (resolve)
+                                                resolve();
+                                            resolve = false;
+                                        }
+                                    });
+                                })];
+                    }
+                });
+            });
+        }
+        function watch_dist() {
+            return __awaiter(this, void 0, void 0, function () {
+                return __generator(this, function (_a) {
+                    return [2 /*return*/, new Promise(function (resolve) {
+                            var watcher_dist = chokidar_1.watch(__dirname);
+                            watcher_dist.on('ready', function () {
+                                watcher_dist.on('all', restart_service);
+                                resolve();
+                            });
+                        })];
+                });
+            });
+        }
+        function follow_logs() {
+            pm2_1.launchBus(function (err, bus) {
+                bus.on('log:out', function (d) {
+                    process.stdout.write(d.data);
+                });
+                bus.on('log:err', function (d) {
+                    process.stdout.write(d.data);
+                    setTimeout(function () { return process.exit(0); }, 2000);
+                });
+            });
+        }
+        function monitor_SIGINT() {
+            process.on('SIGINT', function () {
+                console.log('   SIGINT');
+                stop_service();
+                setTimeout(function () { return process.exit(0); }, 2000);
+            });
+        }
+        var tmp_ws, hdev_no_ws, restart_service;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    if (restart_service.pending)
-                        return [2 /*return*/];
-                    return [4 /*yield*/, stop_service()];
+                    tmp_ws = __dirname == path_1.resolve(path_1.join(utils_1.utils.root, '../dist'));
+                    hdev_no_ws = utils_1.utils.listPackages().indexOf('@hoda5-hdev') >= 0;
+                    if (hdev_no_ws)
+                        console.log('usando hdev do workspace');
+                    restart_service = utils_1.utils.limiteAsync({
+                        ms: 1500,
+                        fn: function () {
+                            return __awaiter(this, void 0, void 0, function () {
+                                return __generator(this, function (_a) {
+                                    switch (_a.label) {
+                                        case 0:
+                                            if (restart_service.pending)
+                                                return [2 /*return*/];
+                                            return [4 /*yield*/, stop_service()];
+                                        case 1:
+                                            _a.sent();
+                                            if (restart_service.pending)
+                                                return [2 /*return*/];
+                                            return [4 /*yield*/, start_service()];
+                                        case 2:
+                                            _a.sent();
+                                            return [2 /*return*/];
+                                    }
+                                });
+                            });
+                        }
+                    });
+                    if (!follow) return [3 /*break*/, 3];
+                    return [4 /*yield*/, follow_service()];
                 case 1:
                     _a.sent();
-                    if (restart_service.pending)
-                        return [2 /*return*/];
                     return [4 /*yield*/, start_service()];
                 case 2:
                     _a.sent();
-                    return [2 /*return*/];
+                    return [3 /*break*/, 5];
+                case 3: return [4 /*yield*/, start_service()];
+                case 4:
+                    _a.sent();
+                    setTimeout(function () { return process.exit(0); }, 2000);
+                    _a.label = 5;
+                case 5: return [2 /*return*/, true];
             }
         });
-    }); });
-    pm2_1.launchBus(function (err, bus) {
-        bus.on('log:out', function (d) {
-            process.stdout.write(d.data);
-        });
-        bus.on('log:err', function (d) {
-            process.stdout.write(d.data);
-            setTimeout(function () { return process.exit(0); }, 2000);
-        });
-    });
-    var watcher = chokidar_1.watch(__dirname);
-    watcher.on('ready', function () {
-        watcher.on('all', restart_service);
-    });
-    process.on('SIGINT', function () {
-        stop_service();
-        setTimeout(function () { return process.exit(0); }, 2000);
     });
 }
 //# sourceMappingURL=cmd_start.js.map

@@ -133,19 +133,37 @@ exports.utils = {
                     cwd: opts.cwd,
                     detached: false,
                 };
+                if (exports.utils.verbose)
+                    console.log(bash_color_1.wrap(opts.name, "PURPLE", 'background'), bash_color_1.wrap(opts.cwd + '$ ', "BLUE", 'background') +
+                        bash_color_1.wrap(' ' + cmd + ' ' + args.join(' '), "RED", 'background'));
                 var proc = child_process_1.spawn(cmd, args, spawnOpts);
                 proc.stdout.on('data', parseLines);
                 proc.stderr.on('data', parseLines);
                 proc.on('exit', function (code) {
+                    if (exports.utils.verbose)
+                        console.log(bash_color_1.wrap(opts.name, "PURPLE", 'background'), bash_color_1.wrap(' exit ' + code, code == 0 ? "GREEN" : "RED", 'background'));
                     emitter.emit('exit', code);
                 });
                 return proc;
                 function parseLines(data) {
-                    var s = data
-                        .toString()
+                    var s1 = data.toString();
+                    var lines;
+                    if (exports.utils.verbose) {
+                        s1.split('\n').forEach(function (lo) {
+                            var s2 = //lo.indexOf('\x1b[2K')>=0 ? '' :
+                             
+                            // lo.replace(/\u001b/g, '<ESC>');
+                            lo.replace(/\u001bc/g, '')
+                                .replace(/\u001b\[\d{0,2}m/g, '');
+                            if (s2.trim()) {
+                                console.log(bash_color_1.wrap(opts.name, "PURPLE", 'background'), s2);
+                            }
+                        });
+                    }
+                    var s2 = s1
                         .replace(/\u001bc/g, '')
                         .replace(/\u001b\[\d{0,2}m/g, '');
-                    var lines = s.split('\n');
+                    lines = s2.split('\n');
                     lines.forEach(function (l) { return emitter.emit('line', l); });
                 }
             }
@@ -173,6 +191,8 @@ exports.utils = {
                     stop: function () {
                         return __awaiter(this, void 0, void 0, function () {
                             return __generator(this, function (_a) {
+                                if (exports.utils.verbose)
+                                    console.log(bash_color_1.wrap(opts.name, "PURPLE", 'background'), bash_color_1.wrap(' kill', "RED", 'background'));
                                 proc.kill();
                                 return [2 /*return*/];
                             });
@@ -189,14 +209,43 @@ exports.utils = {
         // });
         setTimeout(function () { return process.exit(code); }, 200);
     },
-    limiter: function (ms, fn) {
+    defer: function () {
+        var fn_resolve;
+        var fn_reject;
+        var promise = new Promise(function (resolve, reject) {
+            fn_resolve = resolve;
+            fn_reject = reject;
+        });
+        var d = {
+            promise: promise,
+            resolve: function (res) {
+                if (res instanceof Promise)
+                    res.then(d.resolve, d.reject);
+                else if (fn_resolve)
+                    fn_resolve(res);
+                else
+                    setTimeout(function () { return d.resolve(res); }, 10);
+            },
+            reject: function (reason) {
+                if (reason instanceof Promise)
+                    reason.then(d.reject, d.reject);
+                else if (fn_reject)
+                    fn_reject(reason);
+                else
+                    setTimeout(function () { return d.reject(reason); }, 10);
+            },
+        };
+        return d;
+    },
+    limiteSync: function (opts) {
         var tm;
         var ts = 0;
+        var ms = opts.ms, bounce = opts.bounce, fn = opts.fn;
         var limiter = Object.assign(function () {
             limiter.pending = true;
             if (tm)
                 clearTimeout(tm);
-            var timeout = new Date().getTime() - ts;
+            var timeout = bounce ? ms : new Date().getTime() - ts;
             if (timeout > ms)
                 timeout = ms;
             if (timeout < 1)
@@ -206,7 +255,54 @@ exports.utils = {
                 limiter.pending = false;
                 fn();
             }, timeout);
-        }, { pending: false });
+        }, {
+            pending: false,
+            cancel: function () {
+                if (tm)
+                    clearTimeout(tm);
+                tm = undefined;
+            }
+        });
+        return limiter;
+    },
+    limiteAsync: function (opts) {
+        var tm;
+        var ts = 0;
+        var ms = opts.ms, bounce = opts.bounce, fn = opts.fn;
+        var defers = [];
+        var limiter = Object.assign(function () {
+            limiter.pending = true;
+            if (tm)
+                clearTimeout(tm);
+            var timeout = bounce ? ms : new Date().getTime() - ts;
+            if (timeout > ms)
+                timeout = ms;
+            if (timeout < 1)
+                timeout = 1;
+            var defer = exports.utils.defer();
+            defers.push(defer);
+            tm = setTimeout(function () {
+                tm = undefined;
+                limiter.pending = false;
+                try {
+                    var r_1 = fn();
+                    defers.forEach(function (d) { return d.resolve(r_1); });
+                }
+                catch (e) {
+                    defers.forEach(function (d) { return d.reject(e); });
+                }
+                defers = [];
+            }, timeout);
+        }, {
+            pending: false,
+            cancel: function () {
+                if (tm)
+                    clearTimeout(tm);
+                tm = undefined;
+                defers.forEach(function (d) { return d.reject('cancel'); });
+                defers = [];
+            }
+        });
         return limiter;
     }
 };

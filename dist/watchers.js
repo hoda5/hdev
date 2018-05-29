@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var events_1 = require("events");
+var utils_1 = require("./utils");
 exports.watchers = [];
 exports.watchEmitter = new events_1.EventEmitter();
 function listenWatchEvent(event, listenner) {
@@ -11,26 +12,27 @@ function unlistenWatchEvent(event, listenner) {
     exports.watchEmitter.removeListener(event, listenner);
 }
 exports.unlistenWatchEvent = unlistenWatchEvent;
-var tm_reload;
 function onBuilding(watcher) {
-    if (tm_reload)
-        clearTimeout(tm_reload);
+    onReload.cancel();
     exports.watchEmitter.emit('building', watcher);
 }
 function onTesting(watcher) {
-    if (tm_reload)
-        clearTimeout(tm_reload);
     exports.watchEmitter.emit('testing', watcher);
-    tm_reload = setTimeout(function () {
-        exports.watchEmitter.emit('reload');
-    }, 500);
+    onReload();
 }
 function onFinished(watcher) {
     exports.watchEmitter.emit('finished', watcher);
 }
+var onReload = utils_1.utils.limiteSync({
+    ms: 1000,
+    bounce: true,
+    fn: function () {
+        exports.watchEmitter.emit('reload');
+    }
+});
 function addWatcher(watcher) {
     exports.watchers.push(watcher);
-    return { onBuilding: onBuilding, onTesting: onTesting, onFinished: onFinished };
+    return { onBuilding: onBuilding, onTesting: onTesting, onFinished: onFinished, onReload: onReload };
 }
 exports.addWatcher = addWatcher;
 function hasWarnings() {

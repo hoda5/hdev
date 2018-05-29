@@ -4,6 +4,7 @@ import { spawnSync, spawn, ChildProcess, SpawnOptions } from "child_process"
 import { wrap } from "bash-color";
 import * as stringify from "json-stringify-safe";
 import { EventEmitter } from "events";
+import { resolve } from "url";
 
 export type PackageJSON = {
     name: string;
@@ -15,6 +16,11 @@ export type PackageJSON = {
 export type WorkspaceFile = {
     "folders": { path: string }[],
     settings: Object
+}
+export interface Defer<T> {
+    promise: Promise<T>;
+    resolve(res: T | Promise<T>): void;
+    reject(reason: any): void;
 }
 export interface SpawnedProcess {
     readonly name: string;
@@ -126,20 +132,46 @@ export const utils = {
                 cwd: opts.cwd,
                 detached: false,
             }
+            if (utils.verbose)
+                console.log(
+                    wrap(opts.name, "PURPLE", 'background'),
+                    wrap(opts.cwd + '$ ', "BLUE", 'background') +
+                    wrap(' ' + cmd + ' ' + args.join(' '), "RED", 'background')
+                );
             const proc = spawn(cmd, args, spawnOpts);
             proc.stdout.on('data', parseLines);
             proc.stderr.on('data', parseLines);
             proc.on('exit', function (code) {
+                if (utils.verbose)
+                    console.log(
+                        wrap(opts.name, "PURPLE", 'background'),
+                        wrap(' exit ' + code, code == 0 ? "GREEN" : "RED", 'background')
+                    );
                 emitter.emit('exit', code);
             });
             return proc;
 
             function parseLines(data: any) {
-                const s: string = data
-                    .toString()
+                const s1: string = data.toString();
+                let lines: string[]
+                if (utils.verbose) {
+                    s1.split('\n').forEach((lo) => {
+                        const s2 = //lo.indexOf('\x1b[2K')>=0 ? '' :
+                            // lo.replace(/\u001b/g, '<ESC>');
+                            lo.replace(/\u001bc/g, '')
+                                .replace(/\u001b\[\d{0,2}m/g, '');
+                        if (s2.trim()) {
+                            console.log(
+                                wrap(opts.name, "PURPLE", 'background'),
+                                s2
+                            )
+                        }
+                    });
+                }
+                const s2 = s1
                     .replace(/\u001bc/g, '')
                     .replace(/\u001b\[\d{0,2}m/g, '');
-                const lines = s.split('\n');
+                lines = s2.split('\n');
                 lines.forEach((l) => emitter.emit('line', l));
             }
         }
@@ -158,6 +190,11 @@ export const utils = {
                 });
             },
             async stop() {
+                if (utils.verbose)
+                    console.log(
+                        wrap(opts.name, "PURPLE", 'background'),
+                        wrap(' kill', "RED", 'background')
+                    );
                 proc.kill();
             },
         };
@@ -169,13 +206,38 @@ export const utils = {
         // });
         setTimeout(() => process.exit(code), 200);
     },
-    limiter(ms: number, fn: () => void) {
+    defer<T>() {
+        let fn_resolve: (res: T) => void;
+        let fn_reject: (reason: any) => void;
+        let promise = new Promise<T>((resolve, reject) => {
+            fn_resolve = resolve;
+            fn_reject = reject;
+        })
+        const d = {
+            promise,
+            resolve(res: T | Promise<T>) {
+                if (res instanceof Promise)
+                    res.then(d.resolve, d.reject)
+                else if (fn_resolve) fn_resolve(res);
+                else setTimeout(() => d.resolve(res), 10);
+            },
+            reject(reason: any) {
+                if (reason instanceof Promise)
+                    reason.then(d.reject, d.reject)
+                else if (fn_reject) fn_reject(reason);
+                else setTimeout(() => d.reject(reason), 10);
+            },
+        }
+        return d;
+    },
+    limiteSync<T>(opts: { ms: number, bounce?: boolean, fn: () => T }) {
         let tm: NodeJS.Timer | undefined;
         let ts = 0;
+        let { ms, bounce, fn } = opts;
         const limiter = Object.assign(function () {
             limiter.pending = true;
             if (tm) clearTimeout(tm);
-            let timeout = new Date().getTime() - ts;
+            let timeout = bounce ? ms : new Date().getTime() - ts;
             if (timeout > ms) timeout = ms;
             if (timeout < 1) timeout = 1;
             tm = setTimeout(() => {
@@ -183,7 +245,49 @@ export const utils = {
                 limiter.pending = false;
                 fn();
             }, timeout);
-        }, { pending: false });
+        }, {
+                pending: false,
+                cancel() {
+                    if (tm) clearTimeout(tm);
+                    tm = undefined;
+                }
+            });
+        return limiter;
+    }, 
+    limiteAsync<T>(opts: { ms: number, bounce?: boolean, fn: () => Promise<T> }) {
+        let tm: NodeJS.Timer | undefined;
+        let ts = 0;
+        let { ms, bounce, fn } = opts;
+        let defers: Array<Defer<T>> = [];
+        const limiter = Object.assign(function () {
+            limiter.pending = true;
+            if (tm) clearTimeout(tm);
+            let timeout = bounce ? ms : new Date().getTime() - ts;
+            if (timeout > ms) timeout = ms;
+            if (timeout < 1) timeout = 1;
+            const defer = utils.defer<T>();
+            defers.push(defer);
+            tm = setTimeout(() => {
+                tm = undefined;
+                limiter.pending = false;
+                try {
+                    const r = fn();
+                    defers.forEach((d) => d.resolve(r));
+                }
+                catch (e) {
+                    defers.forEach((d) => d.reject(e));
+                }
+                defers = [];
+            }, timeout);
+        }, {
+                pending: false,
+                cancel() {
+                    if (tm) clearTimeout(tm);
+                    tm = undefined;
+                    defers.forEach((d) => d.reject('cancel'));
+                    defers = [];
+                }
+            });
         return limiter;
     }
 }

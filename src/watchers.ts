@@ -1,4 +1,6 @@
 import { EventEmitter } from 'events';
+import { reload } from 'pm2';
+import { utils } from './utils';
 export interface Watcher {
     readonly packageName: string;
     readonly building: boolean;
@@ -30,35 +32,38 @@ export function unlistenWatchEvent(event: 'reload', listenner: () => void): void
 export function unlistenWatchEvent(event: string, listenner: (...args: any[]) => void): void {
     watchEmitter.removeListener(event, listenner);
 }
-
-let tm_reload: NodeJS.Timer;
-
 export interface WatcherEvents {
     onBuilding(watcher: Watcher): void
     onTesting(watcher: Watcher): void
     onFinished(watcher: Watcher): void
+    onReload(): void;
 }
 
 function onBuilding(watcher: Watcher) {
-    if (tm_reload) clearTimeout(tm_reload);
+    onReload.cancel();
     watchEmitter.emit('building', watcher);
 }
 
 function onTesting(watcher: Watcher) {
-    if (tm_reload) clearTimeout(tm_reload);
     watchEmitter.emit('testing', watcher);
-    tm_reload = setTimeout(() => {
-        watchEmitter.emit('reload');
-    }, 500);
+    onReload();
 }
 
 function onFinished(watcher: Watcher) {
     watchEmitter.emit('finished', watcher);
 }
 
+const onReload = utils.limiteSync({
+    ms: 1000,
+    bounce: true,
+    fn() {
+        watchEmitter.emit('reload');
+    }
+});
+
 export function addWatcher(watcher: Watcher): WatcherEvents {
     watchers.push(watcher);
-    return { onBuilding, onTesting, onFinished }
+    return { onBuilding, onTesting, onFinished, onReload }
 }
 
 export function hasWarnings(): boolean {

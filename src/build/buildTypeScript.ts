@@ -28,7 +28,8 @@ export async function watchTypeScript(packageName: string): Promise<Watcher | un
             errors = [];
             building = true;
             abortTesting();
-            if (events) events.onBuilding(watcher);
+            if (events) 
+            events.onBuilding(watcher);
         }
         else if (/Compilation complete/g.test(line)) {
             building = false;

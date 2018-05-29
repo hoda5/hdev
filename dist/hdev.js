@@ -48,7 +48,6 @@ var cmd_start_1 = require("./cmd_start");
 var utils_1 = require("./utils");
 var bash_color_1 = require("bash-color");
 prog.version('1.0.0');
-prog.option('-v, --verbose', 'Modo deputação');
 prog.command('status', 'Status dos repositorios')
     .argument('[name]', 'Nome do pacote')
     .complete(completeWithPackageName)
@@ -66,6 +65,7 @@ prog.command('build', 'build')
     .complete(completeWithPackageName)
     .action(cmd(cmd_build_1.cmd_build));
 prog.command('start', 'inicia o servidor de desenvolvimento')
+    .option('--verbose', 'Modo deputação')
     .option('--log-mode', 'log mode')
     .option('--no-service', 'não inicia como serviço')
     .option('--follow', 'acompanha o log do serviço iniciado')
@@ -103,7 +103,12 @@ prog.parse(process.argv);
 function cmd(fn, showrep) {
     if (showrep === void 0) { showrep = true; }
     return function (args, options) {
-        utils_1.utils.verbose = options.verbose;
+        var l = prog.logger();
+        var ts = l && l.transports;
+        var cap = ts && ts.caporal;
+        var lv = cap && cap.level;
+        // console.dir({ l, ts, cap, lv })
+        utils_1.utils.verbose = lv === 'debug';
         if (showrep)
             console.log(bash_color_1.wrap('repositorio: ', "GREEN", "background") +
                 bash_color_1.wrap(utils_1.utils.root, "GREEN", "background"));

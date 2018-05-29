@@ -10,7 +10,6 @@ let ui: {
     refresh(): void
 };
 
-
 export function initUi(logMode: boolean) {
 
     let screen: blessed.Widgets.Screen;
@@ -20,7 +19,7 @@ export function initUi(logMode: boolean) {
     if (!logMode) initBox();
 
     const building: string[] = [];
-    const refresh = utils.limiter(200, no_limited_refresh);
+    const refresh = utils.limiteSync({ms: 200, fn: no_limited_refresh});
 
     listenWatchEvent('building', refresh);
     listenWatchEvent('testing', refresh);
@@ -28,8 +27,6 @@ export function initUi(logMode: boolean) {
     listenWatchEvent('reload', reload);
 
     ui = { refresh };
-    web.reload();
-    ui.refresh();
 
     function no_limited_refresh() {
         const building: string[] = [];
@@ -162,7 +159,7 @@ export function initUi(logMode: boolean) {
             },
             refresh(content: string[]) {
                 send('hdev-refresh', content);
-            }
+            },
         }
         function send(event: string, ...args: any[]) {
             sio.to('hdev-v1').emit(event, ...args);

@@ -14,7 +14,6 @@ import { utils } from './utils';
 import { wrap } from 'bash-color';
 
 prog.version('1.0.0')
-prog.option('-v, --verbose', 'Modo deputação')
 
 prog.command('status', 'Status dos repositorios')
     .argument('[name]', 'Nome do pacote')
@@ -37,13 +36,14 @@ prog.command('build', 'build')
     .action(cmd(cmd_build));
 
 prog.command('start', 'inicia o servidor de desenvolvimento')
+    .option('--verbose', 'Modo deputação')
     .option('--log-mode', 'log mode')
     .option('--no-service', 'não inicia como serviço')
     .option('--follow', 'acompanha o log do serviço iniciado')
     .action(cmd(cmd_start, false));
 
 prog.command('stop', 'para o servidor de desenvolvimento')
-    .action(cmd(async () =>{
+    .action(cmd(async () => {
         utils.exit(0);
         return Promise.resolve(true);
     }, false));
@@ -79,7 +79,12 @@ prog.parse(process.argv);
 type ActionCallback = (args: any, options: any) => Promise<boolean>;
 function cmd(fn: ActionCallback, showrep = true) {
     return function (args: any, options: any) {
-        utils.verbose = options.verbose;
+        const l: any = prog.logger();
+        const ts = l && l.transports;
+        const cap = ts && ts.caporal;
+        const lv = cap && cap.level
+        // console.dir({ l, ts, cap, lv })
+        utils.verbose = lv === 'debug';
         if (showrep)
             console.log(
                 wrap('repositorio: ', "GREEN", "background") +
