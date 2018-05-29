@@ -188,6 +188,26 @@ exports.utils = {
         //     //
         // });
         setTimeout(function () { return process.exit(code); }, 200);
+    },
+    limiter: function (ms, fn) {
+        var tm;
+        var ts = 0;
+        var limiter = Object.assign(function () {
+            limiter.pending = true;
+            if (tm)
+                clearTimeout(tm);
+            var timeout = new Date().getTime() - ts;
+            if (timeout > ms)
+                timeout = ms;
+            if (timeout < 1)
+                timeout = 1;
+            tm = setTimeout(function () {
+                tm = undefined;
+                limiter.pending = false;
+                fn();
+            }, timeout);
+        }, { pending: false });
+        return limiter;
     }
 };
 var root = findRoot(process.cwd());

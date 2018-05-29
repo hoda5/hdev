@@ -39,7 +39,21 @@ var utils_1 = require("./utils");
 var buildTypeScript_1 = require("./build/buildTypeScript");
 var ui_1 = require("./ui");
 var pm2_1 = require("pm2");
+var chokidar_1 = require("chokidar");
 function cmd_start(args, opts) {
+    return __awaiter(this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            console.dir({ start: process.argv });
+            if (opts.noService)
+                return [2 /*return*/, start_no_service(opts.logMode)];
+            else
+                return [2 /*return*/, start_as_service(opts.follow)];
+            return [2 /*return*/];
+        });
+    });
+}
+exports.cmd_start = cmd_start;
+function start_no_service(logMode) {
     return __awaiter(this, void 0, void 0, function () {
         var _this = this;
         var ok;
@@ -47,7 +61,6 @@ function cmd_start(args, opts) {
             switch (_a.label) {
                 case 0:
                     ok = false;
-                    if (!opts.noService) return [3 /*break*/, 2];
                     return [4 /*yield*/, utils_1.utils.forEachPackage(function (pkg) { return __awaiter(_this, void 0, void 0, function () {
                             return __generator(this, function (_a) {
                                 switch (_a.label) {
@@ -62,21 +75,94 @@ function cmd_start(args, opts) {
                 case 1:
                     _a.sent();
                     if (ok)
-                        ui_1.initUi(opts.logMode);
-                    return [3 /*break*/, 3];
-                case 2:
-                    pm2_1.start({
-                        name: 'hdev',
-                        script: process.argv[0],
-                        args: ['start', '--no-service', '--log-mode'],
-                        watch: true
-                    }, function () { });
-                    setTimeout(function () { return process.exit(0); }, 2000);
-                    _a.label = 3;
-                case 3: return [2 /*return*/, ok];
+                        ui_1.initUi(logMode);
+                    return [2 /*return*/, ok];
             }
         });
     });
 }
-exports.cmd_start = cmd_start;
+function start_as_service(follow) {
+    return __awaiter(this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, start_service()];
+                case 1:
+                    _a.sent();
+                    if (follow)
+                        follow_service();
+                    else
+                        setTimeout(function () { return process.exit(0); }, 2000);
+                    return [2 /*return*/, true];
+            }
+        });
+    });
+}
+function start_service() {
+    console.log('starting');
+    return new Promise(function (resolve, reject) {
+        return pm2_1.start({
+            name: 'hdev',
+            script: process.argv[1],
+            args: ['start', '--no-service', '--log-mode'],
+            restartDelay: 100,
+            watch: false
+        }, function (err) {
+            console.log('started');
+            if (err)
+                reject(err);
+            else
+                resolve();
+        });
+    });
+}
+function stop_service() {
+    console.log('stoppingx');
+    return new Promise(function (resolve, reject) {
+        return pm2_1.stop('hdev', function (err) {
+            console.log('stopped');
+            if (err)
+                reject(err);
+            else
+                resolve();
+        });
+    });
+}
+function follow_service() {
+    var _this = this;
+    var restart_service = utils_1.utils.limiter(1500, function () { return __awaiter(_this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    if (restart_service.pending)
+                        return [2 /*return*/];
+                    return [4 /*yield*/, stop_service()];
+                case 1:
+                    _a.sent();
+                    if (restart_service.pending)
+                        return [2 /*return*/];
+                    return [4 /*yield*/, start_service()];
+                case 2:
+                    _a.sent();
+                    return [2 /*return*/];
+            }
+        });
+    }); });
+    pm2_1.launchBus(function (err, bus) {
+        bus.on('log:out', function (d) {
+            process.stdout.write(d.data);
+        });
+        bus.on('log:err', function (d) {
+            process.stdout.write(d.data);
+            setTimeout(function () { return process.exit(0); }, 2000);
+        });
+    });
+    var watcher = chokidar_1.watch(__dirname);
+    watcher.on('ready', function () {
+        watcher.on('all', restart_service);
+    });
+    process.on('SIGINT', function () {
+        stop_service();
+        setTimeout(function () { return process.exit(0); }, 2000);
+    });
+}
 //# sourceMappingURL=cmd_start.js.map

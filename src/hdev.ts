@@ -39,6 +39,7 @@ prog.command('build', 'build')
 prog.command('start', 'inicia o servidor de desenvolvimento')
     .option('--log-mode', 'log mode')
     .option('--no-service', 'não inicia como serviço')
+    .option('--follow', 'acompanha o log do serviço iniciado')
     .action(cmd(cmd_start, false));
 
 prog.command('stop', 'para o servidor de desenvolvimento')

@@ -168,6 +168,23 @@ export const utils = {
         //     //
         // });
         setTimeout(() => process.exit(code), 200);
+    },
+    limiter(ms: number, fn: () => void) {
+        let tm: NodeJS.Timer | undefined;
+        let ts = 0;
+        const limiter = Object.assign(function () {
+            limiter.pending = true;
+            if (tm) clearTimeout(tm);
+            let timeout = new Date().getTime() - ts;
+            if (timeout > ms) timeout = ms;
+            if (timeout < 1) timeout = 1;
+            tm = setTimeout(() => {
+                tm = undefined;
+                limiter.pending = false;
+                fn();
+            }, timeout);
+        }, { pending: false });
+        return limiter;
     }
 }
 const root = findRoot(process.cwd())
