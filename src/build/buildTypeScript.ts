@@ -8,6 +8,8 @@ export async function buildTypeScript(name: string) {
 }
 
 export async function watchTypeScript(packageName: string): Promise<Watcher | undefined> {
+    if (packageName === '@hoda5/hdev') return;
+    if (utils.verbose) utils.debug('watchTypeScript', packageName);
     if (!utils.exists(packageName, 'tsconfig.json')) return;
     let events: WatcherEvents;
     let warnings: SrcMessage[] = [];
@@ -19,7 +21,7 @@ export async function watchTypeScript(packageName: string): Promise<Watcher | un
     const procName = 'ts_' + utils.displayFolderName(packageName);
     const procBuild = await utils.spawn('npm', ['run', 'watch'], {
         name: procName,
-        cwd: utils.path(packageName),        
+        cwd: utils.path(packageName),
         // watch: [utils.path(name, 'src')],        
     });
     procBuild.on('line', (line: string) => {
@@ -28,8 +30,8 @@ export async function watchTypeScript(packageName: string): Promise<Watcher | un
             errors = [];
             building = true;
             abortTesting();
-            if (events) 
-            events.onBuilding(watcher);
+            if (events)
+                events.onBuilding(watcher);
         }
         else if (/Compilation complete/g.test(line)) {
             building = false;
@@ -91,7 +93,7 @@ export async function watchTypeScript(packageName: string): Promise<Watcher | un
         testing = true;
         const pt = await utils.spawn('npm', ['test'], {
             name: procName + 'test',
-            cwd: utils.path(packageName),            
+            cwd: utils.path(packageName),
         })
         // pt.on('line', (s)=>console.log(s));
         pt.on('exit', () => {

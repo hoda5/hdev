@@ -69,7 +69,7 @@ prog.command('start', 'inicia o servidor de desenvolvimento')
     .option('--log-mode', 'log mode')
     .option('--no-service', 'não inicia como serviço')
     .option('--follow', 'acompanha o log do serviço iniciado')
-    .action(cmd(cmd_start_1.cmd_start, false));
+    .action(cmd(cmd_start_1.cmd_start));
 prog.command('stop', 'para o servidor de desenvolvimento')
     .action(cmd(function () { return __awaiter(_this, void 0, void 0, function () {
     return __generator(this, function (_a) {

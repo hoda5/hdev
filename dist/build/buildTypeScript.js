@@ -119,6 +119,10 @@ function watchTypeScript(packageName) {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
+                    if (packageName === '@hoda5/hdev')
+                        return [2 /*return*/];
+                    if (utils_1.utils.verbose)
+                        utils_1.utils.debug('watchTypeScript', packageName);
                     if (!utils_1.utils.exists(packageName, 'tsconfig.json'))
                         return [2 /*return*/];
                     warnings = [];

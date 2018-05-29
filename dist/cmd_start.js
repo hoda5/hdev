@@ -66,11 +66,14 @@ function start_no_service(logMode) {
                     return [4 /*yield*/, utils_1.utils.forEachPackage(function (pkg) { return __awaiter(_this, void 0, void 0, function () {
                             return __generator(this, function (_a) {
                                 switch (_a.label) {
-                                    case 0: return [4 /*yield*/, buildTypeScript_1.watchTypeScript(pkg)];
+                                    case 0:
+                                        if (!(pkg != '@hoda5-hdev')) return [3 /*break*/, 2];
+                                        return [4 /*yield*/, buildTypeScript_1.watchTypeScript(pkg)];
                                     case 1:
                                         if (_a.sent())
                                             ok = true;
-                                        return [2 /*return*/];
+                                        _a.label = 2;
+                                    case 2: return [2 /*return*/];
                                 }
                             });
                         }); })];
@@ -97,13 +100,17 @@ function start_as_service(follow) {
                     script = utils_1.utils.path('@hoda5-hdev', 'dist/hdev.js');
                 else if (tmp_ws)
                     script = path_1.resolve(path_1.join(utils_1.utils.root, '../dist/hdev.js'));
-                pm2_1.start({
+                var pm2_opts = {
                     name: 'hdev',
                     script: script,
+                    cwd: process.cwd(),
                     args: args,
                     restartDelay: 100,
                     watch: false
-                }, function (err) {
+                };
+                if (utils_1.utils.verbose)
+                    console.dir({ pm2: pm2_opts });
+                pm2_1.start(pm2_opts, function (err) {
                     if (err)
                         fn_reject(err);
                     else {
@@ -136,13 +143,11 @@ function start_as_service(follow) {
                                 console.dir({ follow_service: { hdev_no_ws: hdev_no_ws, tmp_ws: tmp_ws } });
                             if (!(hdev_no_ws || tmp_ws))
                                 utils_1.utils.throw('hdev precisa estar no workspace para poder ser reconstruido');
-                            if (!!hdev_no_ws) return [3 /*break*/, 2];
                             return [4 /*yield*/, watch_hdev_for_rebuild()];
                         case 1:
                             _a.sent();
-                            _a.label = 2;
-                        case 2: return [4 /*yield*/, watch_dist()];
-                        case 3:
+                            return [4 /*yield*/, watch_dist()];
+                        case 2:
                             _a.sent();
                             follow_logs();
                             monitor_SIGINT();

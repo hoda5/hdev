@@ -15,8 +15,9 @@ export async function cmd_start(args: any, opts: any): Promise<boolean> {
 async function start_no_service(logMode: boolean): Promise<boolean> {
     let ok = false;
     await utils.forEachPackage(async (pkg) => {
-        if (await watchTypeScript(pkg))
-            ok = true;
+        if (pkg != '@hoda5-hdev')
+            if (await watchTypeScript(pkg))
+                ok = true;
     });
     if (ok)
         initUi(logMode);
@@ -29,7 +30,7 @@ async function start_as_service(follow: boolean): Promise<boolean> {
     const hdev_no_ws = utils.listPackages().indexOf('@hoda5-hdev') >= 0;
 
     if (hdev_no_ws) console.log('usando hdev do workspace');
-    
+
     const restart_service = utils.limiteAsync({
         ms: 1500,
         async fn() {
@@ -62,13 +63,16 @@ async function start_as_service(follow: boolean): Promise<boolean> {
                 script = utils.path('@hoda5-hdev', 'dist/hdev.js');
             else if (tmp_ws)
                 script = resolve(join(utils.root, '../dist/hdev.js'));
-            start({
+            const pm2_opts = {
                 name: 'hdev',
                 script,
+                cwd: process.cwd(),
                 args,
                 restartDelay: 100,
                 watch: false
-            }, (err) => {
+            }
+            if (utils.verbose) console.dir({ pm2: pm2_opts });
+            start(pm2_opts, (err) => {
                 if (err) fn_reject(err);
                 else {
                     setTimeout(() => {
@@ -95,8 +99,7 @@ async function start_as_service(follow: boolean): Promise<boolean> {
             console.dir({ follow_service: { hdev_no_ws, tmp_ws } })
         if (!(hdev_no_ws || tmp_ws))
             utils.throw('hdev precisa estar no workspace para poder ser reconstruido');
-        if (!hdev_no_ws)
-            await watch_hdev_for_rebuild();
+        await watch_hdev_for_rebuild();
         await watch_dist();
         follow_logs();
         monitor_SIGINT();

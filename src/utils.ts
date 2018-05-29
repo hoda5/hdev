@@ -40,7 +40,7 @@ export const utils = {
     },
     adaptFolderName(packageName: string) {
         if (packageName.indexOf('-') != -1)
-            utils.throw('Invalid package name ' + packageName)
+            return packageName;
         return packageName.replace('/', '-');
     },
     displayFolderName(packageName: string) {
@@ -56,9 +56,8 @@ export const utils = {
     },
     forEachPackage(fn: (packageName: string, folder: string) => Promise<void>) {
         const packages = utils.listPackages();
-        if (utils.verbose) debug('forEachPackage', packages.join());
+        if (utils.verbose) utils.debug('forEachPackage', packages.join());
         return Promise.all(packages.map((p) => {
-            if (utils.verbose) debug('forEachPackage');
             return fn(p.replace('-', '/'), [root, 'packages', p].join('/'));
         })).then(() => true);
     },
@@ -253,7 +252,7 @@ export const utils = {
                 }
             });
         return limiter;
-    }, 
+    },
     limiteAsync<T>(opts: { ms: number, bounce?: boolean, fn: () => Promise<T> }) {
         let tm: NodeJS.Timer | undefined;
         let ts = 0;
@@ -289,6 +288,12 @@ export const utils = {
                 }
             });
         return limiter;
+    },
+    debug(title: string, ...args: any[]) {
+        console.log(
+            wrap(title + ': ', "PURPLE", 'background') +
+            wrap(args.join(' '), "BLUE", 'background')
+        );
     }
 }
 const root = findRoot(process.cwd())
@@ -306,12 +311,6 @@ function findRoot(folder: string) {
     return ''
 }
 
-function debug(title: string, ...args: any[]) {
-    console.log(
-        wrap(title + ': ', "PURPLE", 'background') +
-        wrap(args.join(' '), "BLUE", 'background')
-    );
-}
 
 
 // function parseLines(data) {
