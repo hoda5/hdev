@@ -1,4 +1,7 @@
 declare module "bash-color" {
+    type Color = 'BLACK' | 'RED' | 'GREEN' | 'YELLOW' | 'BLUE' | 'PURPLE' | 'CYAN' | 'WHITE';
+    type Style = 'bold' | 'underline' | 'background' | 'hi_text' | 'hi_bold' | 'hi_background';
+
     function black(s: string, hi?: boolean): string;
     function red(s: string, hi?: boolean): string;
     function green(s: string, hi?: boolean): string;
@@ -7,4 +10,5 @@ declare module "bash-color" {
     function purple(s: string, hi?: boolean): string;
     function cyan(s: string, hi?: boolean): string;
     function white(s: string, hi?: boolean): string;
+    function wrap(s: string, color: Color, style: Style): string
 }

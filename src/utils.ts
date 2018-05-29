@@ -2,7 +2,7 @@ import { readdirSync, readFileSync, existsSync, watch } from "fs"
 import { dirname, basename, join } from "path"
 import { spawnSync } from "child_process"
 import * as pm2 from 'pm2';
-import { red, purple, blue } from "bash-color";
+import { wrap } from "bash-color";
 import * as stringify from "json-stringify-safe";
 
 export type PackageJSON = {
@@ -29,12 +29,41 @@ export interface SpawnedProcess {
 //     }
 // });
 
-const pm2_bus = new Promise<any>((resolve, reject) => {
-    pm2.launchBus((err, bus) => {
-        if (err) return reject(err);
-        resolve(bus);
-    });
-});
+const pm2_bus_ctrl = {
+    refs: 0,
+    p: null as any as Promise<any>,
+    get() {
+        if (pm2_bus_ctrl.p)
+            pm2_bus_ctrl.p = new Promise<any>((resolve, reject) => {
+                pm2.launchBus((err, bus) => {
+                    if (err) return reject(err);
+                    resolve(bus);
+                });
+            });
+        return pm2_bus_ctrl.p;
+    },
+    on(event: string, fn: (...args: any[]) => void) {
+        let t: any;
+        let closed = false;
+        pm2_bus_ctrl.get().then(
+            (b) => {
+                t = b.on(event, fn);
+                if (closed) t.close();
+            }
+        );
+        return {
+            close() {
+                if (t) {
+                    t.close();
+                    t = null;
+                }
+                closed = true;
+            }
+        }
+    }
+}
+
+
 
 export const utils = {
     verbose: false,
@@ -98,8 +127,8 @@ export const utils = {
     },
     exec(cmd: string, args: string[], opts: { cwd: string }) {
         console.log(
-            purple(opts.cwd + '$ ', true) +
-            blue(cmd + ' ' + args.join(' '), true)
+            wrap(opts.cwd + '$ ', "PURPLE", 'hi_background') +
+            wrap(cmd + ' ' + args.join(' '), "BLUE", 'hi_background') 
         );
         const r = spawnSync(
             cmd, args,
@@ -121,12 +150,10 @@ export const utils = {
 
         let t: any;
         if (opts.onLine)
-            pm2_bus.then((bus) => {
-                t = bus.on('log:out', function (d: any) {
-                    if (opts.onLine && d.process.name == opts.name) {
-                        opts.onLine(d.data, d.at);
-                    }
-                });
+            t = pm2_bus_ctrl.on('log:out', function (d: any) {
+                if (opts.onLine && d.process.name == opts.name) {
+                    opts.onLine(d.data, d.at);
+                }
             });
 
         let r: SpawnedProcess = {
@@ -191,7 +218,7 @@ function findRoot(folder: string) {
 
 function debug(title: string, ...args: any[]) {
     console.log(
-        red(title + ': ', true) +
-        blue(args.join(' '), false)
+        wrap(title + ': ', "PURPLE", 'background') +
+        wrap(args.join(' '), "BLUE", 'background') 
     );
 }

@@ -54,13 +54,39 @@ var bash_color_1 = require("bash-color");
 //         process.exit(2);
 //     }
 // });
-var pm2_bus = new Promise(function (resolve, reject) {
-    pm2.launchBus(function (err, bus) {
-        if (err)
-            return reject(err);
-        resolve(bus);
-    });
-});
+var pm2_bus_ctrl = {
+    refs: 0,
+    p: null,
+    get: function () {
+        if (pm2_bus_ctrl.p)
+            pm2_bus_ctrl.p = new Promise(function (resolve, reject) {
+                pm2.launchBus(function (err, bus) {
+                    if (err)
+                        return reject(err);
+                    resolve(bus);
+                });
+            });
+        return pm2_bus_ctrl.p;
+    },
+    on: function (event, fn) {
+        var t;
+        var closed = false;
+        pm2_bus_ctrl.get().then(function (b) {
+            t = b.on(event, fn);
+            if (closed)
+                t.close();
+        });
+        return {
+            close: function () {
+                if (t) {
+                    t.close();
+                    t = null;
+                }
+                closed = true;
+            }
+        };
+    }
+};
 exports.utils = {
     verbose: false,
     get root() {
@@ -123,8 +149,8 @@ exports.utils = {
         process.exit(1);
     },
     exec: function (cmd, args, opts) {
-        console.log(bash_color_1.purple(opts.cwd + '$ ', true) +
-            bash_color_1.blue(cmd + ' ' + args.join(' '), true));
+        console.log(bash_color_1.wrap(opts.cwd + '$ ', "PURPLE", 'hi_background') +
+            bash_color_1.wrap(cmd + ' ' + args.join(' '), "BLUE", 'hi_background'));
         var r = child_process_1.spawnSync(cmd, args, __assign({}, opts, { stdio: ['inherit', 'inherit', 'inherit'] }));
         if (r.status != 0)
             process.exit(1);
@@ -134,12 +160,10 @@ exports.utils = {
             var t, r;
             return __generator(this, function (_a) {
                 if (opts.onLine)
-                    pm2_bus.then(function (bus) {
-                        t = bus.on('log:out', function (d) {
-                            if (opts.onLine && d.process.name == opts.name) {
-                                opts.onLine(d.data, d.at);
-                            }
-                        });
+                    t = pm2_bus_ctrl.on('log:out', function (d) {
+                        if (opts.onLine && d.process.name == opts.name) {
+                            opts.onLine(d.data, d.at);
+                        }
                     });
                 r = {
                     get name() {
@@ -227,7 +251,7 @@ function debug(title) {
     for (var _i = 1; _i < arguments.length; _i++) {
         args[_i - 1] = arguments[_i];
     }
-    console.log(bash_color_1.red(title + ': ', true) +
-        bash_color_1.blue(args.join(' '), false));
+    console.log(bash_color_1.wrap(title + ': ', "PURPLE", 'background') +
+        bash_color_1.wrap(args.join(' '), "BLUE", 'background'));
 }
 //# sourceMappingURL=utils.js.map
