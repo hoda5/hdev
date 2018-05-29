@@ -38,7 +38,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var utils_1 = require("./utils");
 var buildTypeScript_1 = require("./build/buildTypeScript");
 var term_1 = require("./term");
-function cmd_watch(args) {
+function cmd_start(args) {
     return __awaiter(this, void 0, void 0, function () {
         var _this = this;
         var name, ok;
@@ -74,5 +74,5 @@ function cmd_watch(args) {
         });
     });
 }
-exports.cmd_watch = cmd_watch;
+exports.cmd_start = cmd_start;
 //# sourceMappingURL=cmd_watch.js.map

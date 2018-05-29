@@ -3,7 +3,7 @@ import { existsSync, readFileSync, writeFileSync } from "fs"
 import { watchTypeScript } from "./build/buildTypeScript"
 import { refreshTerm } from "./term";
 
-export async function cmd_watch(args: any): Promise<boolean> {
+export async function cmd_start(args: any): Promise<boolean> {
     const name: string = args.name;
     let ok = false;
     if (name) {

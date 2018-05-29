@@ -9,7 +9,7 @@ import { cmd_clone } from './cmd_clone';
 import { cmd_rm } from './cmd_rm';
 import { cmd_link } from './cmd_link';
 import { cmd_build } from './cmd_build';
-import { cmd_watch } from './cmd_watch';
+import { cmd_start } from './cmd_watch';
 import { utils } from './utils';
 import { wrap } from 'bash-color';
 
@@ -36,10 +36,9 @@ prog.command('build', 'build')
     .complete(completeWithPackageName)
     .action(cmd(cmd_build));
 
-prog.command('watch', 'constroi o/os pacotes')
-    .argument('[name]', 'Nome do pacote - se não tiver o nome constroi todos')
+prog.command('start', 'inicia o servidor de desenvolvimento')
     .complete(completeWithPackageName)
-    .action(cmd(cmd_watch));
+    .action(cmd(cmd_start));
 
 prog.command('login', 'configura login do git/github')
     .argument('<name>', 'Nome de usuario no servidor')

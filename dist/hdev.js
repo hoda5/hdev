@@ -64,10 +64,9 @@ prog.command('build', 'build')
     .argument('[name]', 'Nome do pacote - se não tiver o nome constroi todos')
     .complete(completeWithPackageName)
     .action(cmd(cmd_build_1.cmd_build));
-prog.command('watch', 'constroi o/os pacotes')
-    .argument('[name]', 'Nome do pacote - se não tiver o nome constroi todos')
+prog.command('start', 'inicia o servidor de desenvolvimento')
     .complete(completeWithPackageName)
-    .action(cmd(cmd_watch_1.cmd_watch));
+    .action(cmd(cmd_watch_1.cmd_start));
 prog.command('login', 'configura login do git/github')
     .argument('<name>', 'Nome de usuario no servidor')
     .argument('<email>', 'email')
