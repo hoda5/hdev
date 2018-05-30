@@ -72,13 +72,13 @@ exports.utils = {
                 r.push(f1);
             }
         });
+        if (exports.utils.verbose) {
+            exports.utils.debug('listPackages', r.join());
+        }
         return r;
     },
     forEachPackage: function (fn) {
         var packages = exports.utils.listPackages();
-        if (exports.utils.verbose) {
-            exports.utils.debug('forEachPackage', packages.join());
-        }
         return Promise.all(packages.map(function (p) {
             return fn(p, [root, 'packages', p].join('/'));
         })).then(function () { return true; });
@@ -359,8 +359,9 @@ exports.utils = {
             args[_i - 1] = arguments[_i];
         }
         // tslint:disable-next-line
-        console.log(bash_color_1.wrap(title + ': ', 'PURPLE', 'background') +
-            bash_color_1.wrap(JSON.stringify(args), 'BLUE', 'background'));
+        console.log([
+            bash_color_1.wrap(title + ': ', 'PURPLE', 'background')
+        ].concat(args.map(function (a) { return bash_color_1.wrap(JSON.stringify(a), 'BLUE', 'background'); })).join(' '));
     },
 };
 var root = findRoot(process.cwd());

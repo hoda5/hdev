@@ -7,7 +7,7 @@ function init_hdev_client(io) {
             location.reload();
         });
         io.on('hdev-refresh', function (content) {
-            element.textContent = content.join('\n');
+            element.textContent = JSON.stringify(content, null, 2);
         });
     });
 

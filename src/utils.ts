@@ -66,11 +66,11 @@ export const utils = {
         });
       } else { r.push(f1); }
     });
+    if (utils.verbose) { utils.debug('listPackages', r.join()); }
     return r;
   },
   forEachPackage(fn: (packageName: string, folder: string) => Promise<void>) {
     const packages = utils.listPackages();
-    if (utils.verbose) { utils.debug('forEachPackage', packages.join()); }
     return Promise.all(packages.map((p) => {
       return fn(p, [root, 'packages', p].join('/'));
     })).then(() => true);
@@ -318,8 +318,10 @@ export const utils = {
   debug(title: string, ...args: any[]) {
     // tslint:disable-next-line
     console.log(
-      wrap(title + ': ', 'PURPLE', 'background') +
-      wrap(JSON.stringify(args), 'BLUE', 'background'),
+      [
+        wrap(title + ': ', 'PURPLE', 'background'),
+        ...args.map( (a) => wrap(JSON.stringify(a), 'BLUE', 'background')),
+      ].join(' '),
     );
   },
 };

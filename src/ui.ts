@@ -7,7 +7,12 @@ import { utils } from './utils';
 import { listenWatchEvent, Watcher, watchers } from './watchers';
 
 export function initUi(logMode: boolean) {
-
+  interface ContentWeb {
+    building?: string[];
+    testing?: string[];
+    errors?: Watcher[];
+    warnings?: Watcher[];
+  }
   let screen: blessed.Widgets.Screen;
   let box: blessed.Widgets.TextboxElement;
   const web = initWEB();
@@ -32,20 +37,29 @@ export function initUi(logMode: boolean) {
       else if (w.errors.length) errors.push(w);
       else if (w.warnings.length) warnings.push(w);
     });
-    const content: string[] = [];
-    if (building.length) { content.push('Building: ' + building.join()); }
-    if (testing.length) { content.push('Testing: ' + testing.join()); }
+    const content_screen: string[] = [];
+    const content_web: ContentWeb = {};
+    if (building.length) {
+      content_screen.push('Building: ' + building.join());
+      content_web.building = building;
+    }
+    if (testing.length) {
+      content_screen.push('Testing: ' + testing.join());
+      content_web.testing = testing;
+    }
     if (errors.length) {
-      content.push('Error(s): ');
+      content_web.errors = errors;
+      content_screen.push('Error(s): ');
       errors.forEach((w) => {
         w.errors.forEach((m) => {
-          content.push([
-            m.file, ' ', w.packageName,
+          content_screen.push([
+            m.file,
             '(',
             m.row,
             ',',
             m.col,
-            '): ',
+            ') ',
+            w.packageName,
             '\n  ',
             m.msg,
           ].join(''));
@@ -53,17 +67,19 @@ export function initUi(logMode: boolean) {
       });
     }
     if (warnings.length) {
-      content.push('Warning(s):');
+      content_web.warnings = warnings;
+      content_screen.push('Warning(s):');
       if (errors.length === 0) {
         warnings.forEach((w) => {
           w.warnings.forEach((m) => {
-            content.push([
-              m.file, ' ', w.packageName,
+            content_screen.push([
+              m.file,
               '(',
               m.row,
               ',',
               m.col,
               ') ',
+              w.packageName,
               '\n  ',
               m.msg,
             ].join(''));
@@ -71,13 +87,13 @@ export function initUi(logMode: boolean) {
         });
       }
     }
-    if (content.length === 0) { content.push('watching'); }
-    web.refresh(content);
+    web.refresh(content_web);
+    if (content_screen.length === 0) { content_screen.push('watching'); }
     if (logMode) {
       // tslint:disable-next-line
-      console.log(content.join("\n"));
+      console.log(content_screen.join("\n"));
     } else {
-      box.content = ['hdev on port ' + web.port, '', ...content].join('\n');
+      box.content = ['hdev on port ' + web.port, '', ...content_screen].join('\n');
       box.focus();
       screen.render();
     }
@@ -153,7 +169,7 @@ export function initUi(logMode: boolean) {
       reload() {
         send('hdev-reload');
       },
-      refresh(content: string[]) {
+      refresh(content: ContentWeb) {
         send('hdev-refresh', content);
       },
     };

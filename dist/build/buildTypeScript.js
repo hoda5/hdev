@@ -54,7 +54,18 @@ function watchTypeScript(packageName) {
     return __awaiter(this, void 0, void 0, function () {
         function runTests() {
             return __awaiter(this, void 0, void 0, function () {
-                var pt;
+                function flushTest() {
+                    if (utils_1.utils.verbose)
+                        utils_1.utils.debug('flushTest', last);
+                    if (last) {
+                        delete last.parsing;
+                        if (/\.tsx?$/g.test(last.file)) {
+                            errors.push(last);
+                        }
+                    }
+                    last = undefined;
+                }
+                var pt, last;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
@@ -69,13 +80,64 @@ function watchTypeScript(packageName) {
                                 })];
                         case 2:
                             pt = _a.sent();
-                            // pt.on('line', (s)=>console.log(s));
+                            pt.on('line', function (s) {
+                                s = s.replace(/#\s+/g, '').trim();
+                                var mTestName = /not ok \d+\s*(.*)/g.exec(s);
+                                if (mTestName) {
+                                    flushTest();
+                                    last = {
+                                        msg: mTestName[1].replace('●', '').trim(),
+                                        expected: [], received: [], stack: [], file: '', row: 0, col: 0, parsing: '',
+                                    };
+                                }
+                                else if (last) {
+                                    if (last.parsing === '') {
+                                        if (/Expected:$/.test(s)) {
+                                            last.parsing = 'expected';
+                                            // } else {
+                                            //   if (s) last.msg = last.msg + s;
+                                        }
+                                    }
+                                    else if (last.parsing === 'expected') {
+                                        if (/Received:$/.test(s)) {
+                                            last.parsing = 'received';
+                                        }
+                                        else {
+                                            last.expected.push(s);
+                                        }
+                                    }
+                                    else if (last.parsing === 'received') {
+                                        if (/Stack:$/.test(s)) {
+                                            last.parsing = 'stack';
+                                        }
+                                        else {
+                                            last.received.push(s);
+                                        }
+                                    }
+                                    else if (last.parsing === 'stack') {
+                                        var ms = /at\s+(.*)$/.exec(s);
+                                        if (ms) {
+                                            var sp = ms[1];
+                                            last.stack.push(sp);
+                                            if (!last.file) {
+                                                var mf = sp.split(':');
+                                                last.file = mf[0];
+                                                last.row = parseInt(mf[1]);
+                                                last.col = parseInt(mf[2]);
+                                            }
+                                        }
+                                    }
+                                }
+                                // console.log(s)
+                            });
                             pt.on('exit', function () {
+                                flushTest();
                                 var summary = utils_1.utils.readCoverageSummary(packageName);
                                 testing = false;
                                 if (summary) {
-                                    coverage = Math.min(summary.lines.pct, summary.statements.pct, summary.functions.pct, summary.branches.pct);
-                                    if (coverage < 80) {
+                                    coverage = Math.round((summary.lines.pct + summary.statements.pct +
+                                        summary.functions.pct + summary.branches.pct) / 4);
+                                    if (coverage < 10) {
                                         errors.push({
                                             file: '?',
                                             row: 0, col: 0,

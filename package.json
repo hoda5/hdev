@@ -7,7 +7,7 @@
   },
   "scripts": {
     "watch": "tsc -w",
-    "test": "echo TODO && exit 0",
+    "test": "echo TODO && exit 1",
     "build": "tsc",
     "lint": "tslint --project tsconfig.json",
     "lintfix": "tslint --project tsconfig.json --fix"

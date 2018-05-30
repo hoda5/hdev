@@ -15,7 +15,7 @@ export async function cmd_start(args: any, opts: any): Promise<boolean> {
 async function start_no_service(logMode: boolean): Promise<boolean> {
   let ok = false;
   await utils.forEachPackage(async (pkg) => {
-    if (pkg !== '@hoda5-hdev') {
+    if (pkg !== '@hoda5/hdev') {
       if (await watchTypeScript(pkg)) {
         ok = true;
       }
@@ -30,7 +30,7 @@ async function start_no_service(logMode: boolean): Promise<boolean> {
 async function start_as_service(follow: boolean): Promise<boolean> {
 
   const isTempWS = __dirname === resolve(join(utils.root, '../dist'));
-  const wsHasHDEV = utils.listPackages().indexOf('@hoda5-hdev') >= 0;
+  const wsHasHDEV = utils.listPackages().indexOf('@hoda5/hdev') >= 0;
 
   if (wsHasHDEV) {
     // tslint:disable-next-line
@@ -48,8 +48,8 @@ async function start_as_service(follow: boolean): Promise<boolean> {
   });
 
   if (follow) {
-    await follow_service();
     await start_service();
+    await follow_service();
   } else {
     await start_service();
     setTimeout(() => process.exit(0), 2000);
@@ -67,7 +67,7 @@ async function start_as_service(follow: boolean): Promise<boolean> {
       if (utils.verbose) { args.push('--verbose'); }
       let script = process.argv[1];
       if (wsHasHDEV) {
-        script = utils.path('@hoda5-hdev', 'dist/hdev.js');
+        script = utils.path('@hoda5/hdev', 'dist/hdev.js');
       } else if (isTempWS) {
         script = resolve(join(utils.root, '../dist/hdev.js'));
       }
@@ -119,6 +119,8 @@ async function start_as_service(follow: boolean): Promise<boolean> {
   }
 
   async function watch_hdev_for_rebuild() {
+    if (utils.verbose) utils.debug('watch_hdev_for_rebuild');
+
     const p = await utils.spawn('npm', ['run', 'watch'], {
       cwd: resolve(join(__dirname, '..')),
       name: 'rebuild-hdev',
@@ -134,7 +136,9 @@ async function start_as_service(follow: boolean): Promise<boolean> {
       });
     });
   }
+
   async function watch_dist() {
+    if (utils.verbose) utils.debug('watch_dist');
     return new Promise((resolveWatch) => {
       const watcherDist = watch(__dirname);
       watcherDist.on('ready', () => {
@@ -145,9 +149,13 @@ async function start_as_service(follow: boolean): Promise<boolean> {
   }
 
   async function followLogs() {
+    if (utils.verbose) utils.debug('followLogs');
     return new Promise((resolveF, rejectF) => {
       launchBus((err, bus) => {
-        if (err) return rejectF(err);
+        if (err) {
+          if (utils.verbose) utils.debug('followLogs-reject ', err);
+          return rejectF(err);
+        }
         bus.on('log:out', (d: any) => {
           process.stdout.write(d.data);
         });
@@ -156,6 +164,7 @@ async function start_as_service(follow: boolean): Promise<boolean> {
           setTimeout(() => process.exit(0), 2000);
         });
         resolveF();
+        if (utils.verbose) utils.debug('followLogs-resolve');
       });
     });
   }

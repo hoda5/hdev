@@ -99,13 +99,68 @@ export async function watchTypeScript(packageName: string): Promise<Watcher | un
       name: procName + 'test',
       cwd: utils.path(packageName),
     });
-    // pt.on('line', (s)=>console.log(s));
+    let last: {
+      parsing?: string;
+      msg: string;
+      expected: string[];
+      received: string[];
+      stack: string[];
+      file: string;
+      row: number;
+      col: number;
+    } | undefined;
+    pt.on('line', (s) => {
+      s = s.replace(/#\s+/g, '').trim();
+      const mTestName = /not ok \d+\s*(.*)/g.exec(s);
+      if (mTestName) {
+        flushTest();
+        last = {
+          msg: mTestName[1].replace('●', '').trim(),
+          expected: [], received: [], stack: [], file: '', row: 0, col: 0, parsing: '',
+        };
+      } else if (last) {
+        if (last.parsing === '') {
+          if (/Expected:$/.test(s)) {
+            last.parsing = 'expected';
+            // } else {
+            //   if (s) last.msg = last.msg + s;
+          }
+        } else if (last.parsing === 'expected') {
+          if (/Received:$/.test(s)) {
+            last.parsing = 'received';
+          } else {
+            last.expected.push(s);
+          }
+        } else if (last.parsing === 'received') {
+          if (/Stack:$/.test(s)) {
+            last.parsing = 'stack';
+          } else {
+            last.received.push(s);
+          }
+        } else if (last.parsing === 'stack') {
+          const ms = /at\s+(.*)$/.exec(s);
+          if (ms) {
+            const sp = ms[1];
+            last.stack.push(sp);
+            if (!last.file) {
+              const mf = sp.split(':');
+              last.file = mf[0];
+              last.row = parseInt(mf[1]);
+              last.col = parseInt(mf[2]);
+            }
+          }
+        }
+      }
+      // console.log(s)
+    });
     pt.on('exit', () => {
+      flushTest();
       const summary = utils.readCoverageSummary(packageName);
       testing = false;
       if (summary) {
-        coverage = Math.min(summary.lines.pct, summary.statements.pct, summary.functions.pct, summary.branches.pct);
-        if (coverage < 80) {
+        coverage = Math.round((summary.lines.pct + summary.statements.pct +
+          summary.functions.pct + summary.branches.pct) / 4);
+        if (coverage < 10) {
           errors.push({
             file: '?',
             row: 0, col: 0,
@@ -122,6 +177,16 @@ export async function watchTypeScript(packageName: string): Promise<Watcher | un
       }
       if (events) { events.onFinished(watcher); }
     });
+    function flushTest() {
+      if (utils.verbose) utils.debug('flushTest', last);
+      if (last) {
+        delete last.parsing;
+        if (/\.tsx?$/g.test(last.file)) {
+          errors.push(last);
+        }
+      }
+      last = undefined;
+    }
   }
   async function abortTesting() {
     const old = procTest;

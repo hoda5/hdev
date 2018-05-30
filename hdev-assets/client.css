@@ -1,14 +1,12 @@
  
-h1 {
-    font-size: 16pt;
-    margin: 0px;
-}
-
-p {
-    margin: 0px;
-}
-
-canvas {
-    border: 1px solid black;
-    cursor: crosshair;
+#hdev {
+  position: absolute;
+  border: solid 1px black;
+  padding: 6px;
+  margin: 3px;
+  right: 0px;
+  bottom: 0px;
+  max-width: 30em;
+  max-height: 20em;
+  overflow: auto;
 }

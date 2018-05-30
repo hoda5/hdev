@@ -35,24 +35,29 @@ function initUi(logMode) {
             else if (w.warnings.length)
                 warnings.push(w);
         });
-        var content = [];
+        var content_screen = [];
+        var content_web = {};
         if (building.length) {
-            content.push('Building: ' + building.join());
+            content_screen.push('Building: ' + building.join());
+            content_web.building = building;
         }
         if (testing.length) {
-            content.push('Testing: ' + testing.join());
+            content_screen.push('Testing: ' + testing.join());
+            content_web.testing = testing;
         }
         if (errors.length) {
-            content.push('Error(s): ');
+            content_web.errors = errors;
+            content_screen.push('Error(s): ');
             errors.forEach(function (w) {
                 w.errors.forEach(function (m) {
-                    content.push([
-                        m.file, ' ', w.packageName,
+                    content_screen.push([
+                        m.file,
                         '(',
                         m.row,
                         ',',
                         m.col,
-                        '): ',
+                        ') ',
+                        w.packageName,
                         '\n  ',
                         m.msg,
                     ].join(''));
@@ -60,17 +65,19 @@ function initUi(logMode) {
             });
         }
         if (warnings.length) {
-            content.push('Warning(s):');
+            content_web.warnings = warnings;
+            content_screen.push('Warning(s):');
             if (errors.length === 0) {
                 warnings.forEach(function (w) {
                     w.warnings.forEach(function (m) {
-                        content.push([
-                            m.file, ' ', w.packageName,
+                        content_screen.push([
+                            m.file,
                             '(',
                             m.row,
                             ',',
                             m.col,
                             ') ',
+                            w.packageName,
                             '\n  ',
                             m.msg,
                         ].join(''));
@@ -78,16 +85,16 @@ function initUi(logMode) {
                 });
             }
         }
-        if (content.length === 0) {
-            content.push('watching');
+        web.refresh(content_web);
+        if (content_screen.length === 0) {
+            content_screen.push('watching');
         }
-        web.refresh(content);
         if (logMode) {
             // tslint:disable-next-line
-            console.log(content.join("\n"));
+            console.log(content_screen.join("\n"));
         }
         else {
-            box.content = ['hdev on port ' + web.port, ''].concat(content).join('\n');
+            box.content = ['hdev on port ' + web.port, ''].concat(content_screen).join('\n');
             box.focus();
             screen.render();
         }
