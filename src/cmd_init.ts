@@ -4,8 +4,10 @@ import { utils, WorkspaceFile } from "./utils"
 
 export async function cmd_init(): Promise<boolean> {
     const d = resolve(process.cwd());
-    if (readdirSync(d).length)
-        utils.throw("diretório não está vazio: "+d);
+    const ignore = ['.git'];
+    const dc = readdirSync(d).filter((f) => ignore.indexOf(f) == -1);
+    if (dc.length)
+        utils.throw('diretório ' + d + ' não está vazio.\n  ' + dc.join('\n  '));
     const w = d + '/' + basename(d) + '.code-workspace';
     if (!existsSync(w)) {
         const empty: WorkspaceFile = {

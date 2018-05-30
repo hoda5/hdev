@@ -313,8 +313,7 @@ function findRoot(folder: string) {
             return folder;
         }
         folder = dirname(folder);
-    }
-    utils.throw('no code-workspace file found')
+    }    
     return ''
 }
 

@@ -336,7 +336,6 @@ function findRoot(folder) {
         if (typeof state_1 === "object")
             return state_1.value;
     }
-    exports.utils.throw('no code-workspace file found');
     return '';
 }
 // function parseLines(data) {

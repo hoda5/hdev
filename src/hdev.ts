@@ -69,7 +69,7 @@ prog.command('login', 'configura login do git/github')
 
 prog.command('init', 'Inicializa na pasta atual como area de trabalho')
     .option('--subws', 'usado apenas para teste')
-    .action(cmd(cmd_init));
+    .action(cmd(cmd_init, false, false));
 
 prog.command('setup-completation', 'Configura para completar com tab')
     //.argument('<shell>', 'bash/zsh/fish', ['bash', 'zsh', 'fish'])
@@ -78,8 +78,10 @@ prog.command('setup-completation', 'Configura para completar com tab')
 prog.parse(process.argv);
 
 type ActionCallback = (args: any, options: any) => Promise<boolean>;
-function cmd(fn: ActionCallback, showrep = true) {
+function cmd(fn: ActionCallback, showrep = true, validrep = true) {
     return function (args: any, options: any) {
+        if (validrep && utils.root == '')
+            utils.throw('no code-workspace file found!');
         const l: any = prog.logger();
         const ts = l && l.transports;
         const cap = ts && ts.caporal;

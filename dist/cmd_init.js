@@ -40,11 +40,13 @@ var fs_1 = require("fs");
 var utils_1 = require("./utils");
 function cmd_init() {
     return __awaiter(this, void 0, void 0, function () {
-        var d, w, empty, p;
+        var d, ignore, dc, w, empty, p;
         return __generator(this, function (_a) {
             d = path_1.resolve(process.cwd());
-            if (fs_1.readdirSync(d).length)
-                utils_1.utils.throw("diretório não está vazio: " + d);
+            ignore = ['.git'];
+            dc = fs_1.readdirSync(d).filter(function (f) { return ignore.indexOf(f) == -1; });
+            if (dc.length)
+                utils_1.utils.throw('diretório ' + d + ' não está vazio.\n  ' + dc.join('\n  '));
             w = d + '/' + path_1.basename(d) + '.code-workspace';
             if (!fs_1.existsSync(w)) {
                 empty = {
