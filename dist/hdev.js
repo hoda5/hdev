@@ -48,6 +48,7 @@ var cmd_start_1 = require("./cmd_start");
 var utils_1 = require("./utils");
 var bash_color_1 = require("bash-color");
 var cmd_run_1 = require("./cmd_run");
+var cmd_setup_1 = require("./cmd_setup");
 prog.version('1.0.0');
 prog.command('status', 'Status dos repositorios')
     .argument('[name]', 'Nome do pacote')
@@ -62,9 +63,14 @@ prog.command('remove', 'Remove um repositorio')
     .complete(completeWithPackageName)
     .action(cmd(cmd_rm_1.cmd_rm));
 prog.command('build', 'build')
-    .argument('[name]', 'Nome do pacote - se não tiver o nome constroi todos')
+    .argument('<name>', 'Nome do pacote - se não tiver o nome constroi todos')
     .complete(completeWithPackageName)
     .action(cmd(cmd_build_1.cmd_build));
+prog.command('setup', 'setup')
+    .argument('<tipo>', 'tipo', ['typescript'])
+    .argument('<name>', 'Nome do pacote - se não tiver o nome constroi todos')
+    .complete(completeWithPackageName)
+    .action(cmd(cmd_setup_1.cmd_setup));
 prog.command('start', 'inicia o servidor de desenvolvimento')
     .option('--verbose', 'Modo deputação')
     .option('--log-mode', 'log mode')

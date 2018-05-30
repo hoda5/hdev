@@ -37,6 +37,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var utils_1 = require("../utils");
 var watchers_1 = require("../watchers");
+var fs_1 = require("fs");
 function buildTypeScript(name) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
@@ -208,6 +209,57 @@ function watchTypeScript(packageName) {
     });
 }
 exports.watchTypeScript = watchTypeScript;
+function setupTypeScript(name) {
+    return __awaiter(this, void 0, void 0, function () {
+        function ajust_packagejson() {
+            var packageJSON = utils_1.utils.getPackageJsonFor(name);
+            if (!packageJSON.scripts)
+                packageJSON.scripts = {};
+            packageJSON.scripts['build'] = 'tsc';
+            packageJSON.scripts['watch'] = 'tsc -w';
+            fs_1.writeFileSync(utils_1.utils.path(name, 'package.json'), JSON.stringify(packageJSON, null, 2), 'utf-8');
+        }
+        function save_tsconfig() {
+            fs_1.writeFileSync(utils_1.utils.path(name, 'tsconfig.json'), JSON.stringify({
+                "compilerOptions": {
+                    "target": "es5",
+                    "module": "commonjs",
+                    "moduleResolution": "node",
+                    "outDir": "dist",
+                    "sourceMap": true,
+                    "declaration": false,
+                    "strict": true,
+                    "lib": [
+                        "es2017",
+                    ]
+                },
+                "exclude": [
+                    "tmp"
+                ]
+            }, null, 2), 'utf-8');
+        }
+        function save_tslint() {
+            fs_1.writeFileSync(utils_1.utils.path(name, 'tslint.json'), JSON.stringify({
+                "extends": "tslint-config-standard"
+            }, null, 2), 'utf-8');
+        }
+        function install_pkgs() {
+            utils_1.utils.exec('npm', ['install', '--save-dev',
+                'typescript@latest',
+                'tslint@latest',
+                'tslint-config-standard@latest',
+            ], { cwd: utils_1.utils.path(name), title: '' });
+        }
+        return __generator(this, function (_a) {
+            ajust_packagejson();
+            save_tsconfig();
+            save_tslint();
+            install_pkgs();
+            return [2 /*return*/];
+        });
+    });
+}
+exports.setupTypeScript = setupTypeScript;
 // export async function buildTypeScript(name: string) {
 //     if (!utils.exists(name, 'tsconfig.json')) return;
 //     let allDiagnostics: Diagnostic[] = [];

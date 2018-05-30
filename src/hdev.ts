@@ -13,6 +13,7 @@ import { cmd_start } from './cmd_start';
 import { utils } from './utils';
 import { wrap } from 'bash-color';
 import { cmd_run } from './cmd_run';
+import { cmd_setup } from './cmd_setup';
 
 prog.version('1.0.0')
 
@@ -32,9 +33,15 @@ prog.command('remove', 'Remove um repositorio')
     .action(cmd(cmd_rm));
 
 prog.command('build', 'build')
-    .argument('[name]', 'Nome do pacote - se não tiver o nome constroi todos')
+    .argument('<name>', 'Nome do pacote - se não tiver o nome constroi todos')
     .complete(completeWithPackageName)
     .action(cmd(cmd_build));
+
+prog.command('setup', 'setup')
+    .argument('<tipo>', 'tipo', ['typescript'])
+    .argument('<name>', 'Nome do pacote - se não tiver o nome constroi todos')
+    .complete(completeWithPackageName)
+    .action(cmd(cmd_setup));
 
 prog.command('start', 'inicia o servidor de desenvolvimento')
     .option('--verbose', 'Modo deputação')

@@ -1,6 +1,6 @@
 import { utils, SpawnedProcess } from "../utils"
 import { addWatcher, Watcher, WatcherEvents, SrcMessage } from "../watchers"
-import { watch } from "fs";
+import { watch, writeFileSync } from "fs";
 
 export async function buildTypeScript(name: string) {
     if (!utils.exists(name, 'tsconfig.json')) return;
@@ -126,6 +126,55 @@ export async function watchTypeScript(packageName: string): Promise<Watcher | un
         if (old) {
             return await old.stop();
         }
+    }
+}
+
+export async function setupTypeScript(name: string) {
+    ajust_packagejson();
+    save_tsconfig();
+    save_tslint();
+    install_pkgs();
+    function ajust_packagejson() {
+        const packageJSON = utils.getPackageJsonFor(name);
+        if (!packageJSON.scripts)
+            packageJSON.scripts = {};
+        packageJSON.scripts['build'] = 'tsc';
+        packageJSON.scripts['watch'] = 'tsc -w';
+        writeFileSync(utils.path(name, 'package.json'),
+            JSON.stringify(packageJSON, null, 2), 'utf-8');
+    }
+    function save_tsconfig() {
+        writeFileSync(utils.path(name, 'tsconfig.json'),
+            JSON.stringify({
+                "compilerOptions": {
+                    "target": "es5",
+                    "module": "commonjs",
+                    "moduleResolution": "node",
+                    "outDir": "dist",
+                    "sourceMap": true,
+                    "declaration": false,
+                    "strict": true,
+                    "lib": [
+                        "es2017",
+                    ]
+                },
+                "exclude": [
+                    "tmp"
+                ]
+            }, null, 2), 'utf-8');
+    }
+    function save_tslint() {
+        writeFileSync(utils.path(name, 'tslint.json'),
+            JSON.stringify({
+                "extends": "tslint-config-standard"
+            }, null, 2), 'utf-8');
+    }
+    function install_pkgs() {
+        utils.exec('npm', ['install', '--save-dev',
+            'typescript@latest',
+            'tslint@latest',
+            'tslint-config-standard@latest',
+        ], { cwd: utils.path(name), title: '' });
     }
 }
 

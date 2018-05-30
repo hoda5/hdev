@@ -9,6 +9,9 @@ import { resolve } from "url";
 export type PackageJSON = {
     name: string;
     main: string;
+    scripts?: {
+        [name: string]: string;
+    },
     dependencies?: string[],
     devDependencies?: string[],
     peerDependencies?: string[],
