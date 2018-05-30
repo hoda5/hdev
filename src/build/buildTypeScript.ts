@@ -167,7 +167,7 @@ export async function setupTypeScript(name: string, withReact: boolean) {
       ],
       collectCoverage: true,
       coverageReporters: [
-        'json',
+        'json-summary',
         'lcov',
         'text',
       ],

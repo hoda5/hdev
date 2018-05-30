@@ -244,7 +244,7 @@ function setupTypeScript(name, withReact) {
                 ],
                 collectCoverage: true,
                 coverageReporters: [
-                    'json',
+                    'json-summary',
                     'lcov',
                     'text',
                 ],
