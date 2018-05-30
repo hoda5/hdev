@@ -1,4 +1,4 @@
-import { utils } from "./utils";
+import { utils } from './utils';
 
 export function cmd_link() {
   const allpackages: string[] = [];
@@ -8,12 +8,12 @@ export function cmd_link() {
   async function enable_link(packagName: string, folder: string) {
     allpackages.push(packagName);
     utils.exec(
-            "npm", [
-              "link",
+            'npm', [
+              'link',
             ],
       {
         cwd: folder,
-        title: "",
+        title: '',
       },
         );
   }
@@ -27,13 +27,13 @@ export function cmd_link() {
     ].map((dep) => {
       if (allpackages.indexOf(dep) >= 0) {
           utils.exec(
-                    "npm", [
-                      "link",
+                    'npm', [
+                      'link',
                       dep,
                     ],
               {
                 cwd: folder,
-                title: "",
+                title: '',
               },
                 );
         }

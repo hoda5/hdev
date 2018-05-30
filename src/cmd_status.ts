@@ -1,12 +1,12 @@
-import { utils } from "./utils";
+import { utils } from './utils';
 
 export async function cmd_status(args: any): Promise<boolean> {
   const name: string = args.name;
   let ok = false;
   if (name) {
     utils.exec(
-            "git", [
-              "status",
+            'git', [
+              'status',
             ],
       {
         cwd: utils.path(name),
@@ -17,10 +17,10 @@ export async function cmd_status(args: any): Promise<boolean> {
   } else {
     await utils.forEachPackage(async (pkg, folder) => {
       utils.exec(
-                "git", [
-                  "status",
-                  "-b",
-                  "--porcelain",
+                'git', [
+                  'status',
+                  '-b',
+                  '--porcelain',
                 ],
           {
             cwd: folder,
@@ -31,7 +31,7 @@ export async function cmd_status(args: any): Promise<boolean> {
     });
   }
   if (!ok) {
-    utils.throw("repositório vazio");
+    utils.throw('repositório vazio');
   }
   return ok;
 }

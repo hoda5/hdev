@@ -46,26 +46,26 @@ exports.utils = {
         return root;
     },
     get workspaceFile() {
-        var ws = path_1.join(root, path_1.basename(root) + ".code-workspace");
+        var ws = path_1.join(root, path_1.basename(root) + '.code-workspace');
         if (exports.utils.verbose)
-            exports.utils.debug("workspaceFile", ws);
+            exports.utils.debug('workspaceFile', ws);
         return ws;
     },
     displayFolderName: function (packageName) {
         var m = /(?:@([^\/]+))?\/(.*)$/g.exec(packageName);
-        return m ? (m[1] ? (m[2] + "@" + m[1]) : m[2]) : packageName;
+        return m ? (m[1] ? (m[2] + '@' + m[1]) : m[2]) : packageName;
     },
     listPackages: function () {
-        var dir = root + "/packages";
+        var dir = root + '/packages';
         if (!fs_1.existsSync(dir)) {
             return [];
         }
         var l1 = fs_1.readdirSync(dir);
         var r = [];
         l1.forEach(function (f1) {
-            if (f1[0] === "@") {
-                fs_1.readdirSync(dir + "/" + f1).forEach(function (f2) {
-                    r.push(f1 + "/" + f2);
+            if (f1[0] === '@') {
+                fs_1.readdirSync(dir + '/' + f1).forEach(function (f2) {
+                    r.push(f1 + '/' + f2);
                 });
             }
             else {
@@ -77,18 +77,18 @@ exports.utils = {
     forEachPackage: function (fn) {
         var packages = exports.utils.listPackages();
         if (exports.utils.verbose) {
-            exports.utils.debug("forEachPackage", packages.join());
+            exports.utils.debug('forEachPackage', packages.join());
         }
         return Promise.all(packages.map(function (p) {
-            return fn(p, [root, "packages", p].join("/"));
+            return fn(p, [root, 'packages', p].join('/'));
         })).then(function () { return true; });
     },
     getPackageJsonFor: function (packagName) {
-        var json = exports.utils.readJSON(packagName, "package.json");
+        var json = exports.utils.readJSON(packagName, 'package.json');
         if (json.name !== packagName) {
-            exports.utils.throw("Package name (" + packagName +
-                ") é diferente do que está em name do package.json (" +
-                json.name + ")");
+            exports.utils.throw('Package name (' + packagName +
+                ') é diferente do que está em name do package.json (' +
+                json.name + ')');
         }
         return json;
     },
@@ -97,7 +97,7 @@ exports.utils = {
         for (var _i = 1; _i < arguments.length; _i++) {
             names[_i - 1] = arguments[_i];
         }
-        return path_1.join.apply(void 0, [root, "packages", packageName].concat(names));
+        return path_1.join.apply(void 0, [root, 'packages', packageName].concat(names));
     },
     exists: function (packageName) {
         var names = [];
@@ -107,13 +107,13 @@ exports.utils = {
         return fs_1.existsSync(exports.utils.path.apply(exports.utils, [packageName].concat(names)));
     },
     readText: function (packageName, filename) {
-        return fs_1.readFileSync(exports.utils.path(packageName, filename), { encoding: "utf-8" });
+        return fs_1.readFileSync(exports.utils.path(packageName, filename), { encoding: 'utf-8' });
     },
     readJSON: function (packageName, filename) {
         return JSON.parse(exports.utils.readText(packageName, filename));
     },
     readCoverageSummary: function (packageName) {
-        var cov = "coverage/coverage-summary.json";
+        var cov = 'coverage/coverage-summary.json';
         if (exports.utils.exists(packageName, cov)) {
             var summary = exports.utils.readJSON(packageName, cov);
             return summary.total;
@@ -127,16 +127,16 @@ exports.utils = {
     exec: function (cmd, args, opts) {
         if (opts.title) {
             // tslint:disable-next-line
-            console.log(bash_color_1.wrap(opts.title, "RED", "background"));
+            console.log(bash_color_1.wrap(opts.title, 'RED', 'background'));
         }
         else {
             // tslint:disable-next-line
-            console.log(bash_color_1.wrap(opts.cwd + "$ ", "BLUE", "background") +
-                bash_color_1.wrap(cmd + " " + args.join(" "), "RED", "background"));
+            console.log(bash_color_1.wrap(opts.cwd + '$ ', 'BLUE', 'background') +
+                bash_color_1.wrap(cmd + ' ' + args.join(' '), 'RED', 'background'));
         }
         var r = child_process_1.spawnSync(cmd, args, {
             cwd: opts.cwd,
-            stdio: ["inherit", "inherit", "inherit"],
+            stdio: ['inherit', 'inherit', 'inherit'],
         });
         if (r.status !== 0) {
             process.exit(1);
@@ -150,23 +150,23 @@ exports.utils = {
                         var s1 = data.toString();
                         var lines;
                         if (exports.utils.verbose) {
-                            s1.split("\n").forEach(function (lo) {
+                            s1.split('\n').forEach(function (lo) {
                                 var ss2 = // lo.indexOf('\x1b[2K')>=0 ? '' :
                                  
                                 // lo.replace(/\u001b/g, '<ESC>');
-                                lo.replace(/\u001bc/g, "")
-                                    .replace(/\u001b\[\d{0,2}m/g, "");
+                                lo.replace(/\u001bc/g, '')
+                                    .replace(/\u001b\[\d{0,2}m/g, '');
                                 if (ss2.trim()) {
                                     // tslint:disable-next-line
-                                    console.log(bash_color_1.wrap(opts.name, "PURPLE", "background"), ss2);
+                                    console.log(bash_color_1.wrap(opts.name, 'PURPLE', 'background'), ss2);
                                 }
                             });
                         }
                         var s2 = s1
-                            .replace(/\u001bc/g, "")
-                            .replace(/\u001b\[\d{0,2}m/g, "");
-                        lines = s2.split("\n");
-                        lines.forEach(function (l) { return emitter.emit("line", l); });
+                            .replace(/\u001bc/g, '')
+                            .replace(/\u001b\[\d{0,2}m/g, '');
+                        lines = s2.split('\n');
+                        lines.forEach(function (l) { return emitter.emit('line', l); });
                     }
                     var spawnOpts;
                     return __generator(this, function (_a) {
@@ -176,18 +176,18 @@ exports.utils = {
                         };
                         if (exports.utils.verbose) {
                             // tslint:disable-next-line
-                            console.log(bash_color_1.wrap(opts.name, "PURPLE", "background"), bash_color_1.wrap(opts.cwd + "$ ", "BLUE", "background") +
-                                bash_color_1.wrap(" " + cmd + " " + args.join(" "), "RED", "background"));
+                            console.log(bash_color_1.wrap(opts.name, 'PURPLE', 'background'), bash_color_1.wrap(opts.cwd + '$ ', 'BLUE', 'background') +
+                                bash_color_1.wrap(' ' + cmd + ' ' + args.join(' '), 'RED', 'background'));
                         }
                         proc = child_process_1.spawn(cmd, args, spawnOpts);
-                        proc.stdout.on("data", parseLines);
-                        proc.stderr.on("data", parseLines);
-                        proc.on("exit", function (code) {
+                        proc.stdout.on('data', parseLines);
+                        proc.stderr.on('data', parseLines);
+                        proc.on('exit', function (code) {
                             if (exports.utils.verbose) {
                                 // tslint:disable-next-line
-                                console.log(bash_color_1.wrap(opts.name, "PURPLE", "background"), bash_color_1.wrap(" exit " + code, code === 0 ? "GREEN" : "RED", "background"));
+                                console.log(bash_color_1.wrap(opts.name, 'PURPLE', 'background'), bash_color_1.wrap(' exit ' + code, code === 0 ? 'GREEN' : 'RED', 'background'));
                             }
-                            emitter.emit("exit", code);
+                            emitter.emit('exit', code);
                         });
                         return [2 /*return*/, new Promise(function (resolve) {
                                 resolve(proc);
@@ -228,7 +228,7 @@ exports.utils = {
                                     return __generator(this, function (_a) {
                                         if (exports.utils.verbose) {
                                             // tslint:disable-next-line
-                                            console.log(bash_color_1.wrap(opts.name, "PURPLE", "background"), bash_color_1.wrap(" kill", "RED", "background"));
+                                            console.log(bash_color_1.wrap(opts.name, 'PURPLE', 'background'), bash_color_1.wrap(' kill', 'RED', 'background'));
                                         }
                                         proc.kill();
                                         return [2 /*return*/];
@@ -347,7 +347,7 @@ exports.utils = {
                     clearTimeout(tm);
                 }
                 tm = undefined;
-                defers.forEach(function (d) { return d.reject("cancel"); });
+                defers.forEach(function (d) { return d.reject('cancel'); });
                 defers = [];
             },
         });
@@ -359,26 +359,26 @@ exports.utils = {
             args[_i - 1] = arguments[_i];
         }
         // tslint:disable-next-line
-        console.log(bash_color_1.wrap(title + ": ", "PURPLE", "background") +
-            bash_color_1.wrap(JSON.stringify(args), "BLUE", "background"));
+        console.log(bash_color_1.wrap(title + ': ', 'PURPLE', 'background') +
+            bash_color_1.wrap(JSON.stringify(args), 'BLUE', 'background'));
     },
 };
 var root = findRoot(process.cwd());
 function findRoot(folder) {
     var _loop_1 = function () {
         var files = fs_1.readdirSync(folder);
-        var w = path_1.basename(folder) + ".code-workspace";
+        var w = path_1.basename(folder) + '.code-workspace';
         if (files.some(function (f) { return f === w; })) {
             return { value: folder };
         }
         folder = path_1.dirname(folder);
     };
-    while (folder && folder !== "/") {
+    while (folder && folder !== '/') {
         var state_1 = _loop_1();
         if (typeof state_1 === "object")
             return state_1.value;
     }
-    return "";
+    return '';
 }
 // function parseLines(data) {
 //     buffer = [buffer, data.toString()].join('');

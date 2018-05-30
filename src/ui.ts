@@ -1,10 +1,10 @@
-import * as blessed from "blessed";
-import * as express from "express";
-import * as http from "http";
-import { resolve } from "path";
-import * as socketIO from "socket.io";
-import { utils } from "./utils";
-import { listenWatchEvent, Watcher, watchers } from "./watchers";
+import * as blessed from 'blessed';
+import * as express from 'express';
+import * as http from 'http';
+import { resolve } from 'path';
+import * as socketIO from 'socket.io';
+import { utils } from './utils';
+import { listenWatchEvent, Watcher, watchers } from './watchers';
 
 export function initUi(logMode: boolean) {
 
@@ -16,10 +16,10 @@ export function initUi(logMode: boolean) {
 
   const refresh = utils.limiteSync({ ms: 200, fn: no_limited_refresh });
 
-  listenWatchEvent("building", refresh);
-  listenWatchEvent("testing", refresh);
-  listenWatchEvent("finished", refresh);
-  listenWatchEvent("reload", reload);
+  listenWatchEvent('building', refresh);
+  listenWatchEvent('testing', refresh);
+  listenWatchEvent('finished', refresh);
+  listenWatchEvent('reload', reload);
 
   function no_limited_refresh() {
     const building: string[] = [];
@@ -33,51 +33,51 @@ export function initUi(logMode: boolean) {
       else if (w.warnings.length) warnings.push(w);
     });
     const content: string[] = [];
-    if (building.length) { content.push("Building: " + building.join()); }
-    if (testing.length) { content.push("Testing: " + testing.join()); }
+    if (building.length) { content.push('Building: ' + building.join()); }
+    if (testing.length) { content.push('Testing: ' + testing.join()); }
     if (errors.length) {
-      content.push("Error(s): ");
+      content.push('Error(s): ');
       errors.forEach((w) => {
         w.errors.forEach((m) => {
           content.push([
-            m.file, " ", w.packageName,
-            "(",
+            m.file, ' ', w.packageName,
+            '(',
             m.row,
-            ",",
+            ',',
             m.col,
-            "): ",
-            "\n  ",
+            '): ',
+            '\n  ',
             m.msg,
-          ].join(""));
+          ].join(''));
         });
       });
     }
     if (warnings.length) {
-      content.push("Warning(s):");
+      content.push('Warning(s):');
       if (errors.length === 0) {
         warnings.forEach((w) => {
           w.warnings.forEach((m) => {
             content.push([
-              m.file, " ", w.packageName,
-              "(",
+              m.file, ' ', w.packageName,
+              '(',
               m.row,
-              ",",
+              ',',
               m.col,
-              ") ",
-              "\n  ",
+              ') ',
+              '\n  ',
               m.msg,
-            ].join(""));
+            ].join(''));
           });
         });
       }
     }
-    if (content.length === 0) { content.push("watching"); }
+    if (content.length === 0) { content.push('watching'); }
     web.refresh(content);
     if (logMode) {
       // tslint:disable-next-line
       console.log(content.join("\n"));
     } else {
-      box.content = ["hdev on port " + web.port, "", ...content].join("\n");
+      box.content = ['hdev on port ' + web.port, '', ...content].join('\n');
       box.focus();
       screen.render();
     }
@@ -90,29 +90,29 @@ export function initUi(logMode: boolean) {
       smartCSR: true,
     });
 
-    screen.title = "hdev";
+    screen.title = 'hdev';
 
-    screen.key(["escape", "q", "C-c"], () => {
+    screen.key(['escape', 'q', 'C-c'], () => {
       return utils.exit(0);
     });
 
     box = blessed.textbox({
-      top: "center",
-      left: "center",
-      width: "100%",
-      height: "100%",
-      content: "HDEV",
+      top: 'center',
+      left: 'center',
+      width: '100%',
+      height: '100%',
+      content: 'HDEV',
       tags: true,
       border: {
-        type: "line",
+        type: 'line',
       },
       keys: true,
       vi: true,
       style: {
-        fg: "white",
-        bg: "black",
+        fg: 'white',
+        bg: 'black',
         border: {
-          fg: "#f0f0f0",
+          fg: '#f0f0f0',
         },
         // hover: {
         //     bg: 'green'
@@ -127,7 +127,7 @@ export function initUi(logMode: boolean) {
 
     const app = express();
     const httpServer = new http.Server(app);
-    const assetsDir = resolve(__dirname, "../hdev-assets");
+    const assetsDir = resolve(__dirname, '../hdev-assets');
 
     const sio = socketIO(httpServer);
 
@@ -143,22 +143,22 @@ export function initUi(logMode: boolean) {
     //     next();
     // });
 
-    sio.on("connection", (socket) => {
-      socket.join("hdev-v1");
+    sio.on('connection', (socket) => {
+      socket.join('hdev-v1');
       refresh();
     });
 
     return {
       port,
       reload() {
-        send("hdev-reload");
+        send('hdev-reload');
       },
       refresh(content: string[]) {
-        send("hdev-refresh", content);
+        send('hdev-refresh', content);
       },
     };
     function send(event: string, ...args: any[]) {
-      sio.to("hdev-v1").emit(event, ...args);
+      sio.to('hdev-v1').emit(event, ...args);
     }
   }
 }

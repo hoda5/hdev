@@ -1,6 +1,6 @@
 
-import { buildTypeScript } from "./build/buildTypeScript";
-import { utils } from "./utils";
+import { buildTypeScript } from './build/buildTypeScript';
+import { utils } from './utils';
 
 export async function cmd_build(args: any): Promise<boolean> {
   const name: string = args.name;

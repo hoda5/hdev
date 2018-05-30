@@ -43,49 +43,49 @@ function cmd_clone(args) {
         return __generator(this, function (_a) {
             url = args.url;
             packageName = args.name;
-            if (url[0] === "@") {
-                url = "https://github.com/" + url.substr(1) + ".git";
+            if (url[0] === '@') {
+                url = 'https://github.com/' + url.substr(1) + '.git';
             }
             if (!/^(http?|git).*\/.*\.git$/g.test(url)) {
-                utils_1.utils.throw("invalid url");
+                utils_1.utils.throw('invalid url');
             }
             if (!packageName) {
                 m = /([^/]*)\/([^/]*)\.git$/g.exec(url);
                 if (m) {
-                    if (m[1] === "hoda5") {
-                        packageName = "@hoda5/" + m[2];
+                    if (m[1] === 'hoda5') {
+                        packageName = '@hoda5/' + m[2];
                     }
                     else {
                         packageName = m[2];
                     }
                 }
                 else {
-                    utils_1.utils.throw("invalid name");
+                    utils_1.utils.throw('invalid name');
                 }
             }
-            utils_1.utils.exec("git", [
-                "submodule",
-                "add",
-                "--force",
+            utils_1.utils.exec('git', [
+                'submodule',
+                'add',
+                '--force',
                 url,
                 packageName,
             ], {
-                cwd: utils_1.utils.root + "/packages",
-                title: "",
+                cwd: utils_1.utils.root + '/packages',
+                title: '',
             });
             utils_1.utils.getPackageJsonFor(packageName);
             w = utils_1.utils.workspaceFile;
-            wf = fs_1.existsSync(w) ? JSON.parse(fs_1.readFileSync(w, "utf-8")) : {
+            wf = fs_1.existsSync(w) ? JSON.parse(fs_1.readFileSync(w, 'utf-8')) : {
                 folders: [],
                 settings: {},
             };
-            wf.folders.push({ path: "packages/" + packageName });
-            fs_1.writeFileSync(w, JSON.stringify(wf, null, 2), "utf-8");
-            utils_1.utils.exec("npm", [
-                "install",
+            wf.folders.push({ path: 'packages/' + packageName });
+            fs_1.writeFileSync(w, JSON.stringify(wf, null, 2), 'utf-8');
+            utils_1.utils.exec('npm', [
+                'install',
             ], {
-                cwd: utils_1.utils.root + "/packages/" + packageName,
-                title: "",
+                cwd: utils_1.utils.root + '/packages/' + packageName,
+                title: '',
             });
             return [2 /*return*/, true];
         });

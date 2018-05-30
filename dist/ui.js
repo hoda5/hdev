@@ -15,10 +15,10 @@ function initUi(logMode) {
         initBox();
     }
     var refresh = utils_1.utils.limiteSync({ ms: 200, fn: no_limited_refresh });
-    watchers_1.listenWatchEvent("building", refresh);
-    watchers_1.listenWatchEvent("testing", refresh);
-    watchers_1.listenWatchEvent("finished", refresh);
-    watchers_1.listenWatchEvent("reload", reload);
+    watchers_1.listenWatchEvent('building', refresh);
+    watchers_1.listenWatchEvent('testing', refresh);
+    watchers_1.listenWatchEvent('finished', refresh);
+    watchers_1.listenWatchEvent('reload', reload);
     function no_limited_refresh() {
         var building = [];
         var testing = [];
@@ -37,49 +37,49 @@ function initUi(logMode) {
         });
         var content = [];
         if (building.length) {
-            content.push("Building: " + building.join());
+            content.push('Building: ' + building.join());
         }
         if (testing.length) {
-            content.push("Testing: " + testing.join());
+            content.push('Testing: ' + testing.join());
         }
         if (errors.length) {
-            content.push("Error(s): ");
+            content.push('Error(s): ');
             errors.forEach(function (w) {
                 w.errors.forEach(function (m) {
                     content.push([
-                        m.file, " ", w.packageName,
-                        "(",
+                        m.file, ' ', w.packageName,
+                        '(',
                         m.row,
-                        ",",
+                        ',',
                         m.col,
-                        "): ",
-                        "\n  ",
+                        '): ',
+                        '\n  ',
                         m.msg,
-                    ].join(""));
+                    ].join(''));
                 });
             });
         }
         if (warnings.length) {
-            content.push("Warning(s):");
+            content.push('Warning(s):');
             if (errors.length === 0) {
                 warnings.forEach(function (w) {
                     w.warnings.forEach(function (m) {
                         content.push([
-                            m.file, " ", w.packageName,
-                            "(",
+                            m.file, ' ', w.packageName,
+                            '(',
                             m.row,
-                            ",",
+                            ',',
                             m.col,
-                            ") ",
-                            "\n  ",
+                            ') ',
+                            '\n  ',
                             m.msg,
-                        ].join(""));
+                        ].join(''));
                     });
                 });
             }
         }
         if (content.length === 0) {
-            content.push("watching");
+            content.push('watching');
         }
         web.refresh(content);
         if (logMode) {
@@ -87,7 +87,7 @@ function initUi(logMode) {
             console.log(content.join("\n"));
         }
         else {
-            box.content = ["hdev on port " + web.port, ""].concat(content).join("\n");
+            box.content = ['hdev on port ' + web.port, ''].concat(content).join('\n');
             box.focus();
             screen.render();
         }
@@ -99,27 +99,27 @@ function initUi(logMode) {
         screen = blessed.screen({
             smartCSR: true,
         });
-        screen.title = "hdev";
-        screen.key(["escape", "q", "C-c"], function () {
+        screen.title = 'hdev';
+        screen.key(['escape', 'q', 'C-c'], function () {
             return utils_1.utils.exit(0);
         });
         box = blessed.textbox({
-            top: "center",
-            left: "center",
-            width: "100%",
-            height: "100%",
-            content: "HDEV",
+            top: 'center',
+            left: 'center',
+            width: '100%',
+            height: '100%',
+            content: 'HDEV',
             tags: true,
             border: {
-                type: "line",
+                type: 'line',
             },
             keys: true,
             vi: true,
             style: {
-                fg: "white",
-                bg: "black",
+                fg: 'white',
+                bg: 'black',
                 border: {
-                    fg: "#f0f0f0",
+                    fg: '#f0f0f0',
                 },
             },
         });
@@ -129,7 +129,7 @@ function initUi(logMode) {
         var port = process.env.PORT ? parseInt(process.env.PORT) : 7777;
         var app = express();
         var httpServer = new http.Server(app);
-        var assetsDir = path_1.resolve(__dirname, "../hdev-assets");
+        var assetsDir = path_1.resolve(__dirname, '../hdev-assets');
         var sio = socketIO(httpServer);
         httpServer.listen(port, function () {
             // tslint:disable-next-line
@@ -140,17 +140,17 @@ function initUi(logMode) {
         //     console.dir({ dn: __dirname, dir: assets_dir, url: req.url });
         //     next();
         // });
-        sio.on("connection", function (socket) {
-            socket.join("hdev-v1");
+        sio.on('connection', function (socket) {
+            socket.join('hdev-v1');
             refresh();
         });
         return {
             port: port,
             reload: function () {
-                send("hdev-reload");
+                send('hdev-reload');
             },
             refresh: function (content) {
-                send("hdev-refresh", content);
+                send('hdev-refresh', content);
             },
         };
         function send(event) {
@@ -158,7 +158,7 @@ function initUi(logMode) {
             for (var _i = 1; _i < arguments.length; _i++) {
                 args[_i - 1] = arguments[_i];
             }
-            (_a = sio.to("hdev-v1")).emit.apply(_a, [event].concat(args));
+            (_a = sio.to('hdev-v1')).emit.apply(_a, [event].concat(args));
             var _a;
         }
     }

@@ -12,6 +12,7 @@
       "ignore-same-line"
     ],
     "space-before-function-paren": false,
-    "radix": false
+    "radix": false,
+    "quotemark": [true, "single", "avoid-escape", "avoid-template"]
   }
 }

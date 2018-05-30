@@ -43,26 +43,26 @@ function cmd_init() {
         var d, ignore, dc, w, empty, p;
         return __generator(this, function (_a) {
             d = path_1.resolve(process.cwd());
-            ignore = [".git"];
+            ignore = ['.git'];
             dc = fs_1.readdirSync(d).filter(function (f) { return ignore.indexOf(f) === -1; });
             if (dc.length) {
-                utils_1.utils.throw("diretório " + d + " não está vazio.\n  " + dc.join("\n  "));
+                utils_1.utils.throw('diretório ' + d + ' não está vazio.\n  ' + dc.join('\n  '));
             }
-            w = d + "/" + path_1.basename(d) + ".code-workspace";
+            w = d + '/' + path_1.basename(d) + '.code-workspace';
             if (!fs_1.existsSync(w)) {
                 empty = {
                     folders: [],
                     settings: {},
                 };
-                fs_1.writeFileSync(w, JSON.stringify(empty, null, 2), "utf-8");
+                fs_1.writeFileSync(w, JSON.stringify(empty, null, 2), 'utf-8');
             }
             // tslint:disable-next-line
             console.log("inicializado: " + w);
-            p = d + "/packages";
+            p = d + '/packages';
             if (!fs_1.existsSync(p)) {
                 fs_1.mkdirSync(p);
             }
-            utils_1.utils.exec("git", ["init"], { cwd: process.cwd(), title: "" });
+            utils_1.utils.exec('git', ['init'], { cwd: process.cwd(), title: '' });
             return [2 /*return*/, true];
         });
     });

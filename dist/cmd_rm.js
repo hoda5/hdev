@@ -42,20 +42,20 @@ function cmd_rm(args) {
         var packageName, w, wf, path_1;
         return __generator(this, function (_a) {
             packageName = args.name;
-            utils_1.utils.exec("git", [
-                "rm",
-                "-f",
+            utils_1.utils.exec('git', [
+                'rm',
+                '-f',
                 packageName,
             ], {
-                cwd: utils_1.utils.root + "/packages",
-                title: "",
+                cwd: utils_1.utils.root + '/packages',
+                title: '',
             });
             w = utils_1.utils.workspaceFile;
             if (fs_1.existsSync(w)) {
-                wf = JSON.parse(fs_1.readFileSync(w, "utf-8"));
-                path_1 = "packages/" + packageName;
+                wf = JSON.parse(fs_1.readFileSync(w, 'utf-8'));
+                path_1 = 'packages/' + packageName;
                 wf.folders = wf.folders.filter(function (f) { return f.path !== path_1; });
-                fs_1.writeFileSync(w, JSON.stringify(wf, null, 2), "utf-8");
+                fs_1.writeFileSync(w, JSON.stringify(wf, null, 2), 'utf-8');
             }
             return [2 /*return*/, true];
         });

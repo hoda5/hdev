@@ -42,9 +42,9 @@ var path_1 = require("path");
 function buildTypeScript(name) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
-            if (!utils_1.utils.exists(name, "tsconfig.json"))
+            if (!utils_1.utils.exists(name, 'tsconfig.json'))
                 return [2 /*return*/];
-            utils_1.utils.exec("npm", ["run", "build"], { cwd: utils_1.utils.path(name), title: "building: " + name });
+            utils_1.utils.exec('npm', ['run', 'build'], { cwd: utils_1.utils.path(name), title: 'building: ' + name });
             return [2 /*return*/];
         });
     });
@@ -63,32 +63,32 @@ function watchTypeScript(packageName) {
                         case 1:
                             _a.sent();
                             testing = true;
-                            return [4 /*yield*/, utils_1.utils.spawn("npm", ["test"], {
-                                    name: procName + "test",
+                            return [4 /*yield*/, utils_1.utils.spawn('npm', ['test'], {
+                                    name: procName + 'test',
                                     cwd: utils_1.utils.path(packageName),
                                 })];
                         case 2:
                             pt = _a.sent();
                             // pt.on('line', (s)=>console.log(s));
-                            pt.on("exit", function () {
+                            pt.on('exit', function () {
                                 var summary = utils_1.utils.readCoverageSummary(packageName);
                                 testing = false;
                                 if (summary) {
                                     coverage = Math.min(summary.lines.pct, summary.statements.pct, summary.functions.pct, summary.branches.pct);
                                     if (coverage < 80) {
                                         errors.push({
-                                            file: "?",
+                                            file: '?',
                                             row: 0, col: 0,
-                                            msg: ["Cobertura do código por testes está abaixo de ", coverage, "%"].join(""),
+                                            msg: ['Cobertura do código por testes está abaixo de ', coverage, '%'].join(''),
                                         });
                                     }
                                 }
                                 else {
                                     coverage = undefined;
                                     errors.push({
-                                        file: "?",
+                                        file: '?',
                                         row: 0, col: 0,
-                                        msg: "Teste não gerou relatório de cobertura de código",
+                                        msg: 'Teste não gerou relatório de cobertura de código',
                                     });
                                 }
                                 if (events) {
@@ -118,24 +118,24 @@ function watchTypeScript(packageName) {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    if (packageName === "@hoda5/hdev")
+                    if (packageName === '@hoda5/hdev')
                         return [2 /*return*/];
                     if (utils_1.utils.verbose)
-                        utils_1.utils.debug("watchTypeScript", packageName);
-                    if (!utils_1.utils.exists(packageName, "tsconfig.json"))
+                        utils_1.utils.debug('watchTypeScript', packageName);
+                    if (!utils_1.utils.exists(packageName, 'tsconfig.json'))
                         return [2 /*return*/];
                     warnings = [];
                     errors = [];
                     building = false;
                     testing = false;
-                    procName = "ts_" + utils_1.utils.displayFolderName(packageName);
-                    return [4 /*yield*/, utils_1.utils.spawn("npm", ["run", "watch"], {
+                    procName = 'ts_' + utils_1.utils.displayFolderName(packageName);
+                    return [4 /*yield*/, utils_1.utils.spawn('npm', ['run', 'watch'], {
                             name: procName,
                             cwd: utils_1.utils.path(packageName),
                         })];
                 case 1:
                     procBuild = _a.sent();
-                    procBuild.on("line", function (line) {
+                    procBuild.on('line', function (line) {
                         if (/Starting .*compilation/g.test(line)) {
                             warnings = [];
                             errors = [];
@@ -157,7 +157,7 @@ function watchTypeScript(packageName) {
                             if (m) {
                                 var type = m[4];
                                 if (/(TS6192)|(TS6133)/.test(m[6])) {
-                                    type = "warning";
+                                    type = 'warning';
                                 }
                                 var msg = {
                                     file: m[1],
@@ -165,7 +165,7 @@ function watchTypeScript(packageName) {
                                     col: parseInt(m[3]),
                                     msg: m[6] + m[5],
                                 };
-                                if (type === "warning")
+                                if (type === 'warning')
                                     warnings.push(msg);
                                 else
                                     errors.push(msg);
@@ -201,7 +201,7 @@ function watchTypeScript(packageName) {
                         },
                         stop: function () {
                             warnings = [];
-                            errors = [{ file: "", row: 0, col: 0, msg: "stopped" }];
+                            errors = [{ file: '', row: 0, col: 0, msg: 'stopped' }];
                             return procBuild.stop();
                         },
                     };
@@ -219,42 +219,69 @@ function setupTypeScript(name, withReact) {
             if (!packageJSON.scripts) {
                 packageJSON.scripts = {};
             }
-            packageJSON.scripts.build = "tsc";
-            packageJSON.scripts.watch = "tsc -w";
-            packageJSON.scripts.lint = "tslint --project .";
-            packageJSON.scripts.lintfix = "tslint --project . --fix";
+            packageJSON.scripts.build = 'tsc';
+            packageJSON.scripts.watch = 'tsc -w';
+            packageJSON.scripts.lint = 'tslint --project .';
+            packageJSON.scripts.lintfix = 'tslint --project . --fix';
             if (packageJSON.dependencies && packageJSON.dependencies.react)
                 withReact = true;
-            fs_1.writeFileSync(utils_1.utils.path(name, "package.json"), JSON.stringify(packageJSON, null, 2), "utf-8");
+            packageJSON.jest = {
+                transform: {
+                    '^.+\\.tsx?$': 'ts-jest',
+                },
+                testRegex: '(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$',
+                moduleFileExtensions: [
+                    'ts',
+                    'tsx',
+                    'js',
+                    'jsx',
+                    'json',
+                    'node',
+                ],
+                coveragePathIgnorePatterns: [
+                    '/node_modules/',
+                    '/dist/',
+                ],
+                collectCoverage: true,
+                coverageReporters: [
+                    'json',
+                    'lcov',
+                    'text',
+                ],
+            };
+            fs_1.writeFileSync(utils_1.utils.path(name, 'package.json'), JSON.stringify(packageJSON, null, 2), 'utf-8');
         }
         function save_tsconfig() {
-            var tsconfig = JSON.parse(fs_1.readFileSync(path_1.resolve(path_1.join(__dirname, "../../tsconfig.json")), "utf-8"));
+            var tsconfig = JSON.parse(fs_1.readFileSync(path_1.resolve(path_1.join(__dirname, '../../tsconfig.json')), 'utf-8'));
             if (withReact)
-                tsconfig.compilerOptions.lib.push("dom");
-            fs_1.writeFileSync(utils_1.utils.path(name, "tsconfig.json"), JSON.stringify(tsconfig, null, 2), "utf-8");
+                tsconfig.compilerOptions.lib.push('dom');
+            fs_1.writeFileSync(utils_1.utils.path(name, 'tsconfig.json'), JSON.stringify(tsconfig, null, 2), 'utf-8');
         }
         function save_tslint() {
-            var tslint = JSON.parse(fs_1.readFileSync(path_1.resolve(path_1.join(__dirname, "../../tslint.json")), "utf-8"));
-            fs_1.writeFileSync(utils_1.utils.path(name, "tslint.json"), JSON.stringify(tslint, null, 2), "utf-8");
+            var tslint = JSON.parse(fs_1.readFileSync(path_1.resolve(path_1.join(__dirname, '../../tslint.json')), 'utf-8'));
+            fs_1.writeFileSync(utils_1.utils.path(name, 'tslint.json'), JSON.stringify(tslint, null, 2), 'utf-8');
         }
         function install_pkgs() {
             var argsDeps = [];
             if (!/^@hoda5\/(hdev|h5global)$/g.test(name)) {
-                argsDeps.push("@hoda5/h5global@latest");
+                argsDeps.push('@hoda5/h5global@latest');
             }
             var argsDevs = [
-                "typescript@latest",
-                "tslint@latest",
+                'typescript@latest',
+                'tslint@latest',
+                'jest@latest',
+                'ts-jest@latest',
+                '@types/jest@latest',
             ];
             if (withReact) {
-                argsDeps.push("react@latest");
-                argsDevs.push("@types/react@latest");
+                argsDeps.push('react@latest');
+                argsDevs.push('@types/react@latest');
             }
             if (argsDeps.length) {
-                utils_1.utils.exec("npm", ["install", "--save"].concat(argsDeps), { cwd: utils_1.utils.path(name), title: "" });
+                utils_1.utils.exec('npm', ['install', '--save'].concat(argsDeps), { cwd: utils_1.utils.path(name), title: '' });
             }
             if (argsDevs.length) {
-                utils_1.utils.exec("npm", ["install", "--save-dev"].concat(argsDevs), { cwd: utils_1.utils.path(name), title: "" });
+                utils_1.utils.exec('npm', ['install', '--save-dev'].concat(argsDevs), { cwd: utils_1.utils.path(name), title: '' });
             }
         }
         return __generator(this, function (_a) {

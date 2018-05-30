@@ -1,5 +1,5 @@
-import { EventEmitter } from "events";
-import { utils } from "./utils";
+import { EventEmitter } from 'events';
+import { utils } from './utils';
 export interface Watcher {
   readonly packageName: string;
   readonly building: boolean;
@@ -21,15 +21,15 @@ export const watchers: Watcher[] = [];
 export const watchEmitter = new EventEmitter();
 
 export function listenWatchEvent(
-  event: "building" | "testing" | "finished", listenner: (watcher: Watcher) => void): void;
-export function listenWatchEvent(event: "reload", listenner: () => void): void;
+  event: 'building' | 'testing' | 'finished', listenner: (watcher: Watcher) => void): void;
+export function listenWatchEvent(event: 'reload', listenner: () => void): void;
 export function listenWatchEvent(event: string, listenner: (...args: any[]) => void): void {
   watchEmitter.on(event, listenner);
 }
 
 export function unlistenWatchEvent(
-  event: "building" | "testing" | "finished", listenner: (watcher: Watcher) => void): void;
-export function unlistenWatchEvent(event: "reload", listenner: () => void): void;
+  event: 'building' | 'testing' | 'finished', listenner: (watcher: Watcher) => void): void;
+export function unlistenWatchEvent(event: 'reload', listenner: () => void): void;
 export function unlistenWatchEvent(event: string, listenner: (...args: any[]) => void): void {
   watchEmitter.removeListener(event, listenner);
 }
@@ -42,23 +42,23 @@ export interface WatcherEvents {
 
 function onBuilding(watcher: Watcher) {
   onReload.cancel();
-  watchEmitter.emit("building", watcher);
+  watchEmitter.emit('building', watcher);
 }
 
 function onTesting(watcher: Watcher) {
-  watchEmitter.emit("testing", watcher);
+  watchEmitter.emit('testing', watcher);
   onReload();
 }
 
 function onFinished(watcher: Watcher) {
-  watchEmitter.emit("finished", watcher);
+  watchEmitter.emit('finished', watcher);
 }
 
 const onReload = utils.limiteSync({
   ms: 1000,
   bounce: true,
   fn() {
-    watchEmitter.emit("reload");
+    watchEmitter.emit('reload');
   },
 });
 

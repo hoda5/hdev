@@ -1,8 +1,8 @@
-import { wrap } from "bash-color";
-import { spawn, SpawnOptions, spawnSync, ChildProcess } from "child_process";
-import { EventEmitter } from "events";
-import { existsSync, readdirSync, readFileSync } from "fs";
-import { basename, dirname, join } from "path";
+import { wrap } from 'bash-color';
+import { spawn, SpawnOptions, spawnSync, ChildProcess } from 'child_process';
+import { EventEmitter } from 'events';
+import { existsSync, readdirSync, readFileSync } from 'fs';
+import { basename, dirname, join } from 'path';
 
 export interface PackageJSON {
   name: string;
@@ -19,9 +19,10 @@ export interface PackageJSON {
   peerDependencies?: {
     [name: string]: string;
   };
+  jest: any;
 }
 export interface WorkspaceFile {
-  "folders": Array<{ path: string }>;
+  'folders': Array<{ path: string }>;
   settings: any;
 }
 export interface Defer<T> {
@@ -31,8 +32,8 @@ export interface Defer<T> {
 }
 export interface SpawnedProcess {
   readonly name: string;
-  on(event: "line", handler: (s: string) => void): void;
-  on(event: "exit", handler: (code: number) => void): void;
+  on(event: 'line', handler: (s: string) => void): void;
+  on(event: 'exit', handler: (code: number) => void): void;
   restart(): Promise<void>;
   stop(): Promise<void>;
 }
@@ -43,25 +44,25 @@ export const utils = {
     return root;
   },
   get workspaceFile() {
-    const ws = join(root, basename(root) + ".code-workspace");
-    if (utils.verbose) utils.debug("workspaceFile", ws);
+    const ws = join(root, basename(root) + '.code-workspace');
+    if (utils.verbose) utils.debug('workspaceFile', ws);
     return ws;
   },
   displayFolderName(packageName: string) {
     const m = /(?:@([^\/]+))?\/(.*)$/g.exec(packageName);
     return m ? (
-      m[1] ? (m[2] + "@" + m[1]) : m[2]
+      m[1] ? (m[2] + '@' + m[1]) : m[2]
     ) : packageName;
   },
   listPackages() {
-    const dir = root + "/packages";
+    const dir = root + '/packages';
     if (!existsSync(dir)) { return []; }
     const l1 = readdirSync(dir);
     const r: string[] = [];
     l1.forEach((f1) => {
-      if (f1[0] === "@") {
-        readdirSync(dir + "/" + f1).forEach((f2) => {
-          r.push(f1 + "/" + f2);
+      if (f1[0] === '@') {
+        readdirSync(dir + '/' + f1).forEach((f2) => {
+          r.push(f1 + '/' + f2);
         });
       } else { r.push(f1); }
     });
@@ -69,23 +70,23 @@ export const utils = {
   },
   forEachPackage(fn: (packageName: string, folder: string) => Promise<void>) {
     const packages = utils.listPackages();
-    if (utils.verbose) { utils.debug("forEachPackage", packages.join()); }
+    if (utils.verbose) { utils.debug('forEachPackage', packages.join()); }
     return Promise.all(packages.map((p) => {
-      return fn(p, [root, "packages", p].join("/"));
+      return fn(p, [root, 'packages', p].join('/'));
     })).then(() => true);
   },
   getPackageJsonFor(packagName: string) {
-    const json = utils.readJSON<PackageJSON>(packagName, "package.json");
+    const json = utils.readJSON<PackageJSON>(packagName, 'package.json');
     if (json.name !== packagName) {
       utils.throw(
-        "Package name (" + packagName +
-        ") é diferente do que está em name do package.json (" +
-        json.name + ")");
+        'Package name (' + packagName +
+        ') é diferente do que está em name do package.json (' +
+        json.name + ')');
     }
     return json;
   },
   path(packageName: string, ...names: string[]) {
-    return join(root, "packages", packageName, ...names);
+    return join(root, 'packages', packageName, ...names);
   },
   exists(packageName: string, ...names: string[]): boolean {
     return existsSync(utils.path(packageName, ...names));
@@ -93,14 +94,14 @@ export const utils = {
   readText(packageName: string, filename: string): string {
     return readFileSync(
       utils.path(packageName, filename),
-      { encoding: "utf-8" },
+      { encoding: 'utf-8' },
     );
   },
   readJSON<T>(packageName: string, filename: string): T {
     return JSON.parse(utils.readText(packageName, filename)) as T;
   },
   readCoverageSummary(packageName: string): CoverageResult | undefined {
-    const cov = "coverage/coverage-summary.json";
+    const cov = 'coverage/coverage-summary.json';
     if (utils.exists(packageName, cov)) {
       const summary = utils.readJSON<CoverageResults>(packageName, cov);
       return summary.total;
@@ -115,20 +116,20 @@ export const utils = {
     if (opts.title) {
       // tslint:disable-next-line
       console.log(
-        wrap(opts.title, "RED", "background"),
+        wrap(opts.title, 'RED', 'background'),
       );
     } else {
       // tslint:disable-next-line
       console.log(
-        wrap(opts.cwd + "$ ", "BLUE", "background") +
-        wrap(cmd + " " + args.join(" "), "RED", "background"),
+        wrap(opts.cwd + '$ ', 'BLUE', 'background') +
+        wrap(cmd + ' ' + args.join(' '), 'RED', 'background'),
       );
     }
     const r = spawnSync(
       cmd, args,
       {
         cwd: opts.cwd,
-        stdio: ["inherit", "inherit", "inherit"],
+        stdio: ['inherit', 'inherit', 'inherit'],
       },
     );
     if (r.status !== 0) {
@@ -162,8 +163,8 @@ export const utils = {
         if (utils.verbose) {
           // tslint:disable-next-line
           console.log(
-            wrap(opts.name, "PURPLE", "background"),
-            wrap(" kill", "RED", "background"),
+            wrap(opts.name, 'PURPLE', 'background'),
+            wrap(' kill', 'RED', 'background'),
           );
         }
         proc.kill();
@@ -179,23 +180,23 @@ export const utils = {
       if (utils.verbose) {
         // tslint:disable-next-line
         console.log(
-          wrap(opts.name, "PURPLE", "background"),
-          wrap(opts.cwd + "$ ", "BLUE", "background") +
-          wrap(" " + cmd + " " + args.join(" "), "RED", "background"),
+          wrap(opts.name, 'PURPLE', 'background'),
+          wrap(opts.cwd + '$ ', 'BLUE', 'background') +
+          wrap(' ' + cmd + ' ' + args.join(' '), 'RED', 'background'),
         );
       }
       proc = spawn(cmd, args, spawnOpts);
-      proc.stdout.on("data", parseLines);
-      proc.stderr.on("data", parseLines);
-      proc.on("exit", (code) => {
+      proc.stdout.on('data', parseLines);
+      proc.stderr.on('data', parseLines);
+      proc.on('exit', (code) => {
         if (utils.verbose) {
           // tslint:disable-next-line
           console.log(
-            wrap(opts.name, "PURPLE", "background"),
-            wrap(" exit " + code, code === 0 ? "GREEN" : "RED", "background"),
+            wrap(opts.name, 'PURPLE', 'background'),
+            wrap(' exit ' + code, code === 0 ? 'GREEN' : 'RED', 'background'),
           );
         }
-        emitter.emit("exit", code);
+        emitter.emit('exit', code);
       });
       return new Promise<ChildProcess>((resolve) => {
         resolve(proc);
@@ -205,25 +206,25 @@ export const utils = {
         const s1: string = data.toString();
         let lines: string[];
         if (utils.verbose) {
-          s1.split("\n").forEach((lo) => {
+          s1.split('\n').forEach((lo) => {
             const ss2 = // lo.indexOf('\x1b[2K')>=0 ? '' :
               // lo.replace(/\u001b/g, '<ESC>');
-              lo.replace(/\u001bc/g, "")
-                .replace(/\u001b\[\d{0,2}m/g, "");
+              lo.replace(/\u001bc/g, '')
+                .replace(/\u001b\[\d{0,2}m/g, '');
             if (ss2.trim()) {
               // tslint:disable-next-line
               console.log(
-                wrap(opts.name, "PURPLE", "background"),
+                wrap(opts.name, 'PURPLE', 'background'),
                 ss2,
               );
             }
           });
         }
         const s2 = s1
-          .replace(/\u001bc/g, "")
-          .replace(/\u001b\[\d{0,2}m/g, "");
-        lines = s2.split("\n");
-        lines.forEach((l) => emitter.emit("line", l));
+          .replace(/\u001bc/g, '')
+          .replace(/\u001b\[\d{0,2}m/g, '');
+        lines = s2.split('\n');
+        lines.forEach((l) => emitter.emit('line', l));
       }
     }
   },
@@ -308,7 +309,7 @@ export const utils = {
         cancel() {
           if (tm) { clearTimeout(tm); }
           tm = undefined;
-          defers.forEach((d) => d.reject("cancel"));
+          defers.forEach((d) => d.reject('cancel'));
           defers = [];
         },
       });
@@ -317,23 +318,23 @@ export const utils = {
   debug(title: string, ...args: any[]) {
     // tslint:disable-next-line
     console.log(
-      wrap(title + ": ", "PURPLE", "background") +
-      wrap(JSON.stringify(args), "BLUE", "background"),
+      wrap(title + ': ', 'PURPLE', 'background') +
+      wrap(JSON.stringify(args), 'BLUE', 'background'),
     );
   },
 };
 const root = findRoot(process.cwd());
 
 function findRoot(folder: string) {
-  while (folder && folder !== "/") {
+  while (folder && folder !== '/') {
     const files = readdirSync(folder);
-    const w = basename(folder) + ".code-workspace";
+    const w = basename(folder) + '.code-workspace';
     if (files.some((f) => f === w)) {
       return folder;
     }
     folder = dirname(folder);
   }
-  return "";
+  return '';
 }
 
 // function parseLines(data) {

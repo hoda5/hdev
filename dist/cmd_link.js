@@ -44,11 +44,11 @@ function cmd_link() {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 allpackages.push(packagName);
-                utils_1.utils.exec("npm", [
-                    "link",
+                utils_1.utils.exec('npm', [
+                    'link',
                 ], {
                     cwd: folder,
-                    title: "",
+                    title: '',
                 });
                 return [2 /*return*/];
             });
@@ -61,12 +61,12 @@ function cmd_link() {
                 json = utils_1.utils.getPackageJsonFor(packageName);
                 (json.dependencies ? Object.keys(json.dependencies) : []).concat(json.peerDependencies ? Object.keys(json.peerDependencies) : [], json.devDependencies ? Object.keys(json.devDependencies) : []).map(function (dep) {
                     if (allpackages.indexOf(dep) >= 0) {
-                        utils_1.utils.exec("npm", [
-                            "link",
+                        utils_1.utils.exec('npm', [
+                            'link',
                             dep,
                         ], {
                             cwd: folder,
-                            title: "",
+                            title: '',
                         });
                     }
                 });
