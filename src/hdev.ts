@@ -95,6 +95,7 @@ function cmd(fn: ActionCallback, showrep = true, validrep = true) {
         if (validrep && utils.root === "") {
             utils.throw("no code-workspace file found!");
         }
+
         const l: any = prog.logger();
         const ts = l && l.transports;
         const cap = ts && ts.caporal;
@@ -109,7 +110,7 @@ function cmd(fn: ActionCallback, showrep = true, validrep = true) {
             );
         }
         fn(args, options).then((ok: boolean) => {
-            if (!ok) prog.help("hdev"); 
+            if (!ok) prog.help("hdev");
         }, console.log);
     };
 }

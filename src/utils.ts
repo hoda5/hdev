@@ -15,10 +15,10 @@ export interface PackageJSON {
   };
   devDependencies?: {
     [name: string]: string;
-  }
+  };
   peerDependencies?: {
     [name: string]: string;
-  }
+  };
 }
 export interface WorkspaceFile {
   "folders": Array<{ path: string }>;
@@ -44,7 +44,7 @@ export const utils = {
   },
   get workspaceFile() {
     const ws = join(root, basename(root) + ".code-workspace");
-    if (utils.verbose) { utils.debug("workspaceFile", ws); }
+    if (utils.verbose) utils.debug("workspaceFile", ws);
     return ws;
   },
   displayFolderName(packageName: string) {
@@ -243,15 +243,13 @@ export const utils = {
     const d = {
       promise,
       resolve(res: T | Promise<T>) {
-        if (res instanceof Promise) {
-          res.then(d.resolve, d.reject);
-        } else if (fnResolve) fnResolve(res);
+        if (res instanceof Promise) res.then(d.resolve, d.reject);
+        else if (fnResolve) fnResolve(res);
         else { setTimeout(() => d.resolve(res), 10); }
       },
       reject(reason: any) {
-        if (reason instanceof Promise) {
-          reason.then(d.reject, d.reject);
-        } else if (fnReject) fnReject(reason);
+        if (reason instanceof Promise) reason.then(d.reject, d.reject);
+        else if (fnReject) fnReject(reason);
         else { setTimeout(() => d.reject(reason), 10); }
       },
     };

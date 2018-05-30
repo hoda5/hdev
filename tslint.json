@@ -4,8 +4,13 @@
     "interface-name": false,
     "object-literal-sort-keys": false,
     "ordered-imports": false,
-    "variable-name": {"severity": "warning"},
-    "curly": [true, "as-needed"],
+    "variable-name": {
+      "severity": "warning"
+    },
+    "curly": [
+      true,
+      "ignore-same-line"
+    ],
     "space-before-function-paren": false,
     "radix": false
   }

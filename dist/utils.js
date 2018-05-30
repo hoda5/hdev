@@ -47,9 +47,8 @@ exports.utils = {
     },
     get workspaceFile() {
         var ws = path_1.join(root, path_1.basename(root) + ".code-workspace");
-        if (exports.utils.verbose) {
+        if (exports.utils.verbose)
             exports.utils.debug("workspaceFile", ws);
-        }
         return ws;
     },
     displayFolderName: function (packageName) {
@@ -258,9 +257,8 @@ exports.utils = {
         var d = {
             promise: promise,
             resolve: function (res) {
-                if (res instanceof Promise) {
+                if (res instanceof Promise)
                     res.then(d.resolve, d.reject);
-                }
                 else if (fnResolve)
                     fnResolve(res);
                 else {
@@ -268,9 +266,8 @@ exports.utils = {
                 }
             },
             reject: function (reason) {
-                if (reason instanceof Promise) {
+                if (reason instanceof Promise)
                     reason.then(d.reject, d.reject);
-                }
                 else if (fnReject)
                     fnReject(reason);
                 else {

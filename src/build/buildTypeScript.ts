@@ -4,14 +4,14 @@ import { addWatcher, SrcMessage, Watcher, WatcherEvents } from "../watchers";
 import { resolve, join } from "path";
 
 export async function buildTypeScript(name: string) {
-  if (!utils.exists(name, "tsconfig.json")) { return; }
+  if (!utils.exists(name, "tsconfig.json")) return;
   utils.exec("npm", ["run", "build"], { cwd: utils.path(name), title: "building: " + name });
 }
 
 export async function watchTypeScript(packageName: string): Promise<Watcher | undefined> {
-  if (packageName === "@hoda5/hdev") { return; }
-  if (utils.verbose) { utils.debug("watchTypeScript", packageName); }
-  if (!utils.exists(packageName, "tsconfig.json")) { return; }
+  if (packageName === "@hoda5/hdev") return;
+  if (utils.verbose) utils.debug("watchTypeScript", packageName);
+  if (!utils.exists(packageName, "tsconfig.json")) return;
   let events: WatcherEvents;
   let warnings: SrcMessage[] = [];
   let errors: SrcMessage[] = [];
@@ -165,8 +165,9 @@ export async function setupTypeScript(name: string, withReact: boolean) {
   function install_pkgs() {
     const argsDeps = [
     ];
-    if (!/^@hoda5\/(hdev|h5global)$/g.test(name))
+    if (!/^@hoda5\/(hdev|h5global)$/g.test(name)) {
       argsDeps.push("@hoda5/h5global@latest");
+    }
     const argsDevs = [
       "typescript@latest",
       "tslint@latest",
@@ -175,10 +176,12 @@ export async function setupTypeScript(name: string, withReact: boolean) {
       argsDeps.push("react@latest");
       argsDevs.push("@types/react@latest");
     }
-    if (argsDeps.length)
+    if (argsDeps.length) {
       utils.exec("npm", ["install", "--save", ...argsDeps], { cwd: utils.path(name), title: "" });
-    if (argsDevs.length)
+    }
+    if (argsDevs.length) {
       utils.exec("npm", ["install", "--save-dev", ...argsDevs], { cwd: utils.path(name), title: "" });
+    }
   }
 }
 

@@ -42,9 +42,8 @@ var path_1 = require("path");
 function buildTypeScript(name) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
-            if (!utils_1.utils.exists(name, "tsconfig.json")) {
+            if (!utils_1.utils.exists(name, "tsconfig.json"))
                 return [2 /*return*/];
-            }
             utils_1.utils.exec("npm", ["run", "build"], { cwd: utils_1.utils.path(name), title: "building: " + name });
             return [2 /*return*/];
         });
@@ -119,15 +118,12 @@ function watchTypeScript(packageName) {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    if (packageName === "@hoda5/hdev") {
+                    if (packageName === "@hoda5/hdev")
                         return [2 /*return*/];
-                    }
-                    if (utils_1.utils.verbose) {
+                    if (utils_1.utils.verbose)
                         utils_1.utils.debug("watchTypeScript", packageName);
-                    }
-                    if (!utils_1.utils.exists(packageName, "tsconfig.json")) {
+                    if (!utils_1.utils.exists(packageName, "tsconfig.json"))
                         return [2 /*return*/];
-                    }
                     warnings = [];
                     errors = [];
                     building = false;
@@ -243,8 +239,9 @@ function setupTypeScript(name, withReact) {
         }
         function install_pkgs() {
             var argsDeps = [];
-            if (!/^@hoda5\/(hdev|h5global)$/g.test(name))
+            if (!/^@hoda5\/(hdev|h5global)$/g.test(name)) {
                 argsDeps.push("@hoda5/h5global@latest");
+            }
             var argsDevs = [
                 "typescript@latest",
                 "tslint@latest",
@@ -253,10 +250,12 @@ function setupTypeScript(name, withReact) {
                 argsDeps.push("react@latest");
                 argsDevs.push("@types/react@latest");
             }
-            if (argsDeps.length)
+            if (argsDeps.length) {
                 utils_1.utils.exec("npm", ["install", "--save"].concat(argsDeps), { cwd: utils_1.utils.path(name), title: "" });
-            if (argsDevs.length)
+            }
+            if (argsDevs.length) {
                 utils_1.utils.exec("npm", ["install", "--save-dev"].concat(argsDevs), { cwd: utils_1.utils.path(name), title: "" });
+            }
         }
         return __generator(this, function (_a) {
             ajust_packagejson();

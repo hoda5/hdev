@@ -43,9 +43,8 @@ function cmd_run(args) {
             packageName = args.name;
             cmd = args.cmd;
             dir = utils_1.utils.path(packageName);
-            if (cmd[0] === "--") {
+            if (cmd[0] === "--")
                 cmd.splice(0, 1);
-            }
             utils_1.utils.exec(cmd[0], cmd.slice(1), {
                 cwd: dir,
                 title: "",
