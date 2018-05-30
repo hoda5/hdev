@@ -35,17 +35,18 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var utils_1 = require("./utils");
-var buildTypeScript_1 = require("./build/buildTypeScript");
-var ui_1 = require("./ui");
-var pm2_1 = require("pm2");
 var chokidar_1 = require("chokidar");
 var path_1 = require("path");
+var pm2_1 = require("pm2");
+var buildTypeScript_1 = require("./build/buildTypeScript");
+var ui_1 = require("./ui");
+var utils_1 = require("./utils");
 function cmd_start(args, opts) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
-            if (utils_1.utils.verbose)
-                console.dir({ start_with_args: process.argv });
+            if (utils_1.utils.verbose) {
+                utils_1.utils.debug("start_with_args", process.argv || args);
+            }
             if (opts.noService)
                 return [2 /*return*/, start_no_service(opts.logMode)];
             else
@@ -67,11 +68,12 @@ function start_no_service(logMode) {
                             return __generator(this, function (_a) {
                                 switch (_a.label) {
                                     case 0:
-                                        if (!(pkg != '@hoda5-hdev')) return [3 /*break*/, 2];
+                                        if (!(pkg !== "@hoda5-hdev")) return [3 /*break*/, 2];
                                         return [4 /*yield*/, buildTypeScript_1.watchTypeScript(pkg)];
                                     case 1:
-                                        if (_a.sent())
+                                        if (_a.sent()) {
                                             ok = true;
+                                        }
                                         _a.label = 2;
                                     case 2: return [2 /*return*/];
                                 }
@@ -79,8 +81,9 @@ function start_no_service(logMode) {
                         }); })];
                 case 1:
                     _a.sent();
-                    if (ok)
+                    if (ok) {
                         ui_1.initUi(logMode);
+                    }
                     return [2 /*return*/, ok];
             }
         });
@@ -89,48 +92,54 @@ function start_no_service(logMode) {
 function start_as_service(follow) {
     return __awaiter(this, void 0, void 0, function () {
         function start_service() {
-            if (utils_1.utils.verbose)
-                console.log('starting hdev');
-            return new Promise(function (fn_resolve, fn_reject) {
-                var args = ['start', '--no-service', '--log-mode'];
-                if (utils_1.utils.verbose)
-                    args.push('--verbose');
+            if (utils_1.utils.verbose) {
+                // tslint:disable-next-line
+                console.log("starting hdev");
+            }
+            return new Promise(function (fnResolve, fnReject) {
+                var args = ["start", "--no-service", "--log-mode"];
+                if (utils_1.utils.verbose) {
+                    args.push("--verbose");
+                }
                 var script = process.argv[1];
-                if (hdev_no_ws)
-                    script = utils_1.utils.path('@hoda5-hdev', 'dist/hdev.js');
-                else if (tmp_ws)
-                    script = path_1.resolve(path_1.join(utils_1.utils.root, '../dist/hdev.js'));
-                var pm2_opts = {
-                    name: 'hdev',
+                if (wsHasHDEV) {
+                    script = utils_1.utils.path("@hoda5-hdev", "dist/hdev.js");
+                }
+                else if (isTempWS) {
+                    script = path_1.resolve(path_1.join(utils_1.utils.root, "../dist/hdev.js"));
+                }
+                var pm2Opts = {
+                    name: "hdev",
                     script: script,
                     cwd: process.cwd(),
                     args: args,
                     restartDelay: 100,
-                    watch: false
+                    watch: false,
                 };
                 if (utils_1.utils.verbose)
-                    console.dir({ pm2: pm2_opts });
-                pm2_1.start(pm2_opts, function (err) {
+                    utils_1.utils.debug("pm2", pm2Opts);
+                pm2_1.start(pm2Opts, function (err) {
                     if (err)
-                        fn_reject(err);
+                        fnReject(err);
                     else {
                         setTimeout(function () {
-                            fn_resolve();
+                            fnResolve();
                             if (utils_1.utils.verbose)
-                                console.log('hdev started!');
+                                utils_1.utils.debug("hdev started!");
                         }, 1);
                     }
                 });
             });
         }
         function stop_service() {
-            if (utils_1.utils.verbose)
-                console.log('stopping hdev');
-            return new Promise(function (resolve, reject) {
-                return pm2_1.stop('hdev', function (err) {
+            if (utils_1.utils.verbose) {
+                utils_1.utils.debug("stopping hdev");
+            }
+            return new Promise(function (resolveStop) {
+                return pm2_1.stop("hdev", function () {
                     if (utils_1.utils.verbose)
-                        console.log('hdev stopped');
-                    resolve();
+                        utils_1.utils.debug("hdev stopped");
+                    resolveStop();
                 });
             });
         }
@@ -139,17 +148,22 @@ function start_as_service(follow) {
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
-                            if (utils_1.utils.verbose)
-                                console.dir({ follow_service: { hdev_no_ws: hdev_no_ws, tmp_ws: tmp_ws } });
-                            if (!(hdev_no_ws || tmp_ws))
-                                utils_1.utils.throw('hdev precisa estar no workspace para poder ser reconstruido');
+                            if (utils_1.utils.verbose) {
+                                // tslint:disable-next-line
+                                console.dir({ follow_service: { wsHasHDEV: wsHasHDEV, isTempWS: isTempWS } });
+                            }
+                            if (!(wsHasHDEV || isTempWS)) {
+                                utils_1.utils.throw("hdev precisa estar no workspace para poder ser reconstruido");
+                            }
                             return [4 /*yield*/, watch_hdev_for_rebuild()];
                         case 1:
                             _a.sent();
                             return [4 /*yield*/, watch_dist()];
                         case 2:
                             _a.sent();
-                            follow_logs();
+                            return [4 /*yield*/, followLogs()];
+                        case 3:
+                            _a.sent();
                             monitor_SIGINT();
                             return [2 /*return*/];
                     }
@@ -161,19 +175,21 @@ function start_as_service(follow) {
                 var p;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
-                        case 0: return [4 /*yield*/, utils_1.utils.spawn('npm', ['run', 'watch'], {
-                                cwd: path_1.resolve(path_1.join(__dirname, '..')),
-                                name: 'rebuild-hdev'
+                        case 0: return [4 /*yield*/, utils_1.utils.spawn("npm", ["run", "watch"], {
+                                cwd: path_1.resolve(path_1.join(__dirname, "..")),
+                                name: "rebuild-hdev",
                             })];
                         case 1:
                             p = _a.sent();
-                            return [2 /*return*/, new Promise(function (resolve) {
-                                    p.on('line', function (line) {
+                            return [2 /*return*/, new Promise(function (resolveB) {
+                                    p.on("line", function (line) {
                                         if (/Compilation complete/g.test(line)) {
-                                            console.log('hdev rebuilded');
-                                            if (resolve)
-                                                resolve();
-                                            resolve = false;
+                                            // tslint:disable-next-line
+                                            console.log("hdev rebuilded");
+                                            if (resolveB) {
+                                                resolveB();
+                                            }
+                                            resolveB = false;
                                         }
                                     });
                                 })];
@@ -184,56 +200,70 @@ function start_as_service(follow) {
         function watch_dist() {
             return __awaiter(this, void 0, void 0, function () {
                 return __generator(this, function (_a) {
-                    return [2 /*return*/, new Promise(function (resolve) {
-                            var watcher_dist = chokidar_1.watch(__dirname);
-                            watcher_dist.on('ready', function () {
-                                watcher_dist.on('all', restart_service);
-                                resolve();
+                    return [2 /*return*/, new Promise(function (resolveWatch) {
+                            var watcherDist = chokidar_1.watch(__dirname);
+                            watcherDist.on("ready", function () {
+                                watcherDist.on("all", restartService);
+                                resolveWatch();
                             });
                         })];
                 });
             });
         }
-        function follow_logs() {
-            pm2_1.launchBus(function (err, bus) {
-                bus.on('log:out', function (d) {
-                    process.stdout.write(d.data);
-                });
-                bus.on('log:err', function (d) {
-                    process.stdout.write(d.data);
-                    setTimeout(function () { return process.exit(0); }, 2000);
+        function followLogs() {
+            return __awaiter(this, void 0, void 0, function () {
+                return __generator(this, function (_a) {
+                    return [2 /*return*/, new Promise(function (resolveF, rejectF) {
+                            pm2_1.launchBus(function (err, bus) {
+                                if (err)
+                                    return rejectF(err);
+                                bus.on("log:out", function (d) {
+                                    process.stdout.write(d.data);
+                                });
+                                bus.on("log:err", function (d) {
+                                    process.stdout.write(d.data);
+                                    setTimeout(function () { return process.exit(0); }, 2000);
+                                });
+                                resolveF();
+                            });
+                        })];
                 });
             });
         }
         function monitor_SIGINT() {
-            process.on('SIGINT', function () {
-                console.log('   SIGINT');
+            process.on("SIGINT", function () {
+                // tslint:disable-next-line
+                console.log("   SIGINT");
                 stop_service();
                 setTimeout(function () { return process.exit(0); }, 2000);
             });
         }
-        var tmp_ws, hdev_no_ws, restart_service;
+        var isTempWS, wsHasHDEV, restartService;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    tmp_ws = __dirname == path_1.resolve(path_1.join(utils_1.utils.root, '../dist'));
-                    hdev_no_ws = utils_1.utils.listPackages().indexOf('@hoda5-hdev') >= 0;
-                    if (hdev_no_ws)
-                        console.log('usando hdev do workspace');
-                    restart_service = utils_1.utils.limiteAsync({
+                    isTempWS = __dirname === path_1.resolve(path_1.join(utils_1.utils.root, "../dist"));
+                    wsHasHDEV = utils_1.utils.listPackages().indexOf("@hoda5-hdev") >= 0;
+                    if (wsHasHDEV) {
+                        // tslint:disable-next-line
+                        console.log("usando hdev do workspace");
+                    }
+                    restartService = utils_1.utils.limiteAsync({
                         ms: 1500,
                         fn: function () {
                             return __awaiter(this, void 0, void 0, function () {
                                 return __generator(this, function (_a) {
                                     switch (_a.label) {
                                         case 0:
-                                            if (restart_service.pending)
+                                            if (restartService.pending) {
                                                 return [2 /*return*/];
+                                            }
                                             return [4 /*yield*/, stop_service()];
                                         case 1:
                                             _a.sent();
-                                            if (restart_service.pending)
+                                            if (restartService.pending) {
                                                 return [2 /*return*/];
+                                            }
                                             return [4 /*yield*/, start_service()];
                                         case 2:
                                             _a.sent();
@@ -241,7 +271,7 @@ function start_as_service(follow) {
                                     }
                                 });
                             });
-                        }
+                        },
                     });
                     if (!follow) return [3 /*break*/, 3];
                     return [4 /*yield*/, follow_service()];

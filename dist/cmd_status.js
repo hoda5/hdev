@@ -46,23 +46,23 @@ function cmd_status(args) {
                     name = args.name;
                     ok = false;
                     if (!name) return [3 /*break*/, 1];
-                    utils_1.utils.exec('git', [
-                        'status'
+                    utils_1.utils.exec("git", [
+                        "status",
                     ], {
                         cwd: utils_1.utils.path(name),
-                        title: name
+                        title: name,
                     });
                     ok = true;
                     return [3 /*break*/, 3];
                 case 1: return [4 /*yield*/, utils_1.utils.forEachPackage(function (pkg, folder) { return __awaiter(_this, void 0, void 0, function () {
                         return __generator(this, function (_a) {
-                            utils_1.utils.exec('git', [
-                                'status',
-                                '-b',
-                                '--porcelain'
+                            utils_1.utils.exec("git", [
+                                "status",
+                                "-b",
+                                "--porcelain",
                             ], {
                                 cwd: folder,
-                                title: pkg
+                                title: pkg,
                             });
                             ok = true;
                             return [2 /*return*/];
@@ -72,8 +72,9 @@ function cmd_status(args) {
                     _a.sent();
                     _a.label = 3;
                 case 3:
-                    if (!ok)
-                        utils_1.utils.throw('repositório vazio');
+                    if (!ok) {
+                        utils_1.utils.throw("repositório vazio");
+                    }
                     return [2 /*return*/, ok];
             }
         });

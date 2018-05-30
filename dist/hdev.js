@@ -38,55 +38,55 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 var _this = this;
 Object.defineProperty(exports, "__esModule", { value: true });
 var prog = require("caporal");
+var bash_color_1 = require("bash-color");
+var cmd_build_1 = require("./cmd_build");
+var cmd_clone_1 = require("./cmd_clone");
 var cmd_init_1 = require("./cmd_init");
 var cmd_login_1 = require("./cmd_login");
-var cmd_status_1 = require("./cmd_status");
-var cmd_clone_1 = require("./cmd_clone");
 var cmd_rm_1 = require("./cmd_rm");
-var cmd_build_1 = require("./cmd_build");
-var cmd_start_1 = require("./cmd_start");
-var utils_1 = require("./utils");
-var bash_color_1 = require("bash-color");
 var cmd_run_1 = require("./cmd_run");
 var cmd_setup_1 = require("./cmd_setup");
-prog.version('1.0.0');
-prog.command('status', 'Status dos repositorios')
-    .argument('[name]', 'Nome do pacote')
+var cmd_start_1 = require("./cmd_start");
+var cmd_status_1 = require("./cmd_status");
+var utils_1 = require("./utils");
+prog.version("1.0.0");
+prog.command("status", "Status dos repositorios")
+    .argument("[name]", "Nome do pacote")
     .complete(completeWithPackageName)
     .action(cmd(cmd_status_1.cmd_status));
-prog.command('clone', 'Adiciona um repositorio')
-    .argument('<url>', 'repositório git')
-    .argument('[name]', 'Nome do pacote')
+prog.command("clone", "Adiciona um repositorio")
+    .argument("<url>", "repositório git")
+    .argument("[name]", "Nome do pacote")
     .action(cmd(cmd_clone_1.cmd_clone));
-prog.command('remove', 'Remove um repositorio')
-    .argument('<name>', 'Nome do pacote')
+prog.command("remove", "Remove um repositorio")
+    .argument("<name>", "Nome do pacote")
     .complete(completeWithPackageName)
     .action(cmd(cmd_rm_1.cmd_rm));
-prog.command('build', 'build')
-    .argument('<name>', 'Nome do pacote - se não tiver o nome constroi todos')
+prog.command("build", "build")
+    .argument("<name>", "Nome do pacote - se não tiver o nome constroi todos")
     .complete(completeWithPackageName)
     .action(cmd(cmd_build_1.cmd_build));
-prog.command('setup', 'setup')
-    .argument('<tipo>', 'tipo', ['typescript'])
-    .argument('<name>', 'Nome do pacote - se não tiver o nome constroi todos')
+prog.command("setup", "setup")
+    .argument("<tipo>", "tipo", ["typescript"])
+    .argument("<name>", "Nome do pacote - se não tiver o nome constroi todos")
     .complete(completeWithPackageName)
     .action(cmd(cmd_setup_1.cmd_setup));
-prog.command('start', 'inicia o servidor de desenvolvimento')
-    .option('--verbose', 'Modo deputação')
-    .option('--log-mode', 'log mode')
-    .option('--no-service', 'não inicia como serviço')
-    .option('--follow', 'acompanha o log do serviço iniciado')
+prog.command("start", "inicia o servidor de desenvolvimento")
+    .option("--verbose", "Modo deputação")
+    .option("--log-mode", "log mode")
+    .option("--no-service", "não inicia como serviço")
+    .option("--follow", "acompanha o log do serviço iniciado")
     .action(cmd(cmd_start_1.cmd_start));
-prog.command('stop', 'para o servidor de desenvolvimento')
+prog.command("stop", "para o servidor de desenvolvimento")
     .action(cmd(function () { return __awaiter(_this, void 0, void 0, function () {
     return __generator(this, function (_a) {
         utils_1.utils.exit(0);
         return [2 /*return*/, Promise.resolve(true)];
     });
 }); }, false));
-prog.command('login', 'configura login do git/github')
-    .argument('<name>', 'Nome de usuario no servidor')
-    .argument('<email>', 'email')
+prog.command("login", "configura login do git/github")
+    .argument("<name>", "Nome de usuario no servidor")
+    .argument("<email>", "email")
     .action(cmd(cmd_login_1.cmd_login, false));
 // prog.command('publish [name]')
 //     .description('incrementa versao e publica pacotes')
@@ -101,54 +101,56 @@ prog.command('login', 'configura login do git/github')
 //     .action(cmd(todo));
 // prog.command('link')
 //     .action(cmd(cmd_link));
-prog.command('init', 'Inicializa na pasta atual como area de trabalho')
-    .option('--subws', 'usado apenas para teste')
+prog.command("init", "Inicializa na pasta atual como area de trabalho")
+    .option("--subws", "usado apenas para teste")
     .action(cmd(cmd_init_1.cmd_init, false, false));
-prog.command('run', 'executa um comando na pasta do pacote')
-    .argument('<name>', 'nome do pacote')
-    .argument('<cmd...>', 'comando')
+prog.command("run", "executa um comando na pasta do pacote")
+    .argument("<name>", "nome do pacote")
+    .argument("<cmd...>", "comando")
     .action(cmd_run_1.cmd_run);
-prog.command('setupcompletation', 'Configura para completar com tab')
-    //.argument('<shell>', 'bash/zsh/fish', ['bash', 'zsh', 'fish'])
+prog.command("setupcompletation", "Configura para completar com tab")
+    // .argument('<shell>', 'bash/zsh/fish', ['bash', 'zsh', 'fish'])
     .action(cmd_setup_completation);
 prog.parse(process.argv);
 function cmd(fn, showrep, validrep) {
     if (showrep === void 0) { showrep = true; }
     if (validrep === void 0) { validrep = true; }
     return function (args, options) {
-        if (validrep && utils_1.utils.root == '')
-            utils_1.utils.throw('no code-workspace file found!');
+        if (validrep && utils_1.utils.root === "") {
+            utils_1.utils.throw("no code-workspace file found!");
+        }
         var l = prog.logger();
         var ts = l && l.transports;
         var cap = ts && ts.caporal;
         var lv = cap && cap.level;
         // console.dir({ l, ts, cap, lv })
-        utils_1.utils.verbose = lv === 'debug';
-        if (showrep)
-            console.log(bash_color_1.wrap('repositorio: ', "GREEN", "background") +
+        utils_1.utils.verbose = lv === "debug";
+        if (showrep) {
+            // tslint:disable-next-line
+            console.log(bash_color_1.wrap("repositorio: ", "GREEN", "background") +
                 bash_color_1.wrap(utils_1.utils.root, "GREEN", "background"));
+        }
         fn(args, options).then(function (ok) {
-            if (!ok)
-                prog.help('hdev');
+            if (!ok) {
+                prog.help("hdev");
+            }
         }, console.log);
     };
-}
-function todo() {
-    console.log('TODO');
 }
 function completeWithPackageName() {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
-            console.log('aksfhglaksfhglahflsk');
+            // tslint:disable-next-line
+            console.log("completeWithPackageName");
             return [2 /*return*/, Promise.resolve(utils_1.utils.listPackages())];
         });
     });
 }
-function cmd_setup_completation(args) {
-    var shell = 'bash'; // args.shell
-    utils_1.utils.exec(process.argv[0], [process.argv[1], 'completion', shell], {
+function cmd_setup_completation() {
+    var shell = "bash"; // args.shell
+    utils_1.utils.exec(process.argv[0], [process.argv[1], "completion", shell], {
         cwd: process.cwd(),
-        title: '',
+        title: "",
     });
 }
 //# sourceMappingURL=hdev.js.map

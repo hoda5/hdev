@@ -35,8 +35,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var utils_1 = require("./utils");
 var buildTypeScript_1 = require("./build/buildTypeScript");
+var utils_1 = require("./utils");
 function cmd_build(args) {
     return __awaiter(this, void 0, void 0, function () {
         var _this = this;

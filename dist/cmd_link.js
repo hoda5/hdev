@@ -36,7 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var utils_1 = require("./utils");
-function cmd_link(name, url) {
+function cmd_link() {
     var allpackages = [];
     utils_1.utils.forEachPackage(enable_link);
     utils_1.utils.forEachPackage(link_packages);
@@ -44,11 +44,11 @@ function cmd_link(name, url) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 allpackages.push(packagName);
-                utils_1.utils.exec('npm', [
-                    'link'
+                utils_1.utils.exec("npm", [
+                    "link",
                 ], {
                     cwd: folder,
-                    title: ''
+                    title: "",
                 });
                 return [2 /*return*/];
             });
@@ -60,14 +60,15 @@ function cmd_link(name, url) {
             return __generator(this, function (_a) {
                 json = utils_1.utils.getPackageJsonFor(packageName);
                 (json.dependencies ? Object.keys(json.dependencies) : []).concat(json.peerDependencies ? Object.keys(json.peerDependencies) : [], json.devDependencies ? Object.keys(json.devDependencies) : []).map(function (dep) {
-                    if (allpackages.indexOf(dep) >= 0)
-                        utils_1.utils.exec('npm', [
-                            'link',
-                            dep
+                    if (allpackages.indexOf(dep) >= 0) {
+                        utils_1.utils.exec("npm", [
+                            "link",
+                            dep,
                         ], {
                             cwd: folder,
-                            title: ''
+                            title: "",
                         });
+                    }
                 });
                 return [2 /*return*/];
             });

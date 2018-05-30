@@ -35,28 +35,28 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var utils_1 = require("./utils");
 var fs_1 = require("fs");
+var utils_1 = require("./utils");
 function cmd_run(args) {
     return __awaiter(this, void 0, void 0, function () {
         var packageName, cmd, dir, w, wf, path_1;
         return __generator(this, function (_a) {
-            console.dir(args);
             packageName = args.name;
             cmd = args.cmd;
             dir = utils_1.utils.path(packageName);
-            if (cmd[0] == '--')
+            if (cmd[0] === "--") {
                 cmd.splice(0, 1);
+            }
             utils_1.utils.exec(cmd[0], cmd.slice(1), {
                 cwd: dir,
-                title: ''
+                title: "",
             });
             w = utils_1.utils.workspaceFile;
             if (fs_1.existsSync(w)) {
-                wf = JSON.parse(fs_1.readFileSync(w, 'utf-8'));
-                path_1 = 'packages/' + packageName;
-                wf.folders = wf.folders.filter(function (f) { return f.path != path_1; });
-                fs_1.writeFileSync(w, JSON.stringify(wf, null, 2), 'utf-8');
+                wf = JSON.parse(fs_1.readFileSync(w, "utf-8"));
+                path_1 = "packages/" + packageName;
+                wf.folders = wf.folders.filter(function (f) { return f.path !== path_1; });
+                fs_1.writeFileSync(w, JSON.stringify(wf, null, 2), "utf-8");
             }
             return [2 /*return*/, true];
         });

@@ -35,15 +35,16 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+var fs_1 = require("fs");
 var utils_1 = require("../utils");
 var watchers_1 = require("../watchers");
-var fs_1 = require("fs");
 function buildTypeScript(name) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
-            if (!utils_1.utils.exists(name, 'tsconfig.json'))
+            if (!utils_1.utils.exists(name, "tsconfig.json")) {
                 return [2 /*return*/];
-            utils_1.utils.exec('npm', ['run', 'build'], { cwd: utils_1.utils.path(name), title: 'building: ' + name });
+            }
+            utils_1.utils.exec("npm", ["run", "build"], { cwd: utils_1.utils.path(name), title: "building: " + name });
             return [2 /*return*/];
         });
     });
@@ -62,37 +63,37 @@ function watchTypeScript(packageName) {
                         case 1:
                             _a.sent();
                             testing = true;
-                            return [4 /*yield*/, utils_1.utils.spawn('npm', ['test'], {
-                                    name: procName + 'test',
+                            return [4 /*yield*/, utils_1.utils.spawn("npm", ["test"], {
+                                    name: procName + "test",
                                     cwd: utils_1.utils.path(packageName),
-                                })
-                                // pt.on('line', (s)=>console.log(s));
-                            ];
+                                })];
                         case 2:
                             pt = _a.sent();
                             // pt.on('line', (s)=>console.log(s));
-                            pt.on('exit', function () {
+                            pt.on("exit", function () {
                                 var summary = utils_1.utils.readCoverageSummary(packageName);
                                 testing = false;
                                 if (summary) {
                                     coverage = Math.min(summary.lines.pct, summary.statements.pct, summary.functions.pct, summary.branches.pct);
-                                    if (coverage < 80)
+                                    if (coverage < 80) {
                                         errors.push({
-                                            file: '?',
+                                            file: "?",
                                             row: 0, col: 0,
-                                            msg: ['Cobertura do código por testes está abaixo de ', coverage, '%'].join(''),
+                                            msg: ["Cobertura do código por testes está abaixo de ", coverage, "%"].join(""),
                                         });
+                                    }
                                 }
                                 else {
                                     coverage = undefined;
                                     errors.push({
-                                        file: '?',
+                                        file: "?",
                                         row: 0, col: 0,
-                                        msg: 'Teste não gerou relatório de cobertura de código'
+                                        msg: "Teste não gerou relatório de cobertura de código",
                                     });
                                 }
-                                if (events)
+                                if (events) {
                                     events.onFinished(watcher);
+                                }
                             });
                             return [2 /*return*/];
                     }
@@ -103,16 +104,13 @@ function watchTypeScript(packageName) {
             return __awaiter(this, void 0, void 0, function () {
                 var old;
                 return __generator(this, function (_a) {
-                    switch (_a.label) {
-                        case 0:
-                            old = procTest;
-                            procTest = undefined;
-                            testing = false;
-                            if (!old) return [3 /*break*/, 2];
-                            return [4 /*yield*/, old.stop()];
-                        case 1: return [2 /*return*/, _a.sent()];
-                        case 2: return [2 /*return*/];
+                    old = procTest;
+                    procTest = undefined;
+                    testing = false;
+                    if (old) {
+                        return [2 /*return*/, old.stop()];
                     }
+                    return [2 /*return*/];
                 });
             });
         }
@@ -120,49 +118,57 @@ function watchTypeScript(packageName) {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    if (packageName === '@hoda5/hdev')
+                    if (packageName === "@hoda5/hdev") {
                         return [2 /*return*/];
-                    if (utils_1.utils.verbose)
-                        utils_1.utils.debug('watchTypeScript', packageName);
-                    if (!utils_1.utils.exists(packageName, 'tsconfig.json'))
+                    }
+                    if (utils_1.utils.verbose) {
+                        utils_1.utils.debug("watchTypeScript", packageName);
+                    }
+                    if (!utils_1.utils.exists(packageName, "tsconfig.json")) {
                         return [2 /*return*/];
+                    }
                     warnings = [];
                     errors = [];
                     building = false;
                     testing = false;
-                    procName = 'ts_' + utils_1.utils.displayFolderName(packageName);
-                    return [4 /*yield*/, utils_1.utils.spawn('npm', ['run', 'watch'], {
+                    procName = "ts_" + utils_1.utils.displayFolderName(packageName);
+                    return [4 /*yield*/, utils_1.utils.spawn("npm", ["run", "watch"], {
                             name: procName,
                             cwd: utils_1.utils.path(packageName),
                         })];
                 case 1:
                     procBuild = _a.sent();
-                    procBuild.on('line', function (line) {
+                    procBuild.on("line", function (line) {
                         if (/Starting .*compilation/g.test(line)) {
                             warnings = [];
                             errors = [];
                             building = true;
                             abortTesting();
-                            if (events)
+                            if (events) {
                                 events.onBuilding(watcher);
+                            }
                         }
                         else if (/Compilation complete/g.test(line)) {
                             building = false;
-                            if (events)
+                            if (events) {
                                 events.onTesting(watcher);
+                            }
                             runTests();
                         }
                         else {
                             var m = /^([^\(]+)\((\d+),(\d+)\)\:\s*(\w*)\s+([^:]+):\s*(.*)/g.exec(line);
                             if (m) {
                                 var type = m[4];
+                                if (/(TS6192)|(TS6133)/.test(m[6])) {
+                                    type = "warning";
+                                }
                                 var msg = {
                                     file: m[1],
                                     row: parseInt(m[2]),
                                     col: parseInt(m[3]),
-                                    msg: m[6] + m[5]
+                                    msg: m[6] + m[5],
                                 };
-                                if (type === 'warning')
+                                if (type === "warning")
                                     warnings.push(msg);
                                 else
                                     errors.push(msg);
@@ -198,9 +204,9 @@ function watchTypeScript(packageName) {
                         },
                         stop: function () {
                             warnings = [];
-                            errors = [{ file: '', row: 0, col: 0, msg: 'stopped' }];
+                            errors = [{ file: "", row: 0, col: 0, msg: "stopped" }];
                             return procBuild.stop();
-                        }
+                        },
                     };
                     events = watchers_1.addWatcher(watcher);
                     return [2 /*return*/, watcher];
@@ -213,42 +219,45 @@ function setupTypeScript(name) {
     return __awaiter(this, void 0, void 0, function () {
         function ajust_packagejson() {
             var packageJSON = utils_1.utils.getPackageJsonFor(name);
-            if (!packageJSON.scripts)
+            if (!packageJSON.scripts) {
                 packageJSON.scripts = {};
-            packageJSON.scripts['build'] = 'tsc';
-            packageJSON.scripts['watch'] = 'tsc -w';
-            fs_1.writeFileSync(utils_1.utils.path(name, 'package.json'), JSON.stringify(packageJSON, null, 2), 'utf-8');
+            }
+            packageJSON.scripts.build = "tsc";
+            packageJSON.scripts.watch = "tsc -w";
+            packageJSON.scripts.lint = "tslint --project .";
+            packageJSON.scripts.lintfix = "tslint --project . --fix";
+            fs_1.writeFileSync(utils_1.utils.path(name, "package.json"), JSON.stringify(packageJSON, null, 2), "utf-8");
         }
         function save_tsconfig() {
-            fs_1.writeFileSync(utils_1.utils.path(name, 'tsconfig.json'), JSON.stringify({
-                "compilerOptions": {
-                    "target": "es5",
-                    "module": "commonjs",
-                    "moduleResolution": "node",
-                    "outDir": "dist",
-                    "sourceMap": true,
-                    "declaration": false,
-                    "strict": true,
-                    "lib": [
+            fs_1.writeFileSync(utils_1.utils.path(name, "tsconfig.json"), JSON.stringify({
+                compilerOptions: {
+                    target: "es5",
+                    module: "commonjs",
+                    moduleResolution: "node",
+                    outDir: "dist",
+                    sourceMap: true,
+                    declaration: false,
+                    strict: true,
+                    lib: [
                         "es2017",
-                    ]
+                    ],
                 },
-                "exclude": [
-                    "tmp"
-                ]
-            }, null, 2), 'utf-8');
+                exclude: [
+                    "tmp",
+                ],
+            }, null, 2), "utf-8");
         }
         function save_tslint() {
-            fs_1.writeFileSync(utils_1.utils.path(name, 'tslint.json'), JSON.stringify({
-                "extends": "tslint-config-standard"
-            }, null, 2), 'utf-8');
+            fs_1.writeFileSync(utils_1.utils.path(name, "tslint.json"), JSON.stringify({
+                extends: "tslint-config-standard",
+            }, null, 2), "utf-8");
         }
         function install_pkgs() {
-            utils_1.utils.exec('npm', ['install', '--save-dev',
-                'typescript@latest',
-                'tslint@latest',
-                'tslint-config-standard@latest',
-            ], { cwd: utils_1.utils.path(name), title: '' });
+            utils_1.utils.exec("npm", ["install", "--save-dev",
+                "typescript@latest",
+                "tslint@latest",
+                "tslint-config-standard@latest",
+            ], { cwd: utils_1.utils.path(name), title: "" });
         }
         return __generator(this, function (_a) {
             ajust_packagejson();

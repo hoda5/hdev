@@ -35,31 +35,34 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var path_1 = require("path");
 var fs_1 = require("fs");
+var path_1 = require("path");
 var utils_1 = require("./utils");
 function cmd_init() {
     return __awaiter(this, void 0, void 0, function () {
         var d, ignore, dc, w, empty, p;
         return __generator(this, function (_a) {
             d = path_1.resolve(process.cwd());
-            ignore = ['.git'];
-            dc = fs_1.readdirSync(d).filter(function (f) { return ignore.indexOf(f) == -1; });
-            if (dc.length)
-                utils_1.utils.throw('diretório ' + d + ' não está vazio.\n  ' + dc.join('\n  '));
-            w = d + '/' + path_1.basename(d) + '.code-workspace';
+            ignore = [".git"];
+            dc = fs_1.readdirSync(d).filter(function (f) { return ignore.indexOf(f) === -1; });
+            if (dc.length) {
+                utils_1.utils.throw("diretório " + d + " não está vazio.\n  " + dc.join("\n  "));
+            }
+            w = d + "/" + path_1.basename(d) + ".code-workspace";
             if (!fs_1.existsSync(w)) {
                 empty = {
-                    "folders": [],
-                    "settings": {}
+                    folders: [],
+                    settings: {},
                 };
-                fs_1.writeFileSync(w, JSON.stringify(empty, null, 2), 'utf-8');
+                fs_1.writeFileSync(w, JSON.stringify(empty, null, 2), "utf-8");
             }
-            console.log('inicializado: ' + w);
-            p = d + '/packages';
-            if (!fs_1.existsSync(p))
+            // tslint:disable-next-line
+            console.log("inicializado: " + w);
+            p = d + "/packages";
+            if (!fs_1.existsSync(p)) {
                 fs_1.mkdirSync(p);
-            utils_1.utils.exec('git', ['init'], { cwd: process.cwd(), title: '' });
+            }
+            utils_1.utils.exec("git", ["init"], { cwd: process.cwd(), title: "" });
             return [2 /*return*/, true];
         });
     });

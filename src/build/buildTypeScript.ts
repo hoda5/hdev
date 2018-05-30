@@ -1,181 +1,187 @@
-import { utils, SpawnedProcess } from "../utils"
-import { addWatcher, Watcher, WatcherEvents, SrcMessage } from "../watchers"
-import { watch, writeFileSync } from "fs";
+import { writeFileSync } from "fs";
+import { SpawnedProcess, utils } from "../utils";
+import { addWatcher, SrcMessage, Watcher, WatcherEvents } from "../watchers";
 
 export async function buildTypeScript(name: string) {
-    if (!utils.exists(name, 'tsconfig.json')) return;
-    utils.exec('npm', ['run', 'build'], { cwd: utils.path(name), title: 'building: ' + name });
+  if (!utils.exists(name, "tsconfig.json")) { return; }
+  utils.exec("npm", ["run", "build"], { cwd: utils.path(name), title: "building: " + name });
 }
 
 export async function watchTypeScript(packageName: string): Promise<Watcher | undefined> {
-    if (packageName === '@hoda5/hdev') return;
-    if (utils.verbose) utils.debug('watchTypeScript', packageName);
-    if (!utils.exists(packageName, 'tsconfig.json')) return;
-    let events: WatcherEvents;
-    let warnings: SrcMessage[] = [];
-    let errors: SrcMessage[] = [];
-    let building = false;
-    let testing = false;
-    let coverage: number | undefined;
-    let procTest: SpawnedProcess | undefined;
-    const procName = 'ts_' + utils.displayFolderName(packageName);
-    const procBuild = await utils.spawn('npm', ['run', 'watch'], {
-        name: procName,
-        cwd: utils.path(packageName),
-        // watch: [utils.path(name, 'src')],        
-    });
-    procBuild.on('line', (line: string) => {
-        if (/Starting .*compilation/g.test(line)) {
-            warnings = [];
-            errors = [];
-            building = true;
-            abortTesting();
-            if (events)
-                events.onBuilding(watcher);
+  if (packageName === "@hoda5/hdev") { return; }
+  if (utils.verbose) { utils.debug("watchTypeScript", packageName); }
+  if (!utils.exists(packageName, "tsconfig.json")) { return; }
+  let events: WatcherEvents;
+  let warnings: SrcMessage[] = [];
+  let errors: SrcMessage[] = [];
+  let building = false;
+  let testing = false;
+  let coverage: number | undefined;
+  let procTest: SpawnedProcess | undefined;
+  const procName = "ts_" + utils.displayFolderName(packageName);
+  const procBuild = await utils.spawn("npm", ["run", "watch"], {
+    name: procName,
+    cwd: utils.path(packageName),
+    // watch: [utils.path(name, 'src')],
+  });
+  procBuild.on("line", (line: string) => {
+    if (/Starting .*compilation/g.test(line)) {
+      warnings = [];
+      errors = [];
+      building = true;
+      abortTesting();
+      if (events) {
+        events.onBuilding(watcher);
+      }
+    } else if (/Compilation complete/g.test(line)) {
+      building = false;
+      if (events) { events.onTesting(watcher); }
+      runTests();
+    } else {
+      const m = /^([^\(]+)\((\d+),(\d+)\)\:\s*(\w*)\s+([^:]+):\s*(.*)/g.exec(line);
+      if (m) {
+        let type = m[4];
+        if (/(TS6192)|(TS6133)/.test(m[6])) {
+          type = "warning";
         }
-        else if (/Compilation complete/g.test(line)) {
-            building = false;
-            if (events) events.onTesting(watcher);
-            runTests();
-        } else {
-            const m = /^([^\(]+)\((\d+),(\d+)\)\:\s*(\w*)\s+([^:]+):\s*(.*)/g.exec(line);
-            if (m) {
-                const type = m[4];
-                const msg: SrcMessage = {
-                    file: m[1],
-                    row: parseInt(m[2]),
-                    col: parseInt(m[3]),
-                    msg: m[6] + m[5]
-                }
-                if (type === 'warning') warnings.push(msg)
-                else errors.push(msg)
-            }
-            // else {
-            //     line = line.replace(/\x1bc/g, '')
-            //     if (line)
-            //         console.log(line);
-            // }
-        }
-    });
-    const watcher: Watcher = {
-        get packageName() {
-            return packageName;
-        },
-        get building() {
-            return building;
-        },
-        get testing() {
-            return testing;
-        },
-        get warnings() {
-            return warnings;
-        },
-        get coverage() {
-            return coverage;
-        },
-        get errors() {
-            return errors;
-        },
-        restart() {
-            return procBuild.restart();
-        },
-        stop() {
-            warnings = [];
-            errors = [{ file: '', row: 0, col: 0, msg: 'stopped' }];
-            return procBuild.stop();
-        }
+        const msg: SrcMessage = {
+          file: m[1],
+          row: parseInt(m[2]),
+          col: parseInt(m[3]),
+          msg: m[6] + m[5],
+        };
+        if (type === "warning") warnings.push(msg);
+        else errors.push(msg);
+      }
+      // else {
+      //     line = line.replace(/\x1bc/g, '')
+      //     if (line)
+      //         console.log(line);
+      // }
     }
-    events = addWatcher(watcher);
-    return watcher;
-    async function runTests() {
+  });
+  const watcher: Watcher = {
+    get packageName() {
+      return packageName;
+    },
+    get building() {
+      return building;
+    },
+    get testing() {
+      return testing;
+    },
+    get warnings() {
+      return warnings;
+    },
+    get coverage() {
+      return coverage;
+    },
+    get errors() {
+      return errors;
+    },
+    restart() {
+      return procBuild.restart();
+    },
+    stop() {
+      warnings = [];
+      errors = [{ file: "", row: 0, col: 0, msg: "stopped" }];
+      return procBuild.stop();
+    },
+  };
+  events = addWatcher(watcher);
+  return watcher;
+  async function runTests() {
+    coverage = undefined;
+    await abortTesting();
+    testing = true;
+    const pt = await utils.spawn("npm", ["test"], {
+      name: procName + "test",
+      cwd: utils.path(packageName),
+    });
+    // pt.on('line', (s)=>console.log(s));
+    pt.on("exit", () => {
+      const summary = utils.readCoverageSummary(packageName);
+      testing = false;
+      if (summary) {
+        coverage = Math.min(summary.lines.pct, summary.statements.pct, summary.functions.pct, summary.branches.pct);
+        if (coverage < 80) {
+          errors.push({
+            file: "?",
+            row: 0, col: 0,
+            msg: ["Cobertura do código por testes está abaixo de ", coverage, "%"].join(""),
+          });
+        }
+      } else {
         coverage = undefined;
-        await abortTesting();
-        testing = true;
-        const pt = await utils.spawn('npm', ['test'], {
-            name: procName + 'test',
-            cwd: utils.path(packageName),
-        })
-        // pt.on('line', (s)=>console.log(s));
-        pt.on('exit', () => {
-            const summary = utils.readCoverageSummary(packageName);
-            testing = false;
-            if (summary) {
-                coverage = Math.min(summary.lines.pct, summary.statements.pct, summary.functions.pct, summary.branches.pct);
-                if (coverage < 80)
-                    errors.push({
-                        file: '?',
-                        row: 0, col: 0,
-                        msg: ['Cobertura do código por testes está abaixo de ', coverage, '%'].join(''),
-                    })
-            }
-            else {
-                coverage = undefined;
-                errors.push({
-                    file: '?',
-                    row: 0, col: 0,
-                    msg: 'Teste não gerou relatório de cobertura de código'
-                })
-            }
-            if (events) events.onFinished(watcher);
+        errors.push({
+          file: "?",
+          row: 0, col: 0,
+          msg: "Teste não gerou relatório de cobertura de código",
         });
+      }
+      if (events) { events.onFinished(watcher); }
+    });
+  }
+  async function abortTesting() {
+    const old = procTest;
+    procTest = undefined;
+    testing = false;
+    if (old) {
+      return old.stop();
     }
-    async function abortTesting() {
-        const old = procTest;
-        procTest = undefined;
-        testing = false;
-        if (old) {
-            return await old.stop();
-        }
-    }
+  }
 }
 
 export async function setupTypeScript(name: string) {
-    ajust_packagejson();
-    save_tsconfig();
-    save_tslint();
-    install_pkgs();
-    function ajust_packagejson() {
-        const packageJSON = utils.getPackageJsonFor(name);
-        if (!packageJSON.scripts)
-            packageJSON.scripts = {};
-        packageJSON.scripts['build'] = 'tsc';
-        packageJSON.scripts['watch'] = 'tsc -w';
-        writeFileSync(utils.path(name, 'package.json'),
-            JSON.stringify(packageJSON, null, 2), 'utf-8');
+  ajust_packagejson();
+  save_tsconfig();
+  save_tslint();
+  install_pkgs();
+  function ajust_packagejson() {
+    const packageJSON = utils.getPackageJsonFor(name);
+    if (!packageJSON.scripts) {
+      packageJSON.scripts = {};
     }
-    function save_tsconfig() {
-        writeFileSync(utils.path(name, 'tsconfig.json'),
-            JSON.stringify({
-                "compilerOptions": {
-                    "target": "es5",
-                    "module": "commonjs",
-                    "moduleResolution": "node",
-                    "outDir": "dist",
-                    "sourceMap": true,
-                    "declaration": false,
-                    "strict": true,
-                    "lib": [
-                        "es2017",
-                    ]
-                },
-                "exclude": [
-                    "tmp"
-                ]
-            }, null, 2), 'utf-8');
-    }
-    function save_tslint() {
-        writeFileSync(utils.path(name, 'tslint.json'),
-            JSON.stringify({
-                "extends": "tslint-config-standard"
-            }, null, 2), 'utf-8');
-    }
-    function install_pkgs() {
-        utils.exec('npm', ['install', '--save-dev',
-            'typescript@latest',
-            'tslint@latest',
-            'tslint-config-standard@latest',
-        ], { cwd: utils.path(name), title: '' });
-    }
+    packageJSON.scripts.build = "tsc";
+    packageJSON.scripts.watch = "tsc -w";
+    packageJSON.scripts.lint = "tslint --project .";
+    packageJSON.scripts.lintfix = "tslint --project . --fix";
+    writeFileSync(utils.path(name, "package.json"),
+      JSON.stringify(packageJSON, null, 2), "utf-8");
+  }
+  function save_tsconfig() {
+    writeFileSync(utils.path(name, "tsconfig.json"),
+      JSON.stringify({
+        compilerOptions: {
+          target: "es5",
+          module: "commonjs",
+          moduleResolution: "node",
+          outDir: "dist",
+          sourceMap: true,
+          declaration: false,
+          strict: true,
+          lib: [
+            "es2017",
+          ],
+        },
+        exclude: [
+          "tmp",
+        ],
+      }, null, 2), "utf-8");
+  }
+  function save_tslint() {
+    writeFileSync(utils.path(name, "tslint.json"),
+      JSON.stringify({
+        extends: "tslint-config-standard",
+      }, null, 2), "utf-8");
+  }
+  function install_pkgs() {
+    utils.exec("npm", ["install", "--save-dev",
+      "typescript@latest",
+      "tslint@latest",
+      "tslint-config-standard@latest",
+    ], { cwd: utils.path(name), title: "" });
+  }
 }
 
 // export async function buildTypeScript(name: string) {
@@ -205,8 +211,6 @@ export async function setupTypeScript(name: string) {
 //     let emitResult = program.emit();
 
 //     return getPreEmitDiagnostics(program).concat(emitResult.diagnostics);
-
-
 
 //     // let exitCode = emitResult.emitSkipped ? 1 : 0;
 //     // console.log(`Process exiting with code '${exitCode}'.`);
