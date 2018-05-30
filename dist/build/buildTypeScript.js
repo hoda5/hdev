@@ -38,6 +38,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var fs_1 = require("fs");
 var utils_1 = require("../utils");
 var watchers_1 = require("../watchers");
+var path_1 = require("path");
 function buildTypeScript(name) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
@@ -215,7 +216,7 @@ function watchTypeScript(packageName) {
     });
 }
 exports.watchTypeScript = watchTypeScript;
-function setupTypeScript(name) {
+function setupTypeScript(name, withReact) {
     return __awaiter(this, void 0, void 0, function () {
         function ajust_packagejson() {
             var packageJSON = utils_1.utils.getPackageJsonFor(name);
@@ -226,38 +227,37 @@ function setupTypeScript(name) {
             packageJSON.scripts.watch = "tsc -w";
             packageJSON.scripts.lint = "tslint --project .";
             packageJSON.scripts.lintfix = "tslint --project . --fix";
+            if (packageJSON.dependencies && packageJSON.dependencies.react)
+                withReact = true;
             fs_1.writeFileSync(utils_1.utils.path(name, "package.json"), JSON.stringify(packageJSON, null, 2), "utf-8");
         }
         function save_tsconfig() {
-            fs_1.writeFileSync(utils_1.utils.path(name, "tsconfig.json"), JSON.stringify({
-                compilerOptions: {
-                    target: "es5",
-                    module: "commonjs",
-                    moduleResolution: "node",
-                    outDir: "dist",
-                    sourceMap: true,
-                    declaration: false,
-                    strict: true,
-                    lib: [
-                        "es2017",
-                    ],
-                },
-                exclude: [
-                    "tmp",
-                ],
-            }, null, 2), "utf-8");
+            var tsconfig = JSON.parse(fs_1.readFileSync(path_1.resolve(path_1.join(__dirname, "../tsconfig.json")), 'utf-8'));
+            if (withReact)
+                tsconfig.compilerOptions.lib.push("dom");
+            fs_1.writeFileSync(utils_1.utils.path(name, "tsconfig.json"), JSON.stringify(tsconfig, null, 2), "utf-8");
         }
         function save_tslint() {
-            fs_1.writeFileSync(utils_1.utils.path(name, "tslint.json"), JSON.stringify({
-                extends: "tslint-config-standard",
-            }, null, 2), "utf-8");
+            var tslint = JSON.parse(fs_1.readFileSync(path_1.resolve(path_1.join(__dirname, "../tslint.json")), 'utf-8'));
+            fs_1.writeFileSync(utils_1.utils.path(name, "tslint.json"), JSON.stringify(tslint, null, 2), "utf-8");
         }
         function install_pkgs() {
-            utils_1.utils.exec("npm", ["install", "--save-dev",
+            var argsDeps = [
+                "@hoda5/h5global@latest",
+            ];
+            var argsDevs = [
                 "typescript@latest",
                 "tslint@latest",
                 "tslint-config-standard@latest",
-            ], { cwd: utils_1.utils.path(name), title: "" });
+            ];
+            if (withReact) {
+                argsDeps.push("react@lastest");
+                argsDevs.push("@types/react@lastest");
+            }
+            if (argsDeps.length)
+                utils_1.utils.exec("npm", ["install", "--save"].concat(argsDeps), { cwd: utils_1.utils.path(name), title: "" });
+            if (argsDevs.length)
+                utils_1.utils.exec("npm", ["install", "--save-dev"].concat(argsDevs), { cwd: utils_1.utils.path(name), title: "" });
         }
         return __generator(this, function (_a) {
             ajust_packagejson();

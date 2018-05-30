@@ -44,8 +44,12 @@ function cmd_setup(args) {
             tipo = args.tipo;
             name = args.name;
             utils_1.utils.getPackageJsonFor(name);
-            if (tipo) {
-                buildTypeScript_1.setupTypeScript(name);
+            if (tipo == 'typescript') {
+                buildTypeScript_1.setupTypeScript(name, false);
+                return [2 /*return*/, true];
+            }
+            else if (tipo == 'react') {
+                buildTypeScript_1.setupTypeScript(name, true);
                 return [2 /*return*/, true];
             }
             return [2 /*return*/, false];

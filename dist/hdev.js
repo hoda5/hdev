@@ -67,7 +67,7 @@ prog.command("build", "build")
     .complete(completeWithPackageName)
     .action(cmd(cmd_build_1.cmd_build));
 prog.command("setup", "setup")
-    .argument("<tipo>", "tipo", ["typescript"])
+    .argument("<tipo>", "tipo", ["typescript", "react"])
     .argument("<name>", "Nome do pacote - se não tiver o nome constroi todos")
     .complete(completeWithPackageName)
     .action(cmd(cmd_setup_1.cmd_setup));
@@ -131,9 +131,8 @@ function cmd(fn, showrep, validrep) {
                 bash_color_1.wrap(utils_1.utils.root, "GREEN", "background"));
         }
         fn(args, options).then(function (ok) {
-            if (!ok) {
+            if (!ok)
                 prog.help("hdev");
-            }
         }, console.log);
     };
 }

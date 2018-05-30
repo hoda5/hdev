@@ -35,11 +35,10 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var fs_1 = require("fs");
 var utils_1 = require("./utils");
 function cmd_run(args) {
     return __awaiter(this, void 0, void 0, function () {
-        var packageName, cmd, dir, w, wf, path_1;
+        var packageName, cmd, dir;
         return __generator(this, function (_a) {
             packageName = args.name;
             cmd = args.cmd;
@@ -51,13 +50,6 @@ function cmd_run(args) {
                 cwd: dir,
                 title: "",
             });
-            w = utils_1.utils.workspaceFile;
-            if (fs_1.existsSync(w)) {
-                wf = JSON.parse(fs_1.readFileSync(w, "utf-8"));
-                path_1 = "packages/" + packageName;
-                wf.folders = wf.folders.filter(function (f) { return f.path !== path_1; });
-                fs_1.writeFileSync(w, JSON.stringify(wf, null, 2), "utf-8");
-            }
             return [2 /*return*/, true];
         });
     });

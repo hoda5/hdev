@@ -5,7 +5,8 @@
     "object-literal-sort-keys": false,
     "ordered-imports": false,
     "variable-name": {"severity": "warning"},
-    "curly": [true, "ignore-same-line"],
+    "curly": [true, "as-needed"],
+    "space-before-function-paren": false,
     "radix": false
   }
 }

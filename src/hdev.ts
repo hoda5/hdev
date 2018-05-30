@@ -37,7 +37,7 @@ prog.command("build", "build")
     .action(cmd(cmd_build));
 
 prog.command("setup", "setup")
-    .argument("<tipo>", "tipo", ["typescript"])
+    .argument("<tipo>", "tipo", ["typescript", "react"])
     .argument("<name>", "Nome do pacote - se não tiver o nome constroi todos")
     .complete(completeWithPackageName)
     .action(cmd(cmd_setup));
@@ -109,7 +109,7 @@ function cmd(fn: ActionCallback, showrep = true, validrep = true) {
             );
         }
         fn(args, options).then((ok: boolean) => {
-            if (!ok) { prog.help("hdev"); }
+            if (!ok) prog.help("hdev"); 
         }, console.log);
     };
 }

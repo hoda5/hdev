@@ -10,9 +10,15 @@ export interface PackageJSON {
   scripts?: {
     [name: string]: string;
   };
-  dependencies?: string[];
-  devDependencies?: string[];
-  peerDependencies?: string[];
+  dependencies?: {
+    [name: string]: string;
+  };
+  devDependencies?: {
+    [name: string]: string;
+  }
+  peerDependencies?: {
+    [name: string]: string;
+  }
 }
 export interface WorkspaceFile {
   "folders": Array<{ path: string }>;
