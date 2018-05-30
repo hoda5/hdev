@@ -12,6 +12,7 @@ import { cmd_build } from './cmd_build';
 import { cmd_start } from './cmd_start';
 import { utils } from './utils';
 import { wrap } from 'bash-color';
+import { cmd_run } from './cmd_run';
 
 prog.version('1.0.0')
 
@@ -71,7 +72,12 @@ prog.command('init', 'Inicializa na pasta atual como area de trabalho')
     .option('--subws', 'usado apenas para teste')
     .action(cmd(cmd_init, false, false));
 
-prog.command('setup-completation', 'Configura para completar com tab')
+prog.command('run', 'executa um comando na pasta do pacote')
+    .argument('<name>', 'nome do pacote')
+    .argument('<cmd...>', 'comando')
+    .action(cmd_run);
+
+prog.command('setupcompletation', 'Configura para completar com tab')
     //.argument('<shell>', 'bash/zsh/fish', ['bash', 'zsh', 'fish'])
     .action(cmd_setup_completation);
 

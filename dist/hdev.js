@@ -47,6 +47,7 @@ var cmd_build_1 = require("./cmd_build");
 var cmd_start_1 = require("./cmd_start");
 var utils_1 = require("./utils");
 var bash_color_1 = require("bash-color");
+var cmd_run_1 = require("./cmd_run");
 prog.version('1.0.0');
 prog.command('status', 'Status dos repositorios')
     .argument('[name]', 'Nome do pacote')
@@ -97,7 +98,11 @@ prog.command('login', 'configura login do git/github')
 prog.command('init', 'Inicializa na pasta atual como area de trabalho')
     .option('--subws', 'usado apenas para teste')
     .action(cmd(cmd_init_1.cmd_init, false, false));
-prog.command('setup-completation', 'Configura para completar com tab')
+prog.command('run', 'executa um comando na pasta do pacote')
+    .argument('<name>', 'nome do pacote')
+    .argument('<cmd...>', 'comando')
+    .action(cmd_run_1.cmd_run);
+prog.command('setupcompletation', 'Configura para completar com tab')
     //.argument('<shell>', 'bash/zsh/fish', ['bash', 'zsh', 'fish'])
     .action(cmd_setup_completation);
 prog.parse(process.argv);
