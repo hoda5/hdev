@@ -232,27 +232,26 @@ function setupTypeScript(name, withReact) {
             fs_1.writeFileSync(utils_1.utils.path(name, "package.json"), JSON.stringify(packageJSON, null, 2), "utf-8");
         }
         function save_tsconfig() {
-            var tsconfig = JSON.parse(fs_1.readFileSync(path_1.resolve(path_1.join(__dirname, "../tsconfig.json")), 'utf-8'));
+            var tsconfig = JSON.parse(fs_1.readFileSync(path_1.resolve(path_1.join(__dirname, "../../tsconfig.json")), "utf-8"));
             if (withReact)
                 tsconfig.compilerOptions.lib.push("dom");
             fs_1.writeFileSync(utils_1.utils.path(name, "tsconfig.json"), JSON.stringify(tsconfig, null, 2), "utf-8");
         }
         function save_tslint() {
-            var tslint = JSON.parse(fs_1.readFileSync(path_1.resolve(path_1.join(__dirname, "../tslint.json")), 'utf-8'));
+            var tslint = JSON.parse(fs_1.readFileSync(path_1.resolve(path_1.join(__dirname, "../../tslint.json")), "utf-8"));
             fs_1.writeFileSync(utils_1.utils.path(name, "tslint.json"), JSON.stringify(tslint, null, 2), "utf-8");
         }
         function install_pkgs() {
-            var argsDeps = [
-                "@hoda5/h5global@latest",
-            ];
+            var argsDeps = [];
+            if (!/^@hoda5\/(hdev|h5global)$/g.test(name))
+                argsDeps.push("@hoda5/h5global@latest");
             var argsDevs = [
                 "typescript@latest",
                 "tslint@latest",
-                "tslint-config-standard@latest",
             ];
             if (withReact) {
-                argsDeps.push("react@lastest");
-                argsDevs.push("@types/react@lastest");
+                argsDeps.push("react@latest");
+                argsDevs.push("@types/react@latest");
             }
             if (argsDeps.length)
                 utils_1.utils.exec("npm", ["install", "--save"].concat(argsDeps), { cwd: utils_1.utils.path(name), title: "" });
