@@ -1,5 +1,5 @@
-import { SpawnedProcess, utils } from '../utils';
-import { addWatcher, SrcMessage, Watcher, WatcherEvents } from '../watchers';
+import { SpawnedProcess, utils } from '../../utils';
+import { addWatcher, SrcMessage, Watcher, WatcherEvents } from '../../watchers';
 
 export async function watchTypeScript(packageName: string): Promise<Watcher | undefined> {
   if (packageName === '@hoda5/hdev') return;

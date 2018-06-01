@@ -1,5 +1,5 @@
 import { writeFileSync, readFileSync } from 'fs';
-import { utils } from '../utils';
+import { utils } from '../../utils';
 import { resolve, join } from 'path';
 
 export function projectUsesTypeScript(packageName: string) {

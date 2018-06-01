@@ -1,5 +1,5 @@
 
-import { buildTypeScript, projectUsesTypeScript } from './build/buildTypeScript';
+import { buildTypeScript, projectUsesTypeScript } from './build/ts/build';
 import { utils } from './utils';
 
 export async function cmd_build(args: any): Promise<boolean> {

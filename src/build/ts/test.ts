@@ -1,4 +1,4 @@
-import { utils } from '../utils';
+import { utils } from '../../utils';
 import * as Mocha from 'mocha';
 
 export async function testTypeScript(packageName: string) {
@@ -18,6 +18,6 @@ export async function testTypeScript(packageName: string) {
   mocha.addFile('dist/h5global.test.js');
   mocha.addFile('dist/tracker.test.js');
   mocha.run((failures) => {
-    console.log('failures');
+    console.log('failures: '+ failures);
   })
 }

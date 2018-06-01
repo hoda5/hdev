@@ -1,7 +1,7 @@
 import { watch } from 'chokidar';
 import { join, resolve } from 'path';
 import { launchBus, start, stop } from 'pm2';
-import { watchTypeScript } from './build/buildTypeScript';
+import { watchTypeScript } from './build/ts/watch';
 import { initUi } from './ui';
 import { utils } from './utils';
 

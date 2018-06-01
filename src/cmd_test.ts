@@ -1,5 +1,6 @@
 import { utils } from './utils';
-import { projectUsesTypeScript, testTypeScript } from './build/buildTypeScript';
+import { projectUsesTypeScript } from './build/ts/build';
+import { testTypeScript } from './build/ts/test';
 
 export async function cmd_test(args: any): Promise<boolean> {
   const name: string = args.packageName;

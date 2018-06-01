@@ -35,8 +35,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var utils_1 = require("../utils");
-var watchers_1 = require("../watchers");
+var utils_1 = require("../../utils");
+var watchers_1 = require("../../watchers");
 function watchTypeScript(packageName) {
     return __awaiter(this, void 0, void 0, function () {
         function runTests() {
@@ -261,4 +261,4 @@ function watchTypeScript(packageName) {
     });
 }
 exports.watchTypeScript = watchTypeScript;
-//# sourceMappingURL=watchTypeScript.js.map
+//# sourceMappingURL=watch.js.map

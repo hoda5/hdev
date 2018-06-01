@@ -36,7 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var fs_1 = require("fs");
-var utils_1 = require("../utils");
+var utils_1 = require("../../utils");
 var path_1 = require("path");
 function projectUsesTypeScript(packageName) {
     return utils_1.utils.exists(packageName, 'tsconfig.json');
@@ -165,4 +165,4 @@ exports.setupTypeScript = setupTypeScript;
 //     // console.log(`Process exiting with code '${exitCode}'.`);
 //     // process.exit(exitCode);
 // }
-//# sourceMappingURL=buildTypeScript.js.map
+//# sourceMappingURL=build.js.map

@@ -35,7 +35,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var utils_1 = require("../utils");
+var utils_1 = require("../../utils");
 var Mocha = require("mocha");
 function testTypeScript(packageName) {
     return __awaiter(this, void 0, void 0, function () {
@@ -53,11 +53,11 @@ function testTypeScript(packageName) {
             mocha.addFile('dist/h5global.test.js');
             mocha.addFile('dist/tracker.test.js');
             mocha.run(function (failures) {
-                console.log('failures');
+                console.log('failures: ' + failures);
             });
             return [2 /*return*/];
         });
     });
 }
 exports.testTypeScript = testTypeScript;
-//# sourceMappingURL=testTypeScript.js.map
+//# sourceMappingURL=test.js.map

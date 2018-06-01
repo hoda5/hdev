@@ -38,7 +38,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var chokidar_1 = require("chokidar");
 var path_1 = require("path");
 var pm2_1 = require("pm2");
-var buildTypeScript_1 = require("./build/buildTypeScript");
+var watch_1 = require("./build/ts/watch");
 var ui_1 = require("./ui");
 var utils_1 = require("./utils");
 function cmd_start(args, opts) {
@@ -69,7 +69,7 @@ function start_no_service(logMode) {
                                 switch (_a.label) {
                                     case 0:
                                         if (!(pkg !== '@hoda5/hdev')) return [3 /*break*/, 2];
-                                        return [4 /*yield*/, buildTypeScript_1.watchTypeScript(pkg)];
+                                        return [4 /*yield*/, watch_1.watchTypeScript(pkg)];
                                     case 1:
                                         if (_a.sent()) {
                                             ok = true;

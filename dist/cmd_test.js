@@ -36,7 +36,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var utils_1 = require("./utils");
-var buildTypeScript_1 = require("./build/buildTypeScript");
+var build_1 = require("./build/ts/build");
+var test_1 = require("./build/ts/test");
 function cmd_test(args) {
     return __awaiter(this, void 0, void 0, function () {
         var _this = this;
@@ -47,8 +48,8 @@ function cmd_test(args) {
                     name = args.packageName;
                     ok = false;
                     if (!name) return [3 /*break*/, 3];
-                    if (!buildTypeScript_1.projectUsesTypeScript(name)) return [3 /*break*/, 2];
-                    return [4 /*yield*/, buildTypeScript_1.testTypeScript(name)];
+                    if (!build_1.projectUsesTypeScript(name)) return [3 /*break*/, 2];
+                    return [4 /*yield*/, test_1.testTypeScript(name)];
                 case 1:
                     _a.sent();
                     ok = true;
@@ -57,7 +58,7 @@ function cmd_test(args) {
                 case 3: return [4 /*yield*/, utils_1.utils.forEachPackage(function (pkg) { return __awaiter(_this, void 0, void 0, function () {
                         return __generator(this, function (_a) {
                             switch (_a.label) {
-                                case 0: return [4 /*yield*/, buildTypeScript_1.testTypeScript(pkg)];
+                                case 0: return [4 /*yield*/, test_1.testTypeScript(pkg)];
                                 case 1:
                                     _a.sent();
                                     ok = true;
