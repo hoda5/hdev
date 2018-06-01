@@ -5,7 +5,7 @@
     "moduleResolution": "node",
     "outDir": "dist",
     "sourceMap": true,
-    "declaration": false,
+    "declaration": true,
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
@@ -13,6 +13,9 @@
       "es2017"
     ]
   },
+  "include": [
+    "src"
+  ],
   "exclude": [
     "tmp"
   ]

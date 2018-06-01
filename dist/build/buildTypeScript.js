@@ -37,243 +37,20 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var fs_1 = require("fs");
 var utils_1 = require("../utils");
-var watchers_1 = require("../watchers");
 var path_1 = require("path");
-function buildTypeScript(name) {
+function projectUsesTypeScript(packageName) {
+    return utils_1.utils.exists(packageName, 'tsconfig.json');
+}
+exports.projectUsesTypeScript = projectUsesTypeScript;
+function buildTypeScript(packageName) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
-            if (!utils_1.utils.exists(name, 'tsconfig.json'))
-                return [2 /*return*/];
-            utils_1.utils.exec('npm', ['run', 'build'], { cwd: utils_1.utils.path(name), title: 'building: ' + name });
+            utils_1.utils.exec('tsc', ['-p', '.'], { cwd: utils_1.utils.path(packageName), title: 'building: ' + packageName });
             return [2 /*return*/];
         });
     });
 }
 exports.buildTypeScript = buildTypeScript;
-function watchTypeScript(packageName) {
-    return __awaiter(this, void 0, void 0, function () {
-        function runTests() {
-            return __awaiter(this, void 0, void 0, function () {
-                function flushTest() {
-                    if (utils_1.utils.verbose)
-                        utils_1.utils.debug('flushTest', last);
-                    if (last) {
-                        delete last.parsing;
-                        if (/\.tsx?$/g.test(last.file)) {
-                            errors.push(last);
-                        }
-                    }
-                    last = undefined;
-                }
-                var pt, last;
-                return __generator(this, function (_a) {
-                    switch (_a.label) {
-                        case 0:
-                            coverage = undefined;
-                            return [4 /*yield*/, abortTesting()];
-                        case 1:
-                            _a.sent();
-                            testing = true;
-                            return [4 /*yield*/, utils_1.utils.spawn('npm', ['test'], {
-                                    name: procName + 'test',
-                                    cwd: utils_1.utils.path(packageName),
-                                })];
-                        case 2:
-                            pt = _a.sent();
-                            pt.on('line', function (s) {
-                                s = s.replace(/#\s+/g, '').trim();
-                                var mTestName = /not ok \d+\s*(.*)/g.exec(s);
-                                if (mTestName) {
-                                    flushTest();
-                                    last = {
-                                        msg: mTestName[1].replace('●', '').trim(),
-                                        expected: [], received: [], stack: [], file: '', row: 0, col: 0, parsing: '',
-                                    };
-                                }
-                                else if (last) {
-                                    if (last.parsing === '') {
-                                        if (/Expected:$/.test(s)) {
-                                            last.parsing = 'expected';
-                                            // } else {
-                                            //   if (s) last.msg = last.msg + s;
-                                        }
-                                    }
-                                    else if (last.parsing === 'expected') {
-                                        if (/Received:$/.test(s)) {
-                                            last.parsing = 'received';
-                                        }
-                                        else {
-                                            last.expected.push(s);
-                                        }
-                                    }
-                                    else if (last.parsing === 'received') {
-                                        if (/Stack:$/.test(s)) {
-                                            last.parsing = 'stack';
-                                        }
-                                        else {
-                                            last.received.push(s);
-                                        }
-                                    }
-                                    else if (last.parsing === 'stack') {
-                                        var ms = /at\s+(.*)$/.exec(s);
-                                        if (ms) {
-                                            var sp = ms[1];
-                                            last.stack.push(sp);
-                                            if (!last.file) {
-                                                var mf = sp.split(':');
-                                                last.file = mf[0];
-                                                last.row = parseInt(mf[1]);
-                                                last.col = parseInt(mf[2]);
-                                            }
-                                        }
-                                    }
-                                }
-                                // console.log(s)
-                            });
-                            pt.on('exit', function () {
-                                flushTest();
-                                var summary = utils_1.utils.readCoverageSummary(packageName);
-                                testing = false;
-                                if (summary) {
-                                    coverage = Math.round((summary.lines.pct + summary.statements.pct +
-                                        summary.functions.pct + summary.branches.pct) / 4);
-                                    if (coverage < 10) {
-                                        errors.push({
-                                            file: '?',
-                                            row: 0, col: 0,
-                                            msg: ['Cobertura do código por testes está abaixo de ', coverage, '%'].join(''),
-                                        });
-                                    }
-                                }
-                                else {
-                                    coverage = undefined;
-                                    errors.push({
-                                        file: '?',
-                                        row: 0, col: 0,
-                                        msg: 'Teste não gerou relatório de cobertura de código',
-                                    });
-                                }
-                                if (events) {
-                                    events.onFinished(watcher);
-                                }
-                            });
-                            return [2 /*return*/];
-                    }
-                });
-            });
-        }
-        function abortTesting() {
-            return __awaiter(this, void 0, void 0, function () {
-                var old;
-                return __generator(this, function (_a) {
-                    old = procTest;
-                    procTest = undefined;
-                    testing = false;
-                    if (old) {
-                        return [2 /*return*/, old.stop()];
-                    }
-                    return [2 /*return*/];
-                });
-            });
-        }
-        var events, warnings, errors, building, testing, coverage, procTest, procName, procBuild, watcher;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    if (packageName === '@hoda5/hdev')
-                        return [2 /*return*/];
-                    if (utils_1.utils.verbose)
-                        utils_1.utils.debug('watchTypeScript', packageName);
-                    if (!utils_1.utils.exists(packageName, 'tsconfig.json'))
-                        return [2 /*return*/];
-                    warnings = [];
-                    errors = [];
-                    building = false;
-                    testing = false;
-                    procName = 'ts_' + utils_1.utils.displayFolderName(packageName);
-                    return [4 /*yield*/, utils_1.utils.spawn('npm', ['run', 'watch'], {
-                            name: procName,
-                            cwd: utils_1.utils.path(packageName),
-                        })];
-                case 1:
-                    procBuild = _a.sent();
-                    procBuild.on('line', function (line) {
-                        if (/Starting .*compilation/g.test(line)) {
-                            warnings = [];
-                            errors = [];
-                            building = true;
-                            abortTesting();
-                            if (events) {
-                                events.onBuilding(watcher);
-                            }
-                        }
-                        else if (/Compilation complete/g.test(line)) {
-                            building = false;
-                            if (events) {
-                                events.onTesting(watcher);
-                            }
-                            runTests();
-                        }
-                        else {
-                            var m = /^([^\(]+)\((\d+),(\d+)\)\:\s*(\w*)\s+([^:]+):\s*(.*)/g.exec(line);
-                            if (m) {
-                                var type = m[4];
-                                if (/(TS6192)|(TS6133)/.test(m[6])) {
-                                    type = 'warning';
-                                }
-                                var msg = {
-                                    file: m[1],
-                                    row: parseInt(m[2]),
-                                    col: parseInt(m[3]),
-                                    msg: m[6] + m[5],
-                                };
-                                if (type === 'warning')
-                                    warnings.push(msg);
-                                else
-                                    errors.push(msg);
-                            }
-                            // else {
-                            //     line = line.replace(/\x1bc/g, '')
-                            //     if (line)
-                            //         console.log(line);
-                            // }
-                        }
-                    });
-                    watcher = {
-                        get packageName() {
-                            return packageName;
-                        },
-                        get building() {
-                            return building;
-                        },
-                        get testing() {
-                            return testing;
-                        },
-                        get warnings() {
-                            return warnings;
-                        },
-                        get coverage() {
-                            return coverage;
-                        },
-                        get errors() {
-                            return errors;
-                        },
-                        restart: function () {
-                            return procBuild.restart();
-                        },
-                        stop: function () {
-                            warnings = [];
-                            errors = [{ file: '', row: 0, col: 0, msg: 'stopped' }];
-                            return procBuild.stop();
-                        },
-                    };
-                    events = watchers_1.addWatcher(watcher);
-                    return [2 /*return*/, watcher];
-            }
-        });
-    });
-}
-exports.watchTypeScript = watchTypeScript;
 function setupTypeScript(name, withReact) {
     return __awaiter(this, void 0, void 0, function () {
         function ajust_packagejson() {
@@ -335,6 +112,9 @@ function setupTypeScript(name, withReact) {
                 'ts-jest@latest',
                 '@types/jest@latest',
             ];
+            if (!/^@hoda5\/(hdev)$/g.test(name)) {
+                argsDevs.push('@hoda5/h5dev@latest');
+            }
             if (withReact) {
                 argsDeps.push('react@latest');
                 argsDevs.push('@types/react@latest');

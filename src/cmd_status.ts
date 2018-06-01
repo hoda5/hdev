@@ -1,7 +1,7 @@
 import { utils } from './utils';
 
 export async function cmd_status(args: any): Promise<boolean> {
-  const name: string = args.name;
+  const name: string = args.packageName;
   let ok = false;
   if (name) {
     utils.exec(

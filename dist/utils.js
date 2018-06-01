@@ -99,6 +99,20 @@ exports.utils = {
         }
         return path_1.join.apply(void 0, [root, 'packages', packageName].concat(names));
     },
+    add_to_git_ignore: function (packageName) {
+        var ignore = [];
+        for (var _i = 1; _i < arguments.length; _i++) {
+            ignore[_i - 1] = arguments[_i];
+        }
+        var lines = exports.utils.exists('.gitignore') ?
+            fs_1.readFileSync(exports.utils.path(packageName, '.gitignore'), 'utf-8').split('\n') : [];
+        ignore.forEach(function (l) {
+            var i = lines.indexOf(l);
+            if (i === -1)
+                lines.push(l);
+        });
+        fs_1.writeFileSync(exports.utils.path(packageName, '.gitignore'), lines.join('\n'), 'utf-8');
+    },
     exists: function (packageName) {
         var names = [];
         for (var _i = 1; _i < arguments.length; _i++) {
@@ -136,11 +150,37 @@ exports.utils = {
         }
         var r = child_process_1.spawnSync(cmd, args, {
             cwd: opts.cwd,
+            encoding: 'utf-8',
             stdio: ['inherit', 'inherit', 'inherit'],
         });
         if (r.status !== 0) {
             process.exit(1);
         }
+    },
+    pipe: function (cmd, args, opts) {
+        if (opts.verbose) {
+            if (opts.title) {
+                // tslint:disable-next-line
+                console.log(bash_color_1.wrap(opts.title, 'RED', 'background'));
+            }
+            else {
+                // tslint:disable-next-line
+                console.log(bash_color_1.wrap(opts.cwd + '$ ', 'BLUE', 'background') +
+                    bash_color_1.wrap(cmd + ' ' + args.join(' '), 'RED', 'background'));
+            }
+        }
+        var r = child_process_1.spawnSync(cmd, args, {
+            cwd: opts.cwd,
+            encoding: 'utf-8',
+            stdio: 'pipe',
+        });
+        if (r.status !== 0) {
+            process.exit(1);
+        }
+        return {
+            out: r.stdout.toString(),
+            err: r.stderr.toString(),
+        };
     },
     spawn: function (cmd, args, opts) {
         return __awaiter(this, void 0, void 0, function () {

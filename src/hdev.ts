@@ -12,33 +12,44 @@ import { cmd_run } from './cmd_run';
 import { cmd_setup } from './cmd_setup';
 import { cmd_start } from './cmd_start';
 import { cmd_status } from './cmd_status';
+import { cmd_setup_environment, check_environment } from './cmd_setup_environment';
 import { utils } from './utils';
+import { cmd_select } from './cmd_select';
+import { cmd_test } from './cmd_test';
 
 prog.version('1.0.0');
 
+prog.command('select', 'seleciona uma área de trabalho')
+    .action(cmd(cmd_select));
+
 prog.command('status', 'Status dos repositorios')
-    .argument('[name]', 'Nome do pacote')
+    .argument('[package name]', 'Nome do pacote')
     .complete(completeWithPackageName)
     .action(cmd(cmd_status));
 
 prog.command('clone', 'Adiciona um repositorio')
     .argument('<url>', 'repositório git')
-    .argument('[name]', 'Nome do pacote')
+    .argument('[package name]', 'Nome do pacote')
     .action(cmd(cmd_clone));
 
 prog.command('remove', 'Remove um repositorio')
-    .argument('<name>', 'Nome do pacote')
+    .argument('[package name]', 'Nome do pacote')
     .complete(completeWithPackageName)
     .action(cmd(cmd_rm));
 
 prog.command('build', 'build')
-    .argument('<name>', 'Nome do pacote - se não tiver o nome constroi todos')
+    .argument('[package name]', 'Nome do pacote - se não tiver o nome constroi todos')
     .complete(completeWithPackageName)
     .action(cmd(cmd_build));
 
+prog.command('test', 'test')
+    .argument('[package name]', 'Nome do pacote - se não tiver o nome constroi todos')
+    .complete(completeWithPackageName)
+    .action(cmd(cmd_test));
+
 prog.command('setup', 'setup')
     .argument('<tipo>', 'tipo', ['typescript', 'react'])
-    .argument('<name>', 'Nome do pacote - se não tiver o nome constroi todos')
+    .argument('[package name]', 'Nome do pacote - se não tiver o nome constroi todos')
     .complete(completeWithPackageName)
     .action(cmd(cmd_setup));
 
@@ -56,18 +67,18 @@ prog.command('stop', 'para o servidor de desenvolvimento')
     }, false));
 
 prog.command('login', 'configura login do git/github')
-    .argument('<name>', 'Nome de usuario no servidor')
+    .argument('[package name]', 'Nome de usuario no servidor')
     .argument('<email>', 'email')
     .action(cmd(cmd_login, false));
 
-// prog.command('publish [name]')
+// prog.command('publish [package name]')
 //     .description('incrementa versao e publica pacotes')
 //     .action(cmd(todo));
-// prog.command('pull [name]')
+// prog.command('pull [package name]')
 //     .action(cmd(todo));
-// prog.command('push [name]')
+// prog.command('push [package name]')
 //     .action(cmd(todo));
-// prog.command('watch [name]')
+// prog.command('watch [package name]')
 //     .action(cmd(todo));
 // prog.command('upgrade')
 //     .action(cmd(todo));
@@ -79,19 +90,27 @@ prog.command('init', 'Inicializa na pasta atual como area de trabalho')
     .action(cmd(cmd_init, false, false));
 
 prog.command('run', 'executa um comando na pasta do pacote')
-    .argument('<name>', 'nome do pacote')
+    .argument('[package name]', 'nome do pacote')
     .argument('<cmd...>', 'comando')
     .action(cmd_run);
 
-prog.command('setupcompletation', 'Configura para completar com tab')
-    // .argument('<shell>', 'bash/zsh/fish', ['bash', 'zsh', 'fish'])
-    .action(cmd_setup_completation);
+prog.command('setup-environment', 'Configura o hdev no computador')
+    .action(cmd_setup_environment);
 
 prog.parse(process.argv);
 
 type ActionCallback = (args: any, options: any) => Promise<boolean>;
 function cmd(fn: ActionCallback, showrep = true, validrep = true) {
     return (args: any, options: any) => {
+
+        if (!check_environment()) {
+            // tslint:disable-next-line:no-console
+            utils.throw(
+                'O ambiente não está configurado.\n' +
+                '  1) execute ' + wrap('hdev setup_environment', 'BLUE', 'hi_bold') + '\n' +
+                '  2) reinicie o terminal',
+            );
+        }
         if (validrep && utils.root === '') {
             utils.throw('no code-workspace file found!');
         }
@@ -109,6 +128,7 @@ function cmd(fn: ActionCallback, showrep = true, validrep = true) {
                 wrap(utils.root, 'GREEN', 'background'),
             );
         }
+        args.packageName = completPackageName(args.packageName);
         fn(args, options).then((ok: boolean) => {
             if (!ok) prog.help('hdev');
         }, console.log);
@@ -117,14 +137,15 @@ function cmd(fn: ActionCallback, showrep = true, validrep = true) {
 
 async function completeWithPackageName() {
     // tslint:disable-next-line
-    console.log("completeWithPackageName");
+    // console.log("completeWithPackageName");
     return Promise.resolve(utils.listPackages());
 }
 
-function cmd_setup_completation() {
-    const shell = 'bash'; // args.shell
-    utils.exec(process.argv[0], [process.argv[1], 'completion', shell], {
-        cwd: process.cwd(),
-        title: '',
-    });
+function completPackageName(s: string) {
+    if (!s) {
+        s = process.cwd().substr((utils.root + '/packages/').length);
+    }
+    if (utils.listPackages().indexOf(s) > -1) return s;
+    if (utils.listPackages().indexOf('@hoda5/' + s) > -1) return '@hoda5/' + s;
+    utils.throw('invalid packageName: ' + s);
 }

@@ -48,27 +48,36 @@ var cmd_run_1 = require("./cmd_run");
 var cmd_setup_1 = require("./cmd_setup");
 var cmd_start_1 = require("./cmd_start");
 var cmd_status_1 = require("./cmd_status");
+var cmd_setup_environment_1 = require("./cmd_setup_environment");
 var utils_1 = require("./utils");
+var cmd_select_1 = require("./cmd_select");
+var cmd_test_1 = require("./cmd_test");
 prog.version('1.0.0');
+prog.command('select', 'seleciona uma área de trabalho')
+    .action(cmd(cmd_select_1.cmd_select));
 prog.command('status', 'Status dos repositorios')
-    .argument('[name]', 'Nome do pacote')
+    .argument('[package name]', 'Nome do pacote')
     .complete(completeWithPackageName)
     .action(cmd(cmd_status_1.cmd_status));
 prog.command('clone', 'Adiciona um repositorio')
     .argument('<url>', 'repositório git')
-    .argument('[name]', 'Nome do pacote')
+    .argument('[package name]', 'Nome do pacote')
     .action(cmd(cmd_clone_1.cmd_clone));
 prog.command('remove', 'Remove um repositorio')
-    .argument('<name>', 'Nome do pacote')
+    .argument('[package name]', 'Nome do pacote')
     .complete(completeWithPackageName)
     .action(cmd(cmd_rm_1.cmd_rm));
 prog.command('build', 'build')
-    .argument('<name>', 'Nome do pacote - se não tiver o nome constroi todos')
+    .argument('[package name]', 'Nome do pacote - se não tiver o nome constroi todos')
     .complete(completeWithPackageName)
     .action(cmd(cmd_build_1.cmd_build));
+prog.command('test', 'test')
+    .argument('[package name]', 'Nome do pacote - se não tiver o nome constroi todos')
+    .complete(completeWithPackageName)
+    .action(cmd(cmd_test_1.cmd_test));
 prog.command('setup', 'setup')
     .argument('<tipo>', 'tipo', ['typescript', 'react'])
-    .argument('<name>', 'Nome do pacote - se não tiver o nome constroi todos')
+    .argument('[package name]', 'Nome do pacote - se não tiver o nome constroi todos')
     .complete(completeWithPackageName)
     .action(cmd(cmd_setup_1.cmd_setup));
 prog.command('start', 'inicia o servidor de desenvolvimento')
@@ -85,17 +94,17 @@ prog.command('stop', 'para o servidor de desenvolvimento')
     });
 }); }, false));
 prog.command('login', 'configura login do git/github')
-    .argument('<name>', 'Nome de usuario no servidor')
+    .argument('[package name]', 'Nome de usuario no servidor')
     .argument('<email>', 'email')
     .action(cmd(cmd_login_1.cmd_login, false));
-// prog.command('publish [name]')
+// prog.command('publish [package name]')
 //     .description('incrementa versao e publica pacotes')
 //     .action(cmd(todo));
-// prog.command('pull [name]')
+// prog.command('pull [package name]')
 //     .action(cmd(todo));
-// prog.command('push [name]')
+// prog.command('push [package name]')
 //     .action(cmd(todo));
-// prog.command('watch [name]')
+// prog.command('watch [package name]')
 //     .action(cmd(todo));
 // prog.command('upgrade')
 //     .action(cmd(todo));
@@ -105,17 +114,22 @@ prog.command('init', 'Inicializa na pasta atual como area de trabalho')
     .option('--subws', 'usado apenas para teste')
     .action(cmd(cmd_init_1.cmd_init, false, false));
 prog.command('run', 'executa um comando na pasta do pacote')
-    .argument('<name>', 'nome do pacote')
+    .argument('[package name]', 'nome do pacote')
     .argument('<cmd...>', 'comando')
     .action(cmd_run_1.cmd_run);
-prog.command('setupcompletation', 'Configura para completar com tab')
-    // .argument('<shell>', 'bash/zsh/fish', ['bash', 'zsh', 'fish'])
-    .action(cmd_setup_completation);
+prog.command('setup-environment', 'Configura o hdev no computador')
+    .action(cmd_setup_environment_1.cmd_setup_environment);
 prog.parse(process.argv);
 function cmd(fn, showrep, validrep) {
     if (showrep === void 0) { showrep = true; }
     if (validrep === void 0) { validrep = true; }
     return function (args, options) {
+        if (!cmd_setup_environment_1.check_environment()) {
+            // tslint:disable-next-line:no-console
+            utils_1.utils.throw('O ambiente não está configurado.\n' +
+                '  1) execute ' + bash_color_1.wrap('hdev setup_environment', 'BLUE', 'hi_bold') + '\n' +
+                '  2) reinicie o terminal');
+        }
         if (validrep && utils_1.utils.root === '') {
             utils_1.utils.throw('no code-workspace file found!');
         }
@@ -130,6 +144,7 @@ function cmd(fn, showrep, validrep) {
             console.log(bash_color_1.wrap('repositorio: ', 'GREEN', 'background') +
                 bash_color_1.wrap(utils_1.utils.root, 'GREEN', 'background'));
         }
+        args.packageName = completPackageName(args.packageName);
         fn(args, options).then(function (ok) {
             if (!ok)
                 prog.help('hdev');
@@ -140,16 +155,19 @@ function completeWithPackageName() {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             // tslint:disable-next-line
-            console.log("completeWithPackageName");
+            // console.log("completeWithPackageName");
             return [2 /*return*/, Promise.resolve(utils_1.utils.listPackages())];
         });
     });
 }
-function cmd_setup_completation() {
-    var shell = 'bash'; // args.shell
-    utils_1.utils.exec(process.argv[0], [process.argv[1], 'completion', shell], {
-        cwd: process.cwd(),
-        title: '',
-    });
+function completPackageName(s) {
+    if (!s) {
+        s = process.cwd().substr((utils_1.utils.root + '/packages/').length);
+    }
+    if (utils_1.utils.listPackages().indexOf(s) > -1)
+        return s;
+    if (utils_1.utils.listPackages().indexOf('@hoda5/' + s) > -1)
+        return '@hoda5/' + s;
+    utils_1.utils.throw('invalid packageName: ' + s);
 }
 //# sourceMappingURL=hdev.js.map

@@ -40,7 +40,7 @@ function cmd_run(args) {
     return __awaiter(this, void 0, void 0, function () {
         var packageName, cmd, dir;
         return __generator(this, function (_a) {
-            packageName = args.name;
+            packageName = args.packageName;
             cmd = args.cmd;
             dir = utils_1.utils.path(packageName);
             if (cmd[0] === '--')

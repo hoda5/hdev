@@ -42,7 +42,7 @@ function cmd_clone(args) {
         var url, packageName, m, w, wf;
         return __generator(this, function (_a) {
             url = args.url;
-            packageName = args.name;
+            packageName = args.packageName;
             if (url[0] === '@') {
                 url = 'https://github.com/' + url.substr(1) + '.git';
             }

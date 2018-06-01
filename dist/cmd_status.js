@@ -43,7 +43,7 @@ function cmd_status(args) {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    name = args.name;
+                    name = args.packageName;
                     ok = false;
                     if (!name) return [3 /*break*/, 1];
                     utils_1.utils.exec('git', [

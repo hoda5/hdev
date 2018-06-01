@@ -41,7 +41,7 @@ function cmd_rm(args) {
     return __awaiter(this, void 0, void 0, function () {
         var packageName, w, wf, path_1;
         return __generator(this, function (_a) {
-            packageName = args.name;
+            packageName = args.packageName;
             utils_1.utils.exec('git', [
                 'rm',
                 '-f',

@@ -5,6 +5,8 @@
   "bin": {
     "hdev": "dist/hdev.js"
   },
+  "main": "dist/hdevlib.js",
+  "types": "dist/hdevlib.d.ts",
   "scripts": {
     "watch": "tsc -w",
     "test": "echo TODO && exit 1",
@@ -30,21 +32,29 @@
   },
   "dependencies": {
     "@types/blessed": "^0.1.10",
+    "@types/chai": "^4.1.3",
     "@types/chokidar": "^1.7.5",
     "@types/json-stringify-safe": "^5.0.0",
+    "@types/mocha": "^5.2.0",
     "@types/node": "^9.6.19",
+    "@types/npm": "^2.0.29",
+    "@types/source-map-support": "^0.4.1",
     "@types/tail": "^1.2.0",
     "bash-color": "0.0.4",
     "blessed": "^0.1.81",
     "caporal": "^0.10.0",
+    "chai": "^4.1.2",
     "chokidar": "^2.0.3",
     "dev": "^0.1.3",
     "express": "^4.16.3",
     "forever": "^0.15.3",
     "i": "^0.3.6",
     "json-stringify-safe": "^5.0.1",
+    "mocha": "^5.2.0",
+    "npm": "^6.1.0",
     "pm2": "^2.10.4",
     "socket.io": "^2.1.1",
+    "source-map-support": "^0.5.6",
     "tail": "^1.2.3",
     "typescript-standard": "^0.3.36",
     "u": "^0.1.0"

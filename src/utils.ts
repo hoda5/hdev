@@ -1,7 +1,7 @@
 import { wrap } from 'bash-color';
 import { spawn, SpawnOptions, spawnSync, ChildProcess } from 'child_process';
 import { EventEmitter } from 'events';
-import { existsSync, readdirSync, readFileSync } from 'fs';
+import { existsSync, readdirSync, readFileSync, writeFileSync } from 'fs';
 import { basename, dirname, join } from 'path';
 
 export interface PackageJSON {
@@ -88,6 +88,15 @@ export const utils = {
   path(packageName: string, ...names: string[]) {
     return join(root, 'packages', packageName, ...names);
   },
+  add_to_git_ignore(packageName: string, ...ignore: string[]) {
+    const lines = utils.exists('.gitignore') ?
+      readFileSync(utils.path(packageName, '.gitignore'), 'utf-8').split('\n') : [];
+    ignore.forEach((l) => {
+      const i = lines.indexOf(l);
+      if (i === -1) lines.push(l);
+    });
+    writeFileSync(utils.path(packageName, '.gitignore'), lines.join('\n'), 'utf-8');
+  },
   exists(packageName: string, ...names: string[]): boolean {
     return existsSync(utils.path(packageName, ...names));
   },
@@ -129,12 +138,44 @@ export const utils = {
       cmd, args,
       {
         cwd: opts.cwd,
+        encoding: 'utf-8',
         stdio: ['inherit', 'inherit', 'inherit'],
       },
     );
     if (r.status !== 0) {
       process.exit(1);
     }
+  },
+  pipe(cmd: string, args: string[], opts: { cwd: string, title: string, verbose?: boolean }): { out: string, err: string } {
+    if (opts.verbose) {
+      if (opts.title) {
+        // tslint:disable-next-line
+        console.log(
+          wrap(opts.title, 'RED', 'background'),
+        );
+      } else {
+        // tslint:disable-next-line
+        console.log(
+          wrap(opts.cwd + '$ ', 'BLUE', 'background') +
+          wrap(cmd + ' ' + args.join(' '), 'RED', 'background'),
+        );
+      }
+    }
+    const r = spawnSync(
+      cmd, args,
+      {
+        cwd: opts.cwd,
+        encoding: 'utf-8',
+        stdio: 'pipe',
+      },
+    );
+    if (r.status !== 0) {
+      process.exit(1);
+    }
+    return {
+      out: r.stdout.toString(),
+      err: r.stderr.toString(),
+    };
   },
   async spawn(
     cmd: string,
@@ -320,7 +361,7 @@ export const utils = {
     console.log(
       [
         wrap(title + ': ', 'PURPLE', 'background'),
-        ...args.map( (a) => wrap(JSON.stringify(a), 'BLUE', 'background')),
+        ...args.map((a) => wrap(JSON.stringify(a), 'BLUE', 'background')),
       ].join(' '),
     );
   },

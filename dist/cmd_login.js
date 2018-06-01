@@ -40,7 +40,7 @@ function cmd_login(args) {
     return __awaiter(this, void 0, void 0, function () {
         var name, email;
         return __generator(this, function (_a) {
-            name = args.name;
+            name = args.packageName;
             email = args.email;
             utils_1.utils.exec('git', [
                 'config',

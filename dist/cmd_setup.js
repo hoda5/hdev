@@ -39,17 +39,18 @@ var buildTypeScript_1 = require("./build/buildTypeScript");
 var utils_1 = require("./utils");
 function cmd_setup(args) {
     return __awaiter(this, void 0, void 0, function () {
-        var tipo, name;
+        var tipo, packageName;
         return __generator(this, function (_a) {
             tipo = args.tipo;
-            name = args.name;
-            utils_1.utils.getPackageJsonFor(name);
+            packageName = args.packageName;
+            utils_1.utils.getPackageJsonFor(packageName);
+            utils_1.utils.add_to_git_ignore(packageName, 'dist/**/*.test.*', 'dist/**/__tests__');
             if (tipo === 'typescript') {
-                buildTypeScript_1.setupTypeScript(name, false);
+                buildTypeScript_1.setupTypeScript(packageName, false);
                 return [2 /*return*/, true];
             }
             else if (tipo === 'react') {
-                buildTypeScript_1.setupTypeScript(name, true);
+                buildTypeScript_1.setupTypeScript(packageName, true);
                 return [2 /*return*/, true];
             }
             return [2 /*return*/, false];

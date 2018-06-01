@@ -2,7 +2,7 @@ import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { utils, WorkspaceFile } from './utils';
 
 export async function cmd_rm(args: any): Promise<boolean> {
-  const packageName: string = args.name;
+  const packageName: string = args.packageName;
   utils.exec(
         'git', [
           'rm',

@@ -3,7 +3,7 @@ import { utils, WorkspaceFile } from './utils';
 
 export async function cmd_clone(args: any): Promise<boolean> {
   let url: string = args.url;
-  let packageName: string = args.name;
+  let packageName: string = args.packageName;
   if (url[0] === '@') { url = 'https://github.com/' + url.substr(1) + '.git'; }
   if (!/^(http?|git).*\/.*\.git$/g.test(url)) {
     utils.throw('invalid url');

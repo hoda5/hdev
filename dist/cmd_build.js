@@ -44,15 +44,17 @@ function cmd_build(args) {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    name = args.name;
+                    name = args.packageName;
                     ok = false;
-                    if (!name) return [3 /*break*/, 2];
+                    if (!name) return [3 /*break*/, 3];
+                    if (!buildTypeScript_1.projectUsesTypeScript(name)) return [3 /*break*/, 2];
                     return [4 /*yield*/, buildTypeScript_1.buildTypeScript(name)];
                 case 1:
                     _a.sent();
                     ok = true;
-                    return [3 /*break*/, 4];
-                case 2: return [4 /*yield*/, utils_1.utils.forEachPackage(function (pkg) { return __awaiter(_this, void 0, void 0, function () {
+                    _a.label = 2;
+                case 2: return [3 /*break*/, 5];
+                case 3: return [4 /*yield*/, utils_1.utils.forEachPackage(function (pkg) { return __awaiter(_this, void 0, void 0, function () {
                         return __generator(this, function (_a) {
                             switch (_a.label) {
                                 case 0: return [4 /*yield*/, buildTypeScript_1.buildTypeScript(pkg)];
@@ -63,10 +65,10 @@ function cmd_build(args) {
                             }
                         });
                     }); })];
-                case 3:
+                case 4:
                     _a.sent();
-                    _a.label = 4;
-                case 4: return [2 /*return*/, ok];
+                    _a.label = 5;
+                case 5: return [2 /*return*/, ok];
             }
         });
     });

@@ -1,7 +1,7 @@
 import { utils } from './utils';
 
 export async function cmd_run(args: any): Promise<boolean> {
-  const packageName: string = args.name;
+  const packageName: string = args.packageName;
   const cmd: string[] = args.cmd;
   const dir = utils.path(packageName);
   if (cmd[0] === '--') cmd.splice(0, 1);
