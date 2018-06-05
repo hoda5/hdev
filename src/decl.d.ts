@@ -40,3 +40,54 @@ declare interface CoverageResult {
 declare interface CoverageResults {
     [name: string]: CoverageResult
 }
+
+declare module "nyc" {
+    interface ConfigNYC {
+        tempDirectory?: string;
+        subprocessBin?: string;
+        instrumenter?: string;
+        sourceMap?: boolean;
+        showProcessTree?: boolean;
+        eager?: boolean;
+        reportDir?: string;
+        reporter?: string;
+        cacheDir?: string;
+        include?: string;
+        exclude?: string;
+        require?: string;
+        extension?: string;
+        hookRequire?: any;
+        hookRunInContext?: any;
+        hookRunInThisContext?: any;
+        _processInfo?: any;
+    }
+    class NYC {
+        constructor(config: ConfigNYC)
+
+        // instrumenter();
+        // addFile(filename: string);
+        // addAllFiles();
+        // instrumentAllFiles(input, output, cb);
+        // walkAllFiles(dir, visitor)
+        // cleanup()
+        // clearCache();
+        createTempDirectory(): void;
+        // reset();
+        // wrap(bin);
+        // generateUniqueID();
+        // writeCoverageFile();
+        // coverageFinder();
+        // getCoverageMapFromAllCoverageFiles(baseDirectory);
+        report(): void;
+        // showProcessTree();
+        // checkCoverage(thresholds, perFile)
+
+        // eachReport(filenames, iterator, baseDirectory)
+        // loadReports(filenames)
+        // tempDirectory()
+        // reportDirectory()
+        // processInfoDirectory()
+    }
+
+    export = NYC;
+}

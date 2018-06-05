@@ -44,6 +44,7 @@ prog.command('build', 'build')
 
 prog.command('test', 'test')
     .argument('[package name]', 'Nome do pacote - se não tiver o nome constroi todos')
+    .option('-w, --fail-on-warnings', 'O teste falha se for retornado algum alerta')
     .complete(completeWithPackageName)
     .action(cmd(cmd_test));
 

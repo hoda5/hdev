@@ -8,6 +8,7 @@ import { listenWatchEvent, Watcher, watchers } from './watchers';
 
 export function initUi(logMode: boolean) {
   interface ContentWeb {
+    root: string;
     building?: string[];
     testing?: string[];
     errors?: Watcher[];
@@ -37,28 +38,33 @@ export function initUi(logMode: boolean) {
       else if (w.errors.length) errors.push(w);
       else if (w.warnings.length) warnings.push(w);
     });
-    const content_screen: string[] = [];
-    const content_web: ContentWeb = {};
+    const contentScreen: string[] = [];
+    const contentWEB: ContentWeb = {
+      root: utils.root,
+    };
     if (building.length) {
-      content_screen.push('Building: ' + building.join());
-      content_web.building = building;
+      contentScreen.push('Building: ' + building.join());
+      contentWEB.building = building;
     }
     if (testing.length) {
-      content_screen.push('Testing: ' + testing.join());
-      content_web.testing = testing;
+      contentScreen.push('Testing: ' + testing.join());
+      contentWEB.testing = testing;
     }
     if (errors.length) {
-      content_web.errors = errors;
-      content_screen.push('Error(s): ');
+      contentWEB.errors = errors;
+      contentScreen.push('Error(s): ');
       errors.forEach((w) => {
         w.errors.forEach((m) => {
-          content_screen.push([
-            m.file,
-            '(',
-            m.row,
-            ',',
-            m.col,
-            ') ',
+          const loc = utils.loc(m);
+          contentScreen.push([
+            loc ? (
+              loc.file +
+              '(' +
+              loc.row +
+              ',' +
+              loc.col +
+              ') '
+            ) : '',
             w.packageName,
             '\n  ',
             m.msg,
@@ -67,18 +73,21 @@ export function initUi(logMode: boolean) {
       });
     }
     if (warnings.length) {
-      content_web.warnings = warnings;
-      content_screen.push('Warning(s):');
+      contentWEB.warnings = warnings;
+      contentScreen.push('Warning(s):');
       if (errors.length === 0) {
         warnings.forEach((w) => {
           w.warnings.forEach((m) => {
-            content_screen.push([
-              m.file,
-              '(',
-              m.row,
-              ',',
-              m.col,
-              ') ',
+            const loc = utils.loc(m);
+            contentScreen.push([
+              loc ? (
+                loc.file +
+                '(' +
+                loc.row +
+                ',' +
+                loc.col +
+                ') '
+              ) : '',
               w.packageName,
               '\n  ',
               m.msg,
@@ -87,13 +96,13 @@ export function initUi(logMode: boolean) {
         });
       }
     }
-    web.refresh(content_web);
-    if (content_screen.length === 0) { content_screen.push('watching'); }
+    web.refresh(contentWEB);
+    if (contentScreen.length === 0) { contentScreen.push('watching'); }
     if (logMode) {
       // tslint:disable-next-line
-      console.log(content_screen.join("\n"));
+      console.log(contentScreen.join("\n"));
     } else {
-      box.content = ['hdev on port ' + web.port, '', ...content_screen].join('\n');
+      box.content = ['hdev on port ' + web.port, '', ...contentScreen].join('\n');
       box.focus();
       screen.render();
     }

@@ -33,10 +33,32 @@ export interface SpawnedProcess {
     restart(): Promise<void>;
     stop(): Promise<void>;
 }
+export interface SrcMessage {
+    msg: string;
+    stack?: Array<SrcMessageLoc>;
+}
+export interface SrcMessageLoc {
+    file: string;
+    row: number;
+    col: number;
+}
+export interface TestResults {
+    packageName: string;
+    errors: SrcMessage[];
+    warnings: SrcMessage[];
+}
 export declare const utils: {
+    nodify(fn: (cb: (err: Error) => any) => any): Promise<void>;
+    nodify<R>(fn: (cb: (err: Error, res: R) => any) => any): Promise<R>;
+    nodify<A1>(fn: (a1: A1, cb: (err: Error) => any) => any, a1: A1): Promise<void>;
+    nodify<A1, R>(fn: (a1: A1, cb: (err: Error, res: R) => any) => any, a1: A1): Promise<R>;
+    nodify<A1, A2>(fn: (a1: A1, a2: A2, cb: (err: Error) => any) => any, a1: A2, a2: A2): Promise<void>;
+    nodify<A1, A2, R>(fn: (a1: A1, a2: A2, cb: (err: Error, res: R) => any) => any, a1: A2, a2: A2): Promise<R>;
+    nodify<A1, A2, A3>(fn: (a1: A1, a2: A2, a3: A3, cb: (err: Error) => any) => any, a1: A2, a2: A2, a3: A3): Promise<void>;
+    nodify<A1, A2, A3, R>(fn: (a1: A1, a2: A2, a3: A3, cb: (err: Error, res: R) => any) => any, a1: A2, a2: A2, a3: A3): Promise<R>;
     verbose: boolean;
-    readonly root: string;
-    readonly workspaceFile: string;
+    root: string;
+    workspaceFile: string;
     displayFolderName(packageName: string): string;
     listPackages(): string[];
     forEachPackage(fn: (packageName: string, folder: string) => Promise<void>): Promise<boolean>;
@@ -46,6 +68,7 @@ export declare const utils: {
     exists(packageName: string, ...names: string[]): boolean;
     readText(packageName: string, filename: string): string;
     readJSON<T>(packageName: string, filename: string): T;
+    readTestResult(packageName: string): TestResults | undefined;
     readCoverageSummary(packageName: string): CoverageResult | undefined;
     throw(msg: string): void;
     exec(cmd: string, args: string[], opts: {
@@ -87,5 +110,6 @@ export declare const utils: {
         pending: boolean;
         cancel(): void;
     };
+    loc(m: SrcMessage): SrcMessageLoc | undefined;
     debug(title: string, ...args: any[]): void;
 };

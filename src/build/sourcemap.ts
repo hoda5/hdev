@@ -10,6 +10,7 @@ function getFile(uri: string, callback: (err: Error, content: string) => void) {
   // if (isUrl(uri)) {
   //   downloadFile(uri, callback);
   // } else {
+  // console.dir({ readLocalFile: uri })
   readLocalFile(uri, callback);
   // }
 }
@@ -29,8 +30,20 @@ export async function getSourceMapConsumerFromSource(source: string, url: string
 export async function getSourceMapConsumer(sourceUrl: string): Promise<BasicSourceMapConsumer> {
   return new Promise<BasicSourceMapConsumer>((res, rej) => {
     getFile(sourceUrl, (error, source) => {
+      // console.dir({sourceUrl,error, source})
       if (error) rej(error);
       else res(getSourceMapConsumerFromSource(source, sourceUrl));
     });
   });
+}
+
+export interface ErrorFailure {
+  title: string;
+  fullTitle: string;
+  duration: number;
+  currentRetry: number;
+  err: {
+    stack: string,
+    message: string,
+  };
 }

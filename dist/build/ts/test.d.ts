@@ -1,1 +1,1 @@
-export declare function testTypeScript(packageName: string): Promise<void>;
+export declare function testTypeScript(packageName: string, failOnWarnings: boolean): Promise<number>;

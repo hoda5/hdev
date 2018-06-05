@@ -35,28 +35,31 @@ function initUi(logMode) {
             else if (w.warnings.length)
                 warnings.push(w);
         });
-        var content_screen = [];
-        var content_web = {};
+        var contentScreen = [];
+        var contentWEB = {
+            root: utils_1.utils.root,
+        };
         if (building.length) {
-            content_screen.push('Building: ' + building.join());
-            content_web.building = building;
+            contentScreen.push('Building: ' + building.join());
+            contentWEB.building = building;
         }
         if (testing.length) {
-            content_screen.push('Testing: ' + testing.join());
-            content_web.testing = testing;
+            contentScreen.push('Testing: ' + testing.join());
+            contentWEB.testing = testing;
         }
         if (errors.length) {
-            content_web.errors = errors;
-            content_screen.push('Error(s): ');
+            contentWEB.errors = errors;
+            contentScreen.push('Error(s): ');
             errors.forEach(function (w) {
                 w.errors.forEach(function (m) {
-                    content_screen.push([
-                        m.file,
-                        '(',
-                        m.row,
-                        ',',
-                        m.col,
-                        ') ',
+                    var loc = utils_1.utils.loc(m);
+                    contentScreen.push([
+                        loc ? (loc.file +
+                            '(' +
+                            loc.row +
+                            ',' +
+                            loc.col +
+                            ') ') : '',
                         w.packageName,
                         '\n  ',
                         m.msg,
@@ -65,18 +68,19 @@ function initUi(logMode) {
             });
         }
         if (warnings.length) {
-            content_web.warnings = warnings;
-            content_screen.push('Warning(s):');
+            contentWEB.warnings = warnings;
+            contentScreen.push('Warning(s):');
             if (errors.length === 0) {
                 warnings.forEach(function (w) {
                     w.warnings.forEach(function (m) {
-                        content_screen.push([
-                            m.file,
-                            '(',
-                            m.row,
-                            ',',
-                            m.col,
-                            ') ',
+                        var loc = utils_1.utils.loc(m);
+                        contentScreen.push([
+                            loc ? (loc.file +
+                                '(' +
+                                loc.row +
+                                ',' +
+                                loc.col +
+                                ') ') : '',
                             w.packageName,
                             '\n  ',
                             m.msg,
@@ -85,16 +89,16 @@ function initUi(logMode) {
                 });
             }
         }
-        web.refresh(content_web);
-        if (content_screen.length === 0) {
-            content_screen.push('watching');
+        web.refresh(contentWEB);
+        if (contentScreen.length === 0) {
+            contentScreen.push('watching');
         }
         if (logMode) {
             // tslint:disable-next-line
-            console.log(content_screen.join("\n"));
+            console.log(contentScreen.join("\n"));
         }
         else {
-            box.content = ['hdev on port ' + web.port, ''].concat(content_screen).join('\n');
+            box.content = ['hdev on port ' + web.port, ''].concat(contentScreen).join('\n');
             box.focus();
             screen.render();
         }

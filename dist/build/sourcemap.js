@@ -45,6 +45,7 @@ function getFile(uri, callback) {
     // if (isUrl(uri)) {
     //   downloadFile(uri, callback);
     // } else {
+    // console.dir({ readLocalFile: uri })
     readLocalFile(uri, callback);
     // }
 }
@@ -70,6 +71,7 @@ function getSourceMapConsumer(sourceUrl) {
         return __generator(this, function (_a) {
             return [2 /*return*/, new Promise(function (res, rej) {
                     getFile(sourceUrl, function (error, source) {
+                        // console.dir({sourceUrl,error, source})
                         if (error)
                             rej(error);
                         else

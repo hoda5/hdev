@@ -41,35 +41,44 @@ var test_1 = require("./build/ts/test");
 function cmd_test(args) {
     return __awaiter(this, void 0, void 0, function () {
         var _this = this;
-        var name, ok;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
+        var name, failOnWarning, ok, code, _a;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
                 case 0:
                     name = args.packageName;
+                    failOnWarning = args.failOnWarning;
                     ok = false;
+                    code = 0;
                     if (!name) return [3 /*break*/, 3];
                     if (!setup_1.projectUsesTypeScript(name)) return [3 /*break*/, 2];
-                    return [4 /*yield*/, test_1.testTypeScript(name)];
+                    _a = code;
+                    return [4 /*yield*/, test_1.testTypeScript(name, failOnWarning)];
                 case 1:
-                    _a.sent();
+                    code = _a + _b.sent();
                     ok = true;
-                    _a.label = 2;
+                    _b.label = 2;
                 case 2: return [3 /*break*/, 5];
                 case 3: return [4 /*yield*/, utils_1.utils.forEachPackage(function (pkg) { return __awaiter(_this, void 0, void 0, function () {
-                        return __generator(this, function (_a) {
-                            switch (_a.label) {
-                                case 0: return [4 /*yield*/, test_1.testTypeScript(pkg)];
+                        var _a;
+                        return __generator(this, function (_b) {
+                            switch (_b.label) {
+                                case 0:
+                                    _a = code;
+                                    return [4 /*yield*/, test_1.testTypeScript(pkg, failOnWarning)];
                                 case 1:
-                                    _a.sent();
+                                    code = _a + _b.sent();
                                     ok = true;
                                     return [2 /*return*/];
                             }
                         });
                     }); })];
                 case 4:
-                    _a.sent();
-                    _a.label = 5;
-                case 5: return [2 /*return*/, ok];
+                    _b.sent();
+                    _b.label = 5;
+                case 5:
+                    if (code)
+                        process.exit(code);
+                    return [2 /*return*/, ok];
             }
         });
     });

@@ -13,6 +13,7 @@
     ],
     "space-before-function-paren": false,
     "radix": false,
-    "quotemark": [true, "single", "avoid-escape", "avoid-template"]
+    "quotemark": [true, "single", "avoid-escape", "avoid-template"],
+    "await-promise": true,
   }
 }

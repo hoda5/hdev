@@ -37,64 +37,11 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var utils_1 = require("../../utils");
 var watchers_1 = require("../../watchers");
-var ErrorStackParser = require("error-stack-parser");
-var sourcemap_1 = require("../sourcemap");
 function watchTypeScript(packageName) {
     return __awaiter(this, void 0, void 0, function () {
         function runTests() {
             return __awaiter(this, void 0, void 0, function () {
-                function parseTestResult(testOut) {
-                    return __awaiter(this, void 0, void 0, function () {
-                        var _this = this;
-                        var i, j, s, json, e_1;
-                        return __generator(this, function (_a) {
-                            switch (_a.label) {
-                                case 0:
-                                    i = testOut.indexOf('\n{\n');
-                                    j = testOut.indexOf('@@testEnd@@');
-                                    if (!(i === -1)) return [3 /*break*/, 1];
-                                    errors.push({
-                                        file: '?',
-                                        row: 0, col: 0,
-                                        msg: 'npm test deve gerar relatório mocha json',
-                                    });
-                                    return [3 /*break*/, 5];
-                                case 1:
-                                    s = testOut.substr(0, j).substr(i + 1);
-                                    _a.label = 2;
-                                case 2:
-                                    _a.trys.push([2, 4, , 5]);
-                                    json = JSON.parse(s);
-                                    return [4 /*yield*/, Promise.all((json.failures || []).map(function (f) { return __awaiter(_this, void 0, void 0, function () {
-                                            var err;
-                                            return __generator(this, function (_a) {
-                                                switch (_a.label) {
-                                                    case 0: return [4 /*yield*/, mapFailure(packageName, f)];
-                                                    case 1:
-                                                        err = _a.sent();
-                                                        errors.push(err);
-                                                        return [2 /*return*/];
-                                                }
-                                            });
-                                        }); }))];
-                                case 3:
-                                    _a.sent();
-                                    return [3 /*break*/, 5];
-                                case 4:
-                                    e_1 = _a.sent();
-                                    errors.push({
-                                        file: '?',
-                                        row: 0, col: 0,
-                                        msg: 'npm test gerou um relatório mocha json inválido: ' +
-                                            s + '\n' + (e_1.stack ? e_1.stack.toString() : e_1.message),
-                                    });
-                                    return [3 /*break*/, 5];
-                                case 5: return [2 /*return*/];
-                            }
-                        });
-                    });
-                }
-                var npmTest;
+                var e_1;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
@@ -105,26 +52,34 @@ function watchTypeScript(packageName) {
                             testing = true;
                             _a.label = 2;
                         case 2:
-                            _a.trys.push([2, , 5, 6]);
+                            _a.trys.push([2, 6, 7, 8]);
                             return [4 /*yield*/, utils_1.utils.pipe('npm', ['test'], {
                                     title: procName + '_tst',
                                     cwd: utils_1.utils.path(packageName),
                                     verbose: false,
+                                    throwErrors: true,
                                 })];
                         case 3:
-                            npmTest = _a.sent();
-                            return [4 /*yield*/, parseTestResult(npmTest.out + npmTest.err)];
+                            _a.sent();
+                            return [4 /*yield*/, processTestResult()];
                         case 4:
                             _a.sent();
-                            return [3 /*break*/, 6];
+                            return [4 /*yield*/, processCoverageResult()];
                         case 5:
+                            _a.sent();
+                            return [3 /*break*/, 8];
+                        case 6:
+                            e_1 = _a.sent();
+                            errors.push({ msg: e_1.message });
+                            return [3 /*break*/, 8];
+                        case 7:
                             testing = false;
                             if (events) {
                                 events.onFinished(watcher);
                             }
                             console.log('finished');
                             return [7 /*endfinally*/];
-                        case 6: return [2 /*return*/];
+                        case 8: return [2 /*return*/];
                     }
                 });
             });
@@ -138,6 +93,49 @@ function watchTypeScript(packageName) {
                     testing = false;
                     if (old)
                         return [2 /*return*/, old.stop()];
+                    return [2 /*return*/];
+                });
+            });
+        }
+        function processTestResult() {
+            return __awaiter(this, void 0, void 0, function () {
+                var summary;
+                return __generator(this, function (_a) {
+                    summary = utils_1.utils.readTestResult(packageName);
+                    if (summary) {
+                        errors.push.apply(errors, summary.errors);
+                        warnings.push.apply(warnings, summary.warnings);
+                    }
+                    else {
+                        coverage = undefined;
+                        errors.push({
+                            msg: 'Teste não gerou relatório',
+                        });
+                    }
+                    return [2 /*return*/];
+                });
+            });
+        }
+        function processCoverageResult() {
+            return __awaiter(this, void 0, void 0, function () {
+                var summary;
+                return __generator(this, function (_a) {
+                    summary = utils_1.utils.readCoverageSummary(packageName);
+                    if (summary) {
+                        coverage = Math.round((summary.lines.pct + summary.statements.pct +
+                            summary.functions.pct + summary.branches.pct) / 4);
+                        if (coverage < 10) {
+                            errors.push({
+                                msg: ['Cobertura do código por testes está abaixo de ', coverage, '%'].join(''),
+                            });
+                        }
+                    }
+                    else {
+                        coverage = undefined;
+                        errors.push({
+                            msg: 'Teste não gerou relatório de cobertura de código',
+                        });
+                    }
                     return [2 /*return*/];
                 });
             });
@@ -188,9 +186,11 @@ function watchTypeScript(packageName) {
                                     type = 'warning';
                                 }
                                 var msg = {
-                                    file: m[1],
-                                    row: parseInt(m[2]),
-                                    col: parseInt(m[3]),
+                                    stack: [{
+                                            file: m[1],
+                                            row: parseInt(m[2]),
+                                            col: parseInt(m[3]),
+                                        }],
                                     msg: m[6] + m[5],
                                 };
                                 if (type === 'warning')
@@ -229,7 +229,7 @@ function watchTypeScript(packageName) {
                         },
                         stop: function () {
                             warnings = [];
-                            errors = [{ file: '', row: 0, col: 0, msg: 'stopped' }];
+                            errors = [{ msg: 'stopped' }];
                             return procBuild.stop();
                         },
                     };
@@ -240,59 +240,4 @@ function watchTypeScript(packageName) {
     });
 }
 exports.watchTypeScript = watchTypeScript;
-function mapFailure(packageName, f) {
-    return __awaiter(this, void 0, void 0, function () {
-        var _this = this;
-        return __generator(this, function (_a) {
-            return [2 /*return*/, new Promise(function (pmResolve, pmReject) { return __awaiter(_this, void 0, void 0, function () {
-                    var err, stack, stackWithoutNodeModules, s, fileName, row, col, sourceMap, org, e_2;
-                    return __generator(this, function (_a) {
-                        switch (_a.label) {
-                            case 0:
-                                _a.trys.push([0, 2, , 3]);
-                                err = f.err;
-                                stack = ErrorStackParser.parse(err);
-                                stackWithoutNodeModules = stack.filter(function (st) {
-                                    return st.getFileName() && st.getFileName().indexOf('node_modules') === -1;
-                                });
-                                s = stackWithoutNodeModules.length ? stackWithoutNodeModules[0] : stack[0];
-                                fileName = s.getFileName();
-                                row = s.getLineNumber();
-                                col = s.getColumnNumber();
-                                return [4 /*yield*/, sourcemap_1.getSourceMapConsumer(utils_1.utils.path(packageName, fileName))];
-                            case 1:
-                                sourceMap = _a.sent();
-                                org = sourceMap.originalPositionFor({ line: row, column: col });
-                                console.dir({
-                                    src: { line: row, column: col },
-                                    org: org
-                                });
-                                if (org && org.source && org.line) {
-                                    pmResolve({
-                                        msg: err.message,
-                                        file: org.source,
-                                        row: org.line,
-                                        col: org.column || 0,
-                                    });
-                                }
-                                else {
-                                    pmResolve({
-                                        msg: err.message,
-                                        file: fileName,
-                                        row: row,
-                                        col: col,
-                                    });
-                                }
-                                return [3 /*break*/, 3];
-                            case 2:
-                                e_2 = _a.sent();
-                                pmReject(e_2);
-                                return [3 /*break*/, 3];
-                            case 3: return [2 /*return*/];
-                        }
-                    });
-                }); })];
-        });
-    });
-}
 //# sourceMappingURL=watch.js.map

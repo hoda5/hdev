@@ -37,6 +37,45 @@ export interface SpawnedProcess {
   restart(): Promise<void>;
   stop(): Promise<void>;
 }
+export interface SrcMessage {
+  msg: string;
+  stack?: Array<SrcMessageLoc>
+}
+
+export interface SrcMessageLoc {
+  file: string;
+  row: number;
+  col: number;
+}
+
+export interface TestResults {
+  packageName: string;
+  errors: SrcMessage[],
+  warnings: SrcMessage[],
+}
+const nodify: {
+  nodify(fn: (cb: (err: Error) => any) => any): Promise<void>
+  nodify<R>(fn: (cb: (err: Error, res: R) => any) => any): Promise<R>
+  nodify<A1>(fn: (a1: A1, cb: (err: Error) => any) => any, a1: A1): Promise<void>;
+  nodify<A1, R>(fn: (a1: A1, cb: (err: Error, res: R) => any) => any, a1: A1): Promise<R>;
+  nodify<A1, A2>(fn: (a1: A1, a2: A2, cb: (err: Error) => any) => any, a1: A2, a2: A2): Promise<void>;
+  nodify<A1, A2, R>(fn: (a1: A1, a2: A2, cb: (err: Error, res: R) => any) => any, a1: A2, a2: A2): Promise<R>;
+  nodify<A1, A2, A3>(
+    fn: (a1: A1, a2: A2, a3: A3, cb: (err: Error) => any) => any,
+    a1: A2, a2: A2, a3: A3): Promise<void>;
+  nodify<A1, A2, A3, R>(
+    fn: (a1: A1, a2: A2, a3: A3, cb: (err: Error, res: R) => any) => any,
+    a1: A2, a2: A2, a3: A3): Promise<R>;
+} = {
+    nodify(fn: any, ...args: any[]): Promise<any> {
+      return new Promise((pmResolve, pmReject) => {
+        fn.apply(null, [...args, (err: any, res: any) => {
+          if (err) pmReject(err);
+          else pmResolve(res);
+        }]);
+      });
+    },
+  }
 
 export const utils = {
   verbose: false,
@@ -108,6 +147,12 @@ export const utils = {
   },
   readJSON<T>(packageName: string, filename: string): T {
     return JSON.parse(utils.readText(packageName, filename)) as T;
+  },
+  readTestResult(packageName: string): TestResults | undefined {
+    const cov = 'coverage/h5-test-report.json';
+    if (utils.exists(packageName, cov)) {
+      return utils.readJSON<TestResults>(packageName, cov);
+    }
   },
   readCoverageSummary(packageName: string): CoverageResult | undefined {
     const cov = 'coverage/coverage-summary.json';
@@ -375,6 +420,15 @@ export const utils = {
       });
     return limiter;
   },
+  loc(m: SrcMessage) {
+    if (m.stack) {
+      const test = m.stack.filter((s) => /\.test\.ts$/g.test(s.file));
+      if (test.length) return test[0];
+      const ts = m.stack.filter((s) => /\.ts$/g.test(s.file));
+      if (ts.length) return ts[0];
+      return m.stack[0];
+    }
+  },
   debug(title: string, ...args: any[]) {
     // tslint:disable-next-line
     console.log(
@@ -384,6 +438,7 @@ export const utils = {
       ].join(' '),
     );
   },
+  ...nodify
 };
 const root = findRoot(process.cwd());
 

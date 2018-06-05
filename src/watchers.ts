@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events';
-import { utils } from './utils';
+import { utils, SrcMessage } from './utils';
 export interface Watcher {
   readonly packageName: string;
   readonly building: boolean;
@@ -9,12 +9,6 @@ export interface Watcher {
   readonly coverage: number | undefined;
   restart(): Promise<void>;
   stop(): Promise<void>;
-}
-export interface SrcMessage {
-  file: string;
-  row: number;
-  col: number;
-  msg: string;
 }
 
 export const watchers: Watcher[] = [];
