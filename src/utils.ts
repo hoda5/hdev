@@ -32,7 +32,7 @@ export interface Defer<T> {
 }
 export interface SpawnedProcess {
   readonly name: string;
-  on(event: 'line', handler: (s: string) => void): void;
+  on(event: 'line' | 'error', handler: (s: string) => void): void;
   on(event: 'exit', handler: (code: number) => void): void;
   restart(): Promise<void>;
   stop(): Promise<void>;
@@ -146,36 +146,53 @@ export const utils = {
       process.exit(1);
     }
   },
-  pipe(cmd: string, args: string[], opts: { cwd: string, title: string, verbose?: boolean }): { out: string, err: string } {
-    if (opts.verbose) {
-      if (opts.title) {
-        // tslint:disable-next-line
-        console.log(
-          wrap(opts.title, 'RED', 'background'),
-        );
-      } else {
-        // tslint:disable-next-line
-        console.log(
-          wrap(opts.cwd + '$ ', 'BLUE', 'background') +
-          wrap(cmd + ' ' + args.join(' '), 'RED', 'background'),
-        );
+  pipe(
+    cmd: string,
+    args: string[],
+    opts: { cwd: string, title: string, verbose?: boolean, throwErrors?: boolean }) {
+    return new Promise<{ out: string, err: string }>((pmResolve, pmReject) => {
+      if (opts.verbose) {
+        if (opts.title) {
+          // tslint:disable-next-line
+          console.log(
+            wrap(opts.title, 'RED', 'background'),
+          );
+        } else {
+          // tslint:disable-next-line
+          console.log(
+            wrap(opts.cwd + '$ ', 'BLUE', 'background') +
+            wrap(cmd + ' ' + args.join(' '), 'RED', 'background'),
+          );
+        }
       }
-    }
-    const r = spawnSync(
-      cmd, args,
-      {
+      const spawnOpts = {
         cwd: opts.cwd,
-        encoding: 'utf-8',
-        stdio: 'pipe',
-      },
-    );
-    if (r.status !== 0) {
-      process.exit(1);
-    }
-    return {
-      out: r.stdout.toString(),
-      err: r.stderr.toString(),
-    };
+        stdio: ['pipe', 'pipe', 'pipe'],
+        // encoding: 'utf8',
+      };
+      const child = spawn(cmd, args, spawnOpts);
+      const out: string[] = [];
+      const err: string[] = [];
+      child.stdout.on('data', (s) => {
+        out.push(s.toString());
+      });
+      child.stderr.on('data', (s) => {
+        err.push(s.toString());
+      });
+      child.on('close', (code) => {
+        if (opts.throwErrors && code) {
+          err.push('code=' + code);
+          pmReject(err.join(''));
+        } else {
+          pmResolve(
+            {
+              err: err.join(''),
+              out: out.join(''),
+            },
+          );
+        }
+      });
+    });
   },
   async spawn(
     cmd: string,
@@ -228,7 +245,9 @@ export const utils = {
       }
       proc = spawn(cmd, args, spawnOpts);
       proc.stdout.on('data', parseLines);
-      proc.stderr.on('data', parseLines);
+      proc.stderr.on('data', (data) => {
+        emitter.emit('error', data.toString());
+      });
       proc.on('exit', (code) => {
         if (utils.verbose) {
           // tslint:disable-next-line

@@ -1,5 +1,18 @@
 import { SpawnedProcess, utils } from '../../utils';
 import { addWatcher, SrcMessage, Watcher, WatcherEvents } from '../../watchers';
+import * as ErrorStackParser from 'error-stack-parser';
+import { getSourceMapConsumer } from '../sourcemap';
+
+interface ErrorFailure {
+  title: string;
+  fullTitle: string;
+  duration: number;
+  currentRetry: number;
+  err: {
+    stack: string,
+    message: string,
+  };
+}
 
 export async function watchTypeScript(packageName: string): Promise<Watcher | undefined> {
   if (packageName === '@hoda5/hdev') return;
@@ -88,105 +101,114 @@ export async function watchTypeScript(packageName: string): Promise<Watcher | un
     coverage = undefined;
     await abortTesting();
     testing = true;
-    const pt = await utils.spawn('npm', ['test'], {
-      name: procName + 'test',
-      cwd: utils.path(packageName),
-    });
-    let last: {
-      parsing?: string;
-      msg: string;
-      expected: string[];
-      received: string[];
-      stack: string[];
-      file: string;
-      row: number;
-      col: number;
-    } | undefined;
-    pt.on('line', (s) => {
-      s = s.replace(/#\s+/g, '').trim();
-      const mTestName = /not ok \d+\s*(.*)/g.exec(s);
-      if (mTestName) {
-        flushTest();
-        last = {
-          msg: mTestName[1].replace('●', '').trim(),
-          expected: [], received: [], stack: [], file: '', row: 0, col: 0, parsing: '',
-        };
-      } else if (last) {
-        if (last.parsing === '') {
-          if (/Expected:$/.test(s)) {
-            last.parsing = 'expected';
-            // } else {
-            //   if (s) last.msg = last.msg + s;
-          }
-        } else if (last.parsing === 'expected') {
-          if (/Received:$/.test(s)) {
-            last.parsing = 'received';
-          } else {
-            last.expected.push(s);
-          }
-        } else if (last.parsing === 'received') {
-          if (/Stack:$/.test(s)) {
-            last.parsing = 'stack';
-          } else {
-            last.received.push(s);
-          }
-        } else if (last.parsing === 'stack') {
-          const ms = /at\s+(.*)$/.exec(s);
-          if (ms) {
-            const sp = ms[1];
-            last.stack.push(sp);
-            if (!last.file) {
-              const mf = sp.split(':');
-              last.file = mf[0];
-              last.row = parseInt(mf[1]);
-              last.col = parseInt(mf[2]);
-            }
-          }
-        }
-      }
-      // console.log(s)
-    });
-    pt.on('exit', () => {
-      flushTest();
-      const summary = utils.readCoverageSummary(packageName);
+    try {
+      const npmTest = await utils.pipe('npm', ['test'], {
+        title: procName + '_tst',
+        cwd: utils.path(packageName),
+        verbose: false,
+      });
+      await parseTestResult(npmTest.out + npmTest.err);
+      // await parseCoverageResult();
+    } finally {
       testing = false;
-      if (summary) {
-        coverage = Math.round((summary.lines.pct + summary.statements.pct +
-          summary.functions.pct + summary.branches.pct) / 4);
-        if (coverage < 10) {
-          errors.push({
-            file: '?',
-            row: 0, col: 0,
-            msg: ['Cobertura do código por testes está abaixo de ', coverage, '%'].join(''),
-          });
-        }
-      } else {
-        coverage = undefined;
+      if (events) { events.onFinished(watcher); }
+      console.log('finished')
+    }
+
+    async function parseTestResult(testOut: string) {
+      const i = testOut.indexOf('\n{\n');
+      const j = testOut.indexOf('@@testEnd@@');
+      if (i === -1) {
         errors.push({
           file: '?',
           row: 0, col: 0,
-          msg: 'Teste não gerou relatório de cobertura de código',
+          msg: 'npm test deve gerar relatório mocha json',
         });
-      }
-      if (events) { events.onFinished(watcher); }
-    });
-    function flushTest() {
-      if (utils.verbose) utils.debug('flushTest', last);
-      if (last) {
-        delete last.parsing;
-        if (/\.tsx?$/g.test(last.file)) {
-          errors.push(last);
+      } else {
+        const s = testOut.substr(0, j).substr(i + 1);
+        try {
+          const json = JSON.parse(s) as {
+            failures?: ErrorFailure[],
+          };
+          await Promise.all((json.failures || []).map(async (f) => {
+            const err = await mapFailure(packageName, f);
+            errors.push(err);
+          }));
+        } catch (e) {
+          errors.push({
+            file: '?',
+            row: 0, col: 0,
+            msg: 'npm test gerou um relatório mocha json inválido: ' +
+              s + '\n' + (e.stack ? e.stack.toString() : e.message),
+          });
         }
       }
-      last = undefined;
     }
+    // async function parseCoverageResult() {
+    //   const summary = utils.readCoverageSummary(packageName);
+    //   if (summary) {
+    //     coverage = Math.round((summary.lines.pct + summary.statements.pct +
+    //       summary.functions.pct + summary.branches.pct) / 4);
+    //     if (coverage < 10) {
+    //       errors.push({
+    //         file: '?',
+    //         row: 0, col: 0,
+    //         msg: ['Cobertura do código por testes está abaixo de ', coverage, '%'].join(''),
+    //       });
+    //     }
+    //   } else {
+    //     coverage = undefined;
+    //     errors.push({
+    //       file: '?',
+    //       row: 0, col: 0,
+    //       msg: 'Teste não gerou relatório de cobertura de código',
+    //     });
+    //   }
+    // }
   }
   async function abortTesting() {
     const old = procTest;
     procTest = undefined;
     testing = false;
-    if (old) {
-      return old.stop();
-    }
+    if (old) return old.stop();
   }
+}
+
+async function mapFailure(packageName: string, f: ErrorFailure) {
+  return new Promise<SrcMessage>(async (pmResolve, pmReject) => {
+    try {
+      const err = f.err;
+      const stack = ErrorStackParser.parse(err as any);
+      const stackWithoutNodeModules = stack.filter((st) =>
+        st.getFileName() && st.getFileName().indexOf('node_modules') === -1);
+      const s = stackWithoutNodeModules.length ? stackWithoutNodeModules[0] : stack[0];
+
+      const fileName = s.getFileName();
+      const row = s.getLineNumber();
+      const col = s.getColumnNumber();
+
+      const sourceMap = await getSourceMapConsumer(utils.path(packageName, fileName));
+      const org = sourceMap.originalPositionFor({ line: row, column: col });
+      console.dir({
+        src: { line: row, column: col },
+        org})
+      if (org && org.source && org.line) {
+        pmResolve({
+          msg: err.message,
+          file: org.source,
+          row: org.line,
+          col: org.column || 0,
+        });
+      } else {
+        pmResolve({
+          msg: err.message,
+          file: fileName,
+          row,
+          col,
+        });
+      }
+    } catch (e) {
+      pmReject(e);
+    }
+  });
 }

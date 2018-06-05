@@ -42,15 +42,33 @@ export interface WatcherEvents {
 
 function onBuilding(watcher: Watcher) {
   onReload.cancel();
+  if (utils.verbose) {
+    utils.debug(
+      'emit building',
+      watcher,
+    );
+  }
   watchEmitter.emit('building', watcher);
 }
 
 function onTesting(watcher: Watcher) {
+  if (utils.verbose) {
+    utils.debug(
+      'emit testing',
+      watcher,
+    );
+  }
   watchEmitter.emit('testing', watcher);
   onReload();
 }
 
 function onFinished(watcher: Watcher) {
+  if (utils.verbose) {
+    utils.debug(
+      'emit finished',
+      watcher,
+    );
+  }
   watchEmitter.emit('finished', watcher);
 }
 
@@ -58,6 +76,11 @@ const onReload = utils.limiteSync({
   ms: 1000,
   bounce: true,
   fn() {
+    if (utils.verbose) {
+      utils.debug(
+        'emit reload',
+      );
+    }
     watchEmitter.emit('reload');
   },
 });

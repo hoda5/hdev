@@ -158,29 +158,44 @@ exports.utils = {
         }
     },
     pipe: function (cmd, args, opts) {
-        if (opts.verbose) {
-            if (opts.title) {
-                // tslint:disable-next-line
-                console.log(bash_color_1.wrap(opts.title, 'RED', 'background'));
+        return new Promise(function (pmResolve, pmReject) {
+            if (opts.verbose) {
+                if (opts.title) {
+                    // tslint:disable-next-line
+                    console.log(bash_color_1.wrap(opts.title, 'RED', 'background'));
+                }
+                else {
+                    // tslint:disable-next-line
+                    console.log(bash_color_1.wrap(opts.cwd + '$ ', 'BLUE', 'background') +
+                        bash_color_1.wrap(cmd + ' ' + args.join(' '), 'RED', 'background'));
+                }
             }
-            else {
-                // tslint:disable-next-line
-                console.log(bash_color_1.wrap(opts.cwd + '$ ', 'BLUE', 'background') +
-                    bash_color_1.wrap(cmd + ' ' + args.join(' '), 'RED', 'background'));
-            }
-        }
-        var r = child_process_1.spawnSync(cmd, args, {
-            cwd: opts.cwd,
-            encoding: 'utf-8',
-            stdio: 'pipe',
+            var spawnOpts = {
+                cwd: opts.cwd,
+                stdio: ['pipe', 'pipe', 'pipe'],
+            };
+            var child = child_process_1.spawn(cmd, args, spawnOpts);
+            var out = [];
+            var err = [];
+            child.stdout.on('data', function (s) {
+                out.push(s.toString());
+            });
+            child.stderr.on('data', function (s) {
+                err.push(s.toString());
+            });
+            child.on('close', function (code) {
+                if (opts.throwErrors && code) {
+                    err.push('code=' + code);
+                    pmReject(err.join(''));
+                }
+                else {
+                    pmResolve({
+                        err: err.join(''),
+                        out: out.join(''),
+                    });
+                }
+            });
         });
-        if (r.status !== 0) {
-            process.exit(1);
-        }
-        return {
-            out: r.stdout.toString(),
-            err: r.stderr.toString(),
-        };
     },
     spawn: function (cmd, args, opts) {
         return __awaiter(this, void 0, void 0, function () {
@@ -221,7 +236,9 @@ exports.utils = {
                         }
                         proc = child_process_1.spawn(cmd, args, spawnOpts);
                         proc.stdout.on('data', parseLines);
-                        proc.stderr.on('data', parseLines);
+                        proc.stderr.on('data', function (data) {
+                            emitter.emit('error', data.toString());
+                        });
                         proc.on('exit', function (code) {
                             if (exports.utils.verbose) {
                                 // tslint:disable-next-line

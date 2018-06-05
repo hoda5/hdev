@@ -1,57 +1,36 @@
-// "use strict";
+import { readFile } from 'fs';
+import { resolve } from 'source-map-resolve';
+import { SourceMapConsumer, BasicSourceMapConsumer } from 'source-map';
 
-// var http = require('http'),
-//     fs = require('fs'),
-//     isUrl = require('is-url'),
-//     sourceMapResolve = require('source-map-resolve'),
-//     sourceMap = require("source-map");
+function readLocalFile(uri: string, callback: (err: Error, content: string) => void) {
+  readFile(uri, 'utf8', callback);
+}
 
-// var downloadFile = function downloadFile (url, callback) {
-//     http.get(url, function (response) {
-//         var body = '';
-//         response.on('data', function(chunk) {
-//             body += chunk;
-//         }).on('end', function() {
-//             callback(null, body);
-//         });
-//     }).on('error', function () {
-//         callback(true, null);
-//     });
-// };
+function getFile(uri: string, callback: (err: Error, content: string) => void) {
+  // if (isUrl(uri)) {
+  //   downloadFile(uri, callback);
+  // } else {
+  readLocalFile(uri, callback);
+  // }
+}
 
-// var readLocalFile = function readLocalFile (uri, callback) {
-//     fs.readFile(uri, 'utf8', callback);
-// };
+export async function getSourceMapConsumerFromSource(source: string, url: string): Promise<BasicSourceMapConsumer> {
+  return new Promise<BasicSourceMapConsumer>((res, rej) => {
+    resolve(source, url, getFile, (error, result) => {
+      if (error) rej(error);
+      else {
+        result.map.sourcesContent = result.sourcesContent;
+        res(new SourceMapConsumer(result.map));
+      }
+    });
+  });
+}
 
-// var getFile = function getFile (uri, callback) {
-//     if (isUrl(uri)) {
-//         downloadFile(uri, callback);
-//     } else {
-//         readLocalFile(uri, callback);
-//     }
-// };
-
-// var getSourceMapConsumerFromSource = function getSourceMapConsumerFromSource (source, url, callback) {
-//     sourceMapResolve.resolve(source, url, getFile, function (error, result) {
-//         var sourceMapConsumer = null;
-
-//         if (!error) {
-//             result.map.sourcesContent = result.sourcesContent;
-//             sourceMapConsumer = new sourceMap.SourceMapConsumer(result.map);
-//         }
-
-//         callback(error, sourceMapConsumer);
-//     });
-// };
-
-// var getSourceMapConsumer = function getSourceMapConsumer (sourceUrl, callback) {
-//     getFile(sourceUrl, function (error, source) {
-//         if (error) {
-//             callback(error, null);
-//         } else {
-//             getSourceMapConsumerFromSource(source, sourceUrl, callback);
-//         }
-//     });
-// };
-
-// module.exports = getSourceMapConsumer;
+export async function getSourceMapConsumer(sourceUrl: string): Promise<BasicSourceMapConsumer> {
+  return new Promise<BasicSourceMapConsumer>((res, rej) => {
+    getFile(sourceUrl, (error, source) => {
+      if (error) rej(error);
+      else res(getSourceMapConsumerFromSource(source, sourceUrl));
+    });
+  });
+}

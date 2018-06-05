@@ -13,13 +13,30 @@ declare module "bash-color" {
     function wrap(s: string, color: Color, style: Style): string
 }
 
+declare module "source-map-resolve" {
+    function resolve(
+        code: string,
+        url: string,
+        getfile: (filename: string, cb: (err: Error, content: string) => void) => void,
+        cb: (err: Error, content: {
+            map: any,
+            url: string,
+            sourcesRelativeTo: string;
+            sourceMappingURL: string;
+            sourcesResolved: string[],
+            sourcesContent: string[]
+        }
+        ) => void,
+    ): void;
+}
+
 declare interface CoverageResult {
-        lines: { total: number, covered: number, skipped: number, pct: number },
-        statements: { total: number, covered: number, skipped: number, pct: number },
-        functions: { total: number, covered: number, skipped: number, pct: number },
-        branches: { total: number, covered: number, skipped: number, pct: number },    
+    lines: { total: number, covered: number, skipped: number, pct: number },
+    statements: { total: number, covered: number, skipped: number, pct: number },
+    functions: { total: number, covered: number, skipped: number, pct: number },
+    branches: { total: number, covered: number, skipped: number, pct: number },
 }
 
 declare interface CoverageResults {
-    [name: string]: CoverageResult    
+    [name: string]: CoverageResult
 }

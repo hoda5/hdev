@@ -138,6 +138,10 @@ function initUi(logMode) {
         var httpServer = new http.Server(app);
         var assetsDir = path_1.resolve(__dirname, '../hdev-assets');
         var sio = socketIO(httpServer);
+        httpServer.on('error', function (err) {
+            utils_1.utils.exec('/bin/ss', ['-lptn', 'sport = :7777'], { cwd: process.cwd(), title: '' });
+            utils_1.utils.throw(err.message);
+        });
         httpServer.listen(port, function () {
             // tslint:disable-next-line
             console.log("Listening on *:" + port);

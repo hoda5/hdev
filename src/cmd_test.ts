@@ -1,5 +1,5 @@
 import { utils } from './utils';
-import { projectUsesTypeScript } from './build/ts/build';
+import { projectUsesTypeScript } from './build/ts/setup';
 import { testTypeScript } from './build/ts/test';
 
 export async function cmd_test(args: any): Promise<boolean> {

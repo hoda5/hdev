@@ -1,8 +1,7 @@
-import { utils } from '../../utils';
 import * as Mocha from 'mocha';
+import { utils } from '../../utils';
 
 export async function testTypeScript(packageName: string) {
-  const dir = utils.path(packageName);
   const mochaOpts = {
     ui: 'tdd',
     reporter: 'json',
@@ -15,9 +14,11 @@ export async function testTypeScript(packageName: string) {
     // bail?: boolean;
   };
   const mocha = new Mocha(mochaOpts);
-  mocha.addFile('dist/h5global.test.js');
-  mocha.addFile('dist/tracker.test.js');
+  mocha.addFile(utils.path(packageName) + '/dist/h5global.test.js');
+  mocha.addFile(utils.path(packageName) + '/dist/tracker.test.js');
   mocha.run((failures) => {
-    console.log('failures: '+ failures);
-  })
+    
+    console.log('\n@@testEnd@@\n');
+    process.exit(failures > 0 ? 1 : 0);
+  });
 }

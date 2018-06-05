@@ -35,13 +35,12 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var utils_1 = require("../../utils");
 var Mocha = require("mocha");
+var utils_1 = require("../../utils");
 function testTypeScript(packageName) {
     return __awaiter(this, void 0, void 0, function () {
-        var dir, mochaOpts, mocha;
+        var mochaOpts, mocha;
         return __generator(this, function (_a) {
-            dir = utils_1.utils.path(packageName);
             mochaOpts = {
                 ui: 'tdd',
                 reporter: 'json',
@@ -50,10 +49,11 @@ function testTypeScript(packageName) {
                 timeout: 3000,
             };
             mocha = new Mocha(mochaOpts);
-            mocha.addFile('dist/h5global.test.js');
-            mocha.addFile('dist/tracker.test.js');
+            mocha.addFile(utils_1.utils.path(packageName) + '/dist/h5global.test.js');
+            mocha.addFile(utils_1.utils.path(packageName) + '/dist/tracker.test.js');
             mocha.run(function (failures) {
-                console.log('failures: ' + failures);
+                console.log('\n@@testEnd@@\n');
+                process.exit(failures > 0 ? 1 : 0);
             });
             return [2 /*return*/];
         });

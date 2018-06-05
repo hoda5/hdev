@@ -37,22 +37,64 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var utils_1 = require("../../utils");
 var watchers_1 = require("../../watchers");
+var ErrorStackParser = require("error-stack-parser");
+var sourcemap_1 = require("../sourcemap");
 function watchTypeScript(packageName) {
     return __awaiter(this, void 0, void 0, function () {
         function runTests() {
             return __awaiter(this, void 0, void 0, function () {
-                function flushTest() {
-                    if (utils_1.utils.verbose)
-                        utils_1.utils.debug('flushTest', last);
-                    if (last) {
-                        delete last.parsing;
-                        if (/\.tsx?$/g.test(last.file)) {
-                            errors.push(last);
-                        }
-                    }
-                    last = undefined;
+                function parseTestResult(testOut) {
+                    return __awaiter(this, void 0, void 0, function () {
+                        var _this = this;
+                        var i, j, s, json, e_1;
+                        return __generator(this, function (_a) {
+                            switch (_a.label) {
+                                case 0:
+                                    i = testOut.indexOf('\n{\n');
+                                    j = testOut.indexOf('@@testEnd@@');
+                                    if (!(i === -1)) return [3 /*break*/, 1];
+                                    errors.push({
+                                        file: '?',
+                                        row: 0, col: 0,
+                                        msg: 'npm test deve gerar relatório mocha json',
+                                    });
+                                    return [3 /*break*/, 5];
+                                case 1:
+                                    s = testOut.substr(0, j).substr(i + 1);
+                                    _a.label = 2;
+                                case 2:
+                                    _a.trys.push([2, 4, , 5]);
+                                    json = JSON.parse(s);
+                                    return [4 /*yield*/, Promise.all((json.failures || []).map(function (f) { return __awaiter(_this, void 0, void 0, function () {
+                                            var err;
+                                            return __generator(this, function (_a) {
+                                                switch (_a.label) {
+                                                    case 0: return [4 /*yield*/, mapFailure(packageName, f)];
+                                                    case 1:
+                                                        err = _a.sent();
+                                                        errors.push(err);
+                                                        return [2 /*return*/];
+                                                }
+                                            });
+                                        }); }))];
+                                case 3:
+                                    _a.sent();
+                                    return [3 /*break*/, 5];
+                                case 4:
+                                    e_1 = _a.sent();
+                                    errors.push({
+                                        file: '?',
+                                        row: 0, col: 0,
+                                        msg: 'npm test gerou um relatório mocha json inválido: ' +
+                                            s + '\n' + (e_1.stack ? e_1.stack.toString() : e_1.message),
+                                    });
+                                    return [3 /*break*/, 5];
+                                case 5: return [2 /*return*/];
+                            }
+                        });
+                    });
                 }
-                var pt, last;
+                var npmTest;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
@@ -61,90 +103,28 @@ function watchTypeScript(packageName) {
                         case 1:
                             _a.sent();
                             testing = true;
-                            return [4 /*yield*/, utils_1.utils.spawn('npm', ['test'], {
-                                    name: procName + 'test',
-                                    cwd: utils_1.utils.path(packageName),
-                                })];
+                            _a.label = 2;
                         case 2:
-                            pt = _a.sent();
-                            pt.on('line', function (s) {
-                                s = s.replace(/#\s+/g, '').trim();
-                                var mTestName = /not ok \d+\s*(.*)/g.exec(s);
-                                if (mTestName) {
-                                    flushTest();
-                                    last = {
-                                        msg: mTestName[1].replace('●', '').trim(),
-                                        expected: [], received: [], stack: [], file: '', row: 0, col: 0, parsing: '',
-                                    };
-                                }
-                                else if (last) {
-                                    if (last.parsing === '') {
-                                        if (/Expected:$/.test(s)) {
-                                            last.parsing = 'expected';
-                                            // } else {
-                                            //   if (s) last.msg = last.msg + s;
-                                        }
-                                    }
-                                    else if (last.parsing === 'expected') {
-                                        if (/Received:$/.test(s)) {
-                                            last.parsing = 'received';
-                                        }
-                                        else {
-                                            last.expected.push(s);
-                                        }
-                                    }
-                                    else if (last.parsing === 'received') {
-                                        if (/Stack:$/.test(s)) {
-                                            last.parsing = 'stack';
-                                        }
-                                        else {
-                                            last.received.push(s);
-                                        }
-                                    }
-                                    else if (last.parsing === 'stack') {
-                                        var ms = /at\s+(.*)$/.exec(s);
-                                        if (ms) {
-                                            var sp = ms[1];
-                                            last.stack.push(sp);
-                                            if (!last.file) {
-                                                var mf = sp.split(':');
-                                                last.file = mf[0];
-                                                last.row = parseInt(mf[1]);
-                                                last.col = parseInt(mf[2]);
-                                            }
-                                        }
-                                    }
-                                }
-                                // console.log(s)
-                            });
-                            pt.on('exit', function () {
-                                flushTest();
-                                var summary = utils_1.utils.readCoverageSummary(packageName);
-                                testing = false;
-                                if (summary) {
-                                    coverage = Math.round((summary.lines.pct + summary.statements.pct +
-                                        summary.functions.pct + summary.branches.pct) / 4);
-                                    if (coverage < 10) {
-                                        errors.push({
-                                            file: '?',
-                                            row: 0, col: 0,
-                                            msg: ['Cobertura do código por testes está abaixo de ', coverage, '%'].join(''),
-                                        });
-                                    }
-                                }
-                                else {
-                                    coverage = undefined;
-                                    errors.push({
-                                        file: '?',
-                                        row: 0, col: 0,
-                                        msg: 'Teste não gerou relatório de cobertura de código',
-                                    });
-                                }
-                                if (events) {
-                                    events.onFinished(watcher);
-                                }
-                            });
-                            return [2 /*return*/];
+                            _a.trys.push([2, , 5, 6]);
+                            return [4 /*yield*/, utils_1.utils.pipe('npm', ['test'], {
+                                    title: procName + '_tst',
+                                    cwd: utils_1.utils.path(packageName),
+                                    verbose: false,
+                                })];
+                        case 3:
+                            npmTest = _a.sent();
+                            return [4 /*yield*/, parseTestResult(npmTest.out + npmTest.err)];
+                        case 4:
+                            _a.sent();
+                            return [3 /*break*/, 6];
+                        case 5:
+                            testing = false;
+                            if (events) {
+                                events.onFinished(watcher);
+                            }
+                            console.log('finished');
+                            return [7 /*endfinally*/];
+                        case 6: return [2 /*return*/];
                     }
                 });
             });
@@ -156,9 +136,8 @@ function watchTypeScript(packageName) {
                     old = procTest;
                     procTest = undefined;
                     testing = false;
-                    if (old) {
+                    if (old)
                         return [2 /*return*/, old.stop()];
-                    }
                     return [2 /*return*/];
                 });
             });
@@ -261,4 +240,59 @@ function watchTypeScript(packageName) {
     });
 }
 exports.watchTypeScript = watchTypeScript;
+function mapFailure(packageName, f) {
+    return __awaiter(this, void 0, void 0, function () {
+        var _this = this;
+        return __generator(this, function (_a) {
+            return [2 /*return*/, new Promise(function (pmResolve, pmReject) { return __awaiter(_this, void 0, void 0, function () {
+                    var err, stack, stackWithoutNodeModules, s, fileName, row, col, sourceMap, org, e_2;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                _a.trys.push([0, 2, , 3]);
+                                err = f.err;
+                                stack = ErrorStackParser.parse(err);
+                                stackWithoutNodeModules = stack.filter(function (st) {
+                                    return st.getFileName() && st.getFileName().indexOf('node_modules') === -1;
+                                });
+                                s = stackWithoutNodeModules.length ? stackWithoutNodeModules[0] : stack[0];
+                                fileName = s.getFileName();
+                                row = s.getLineNumber();
+                                col = s.getColumnNumber();
+                                return [4 /*yield*/, sourcemap_1.getSourceMapConsumer(utils_1.utils.path(packageName, fileName))];
+                            case 1:
+                                sourceMap = _a.sent();
+                                org = sourceMap.originalPositionFor({ line: row, column: col });
+                                console.dir({
+                                    src: { line: row, column: col },
+                                    org: org
+                                });
+                                if (org && org.source && org.line) {
+                                    pmResolve({
+                                        msg: err.message,
+                                        file: org.source,
+                                        row: org.line,
+                                        col: org.column || 0,
+                                    });
+                                }
+                                else {
+                                    pmResolve({
+                                        msg: err.message,
+                                        file: fileName,
+                                        row: row,
+                                        col: col,
+                                    });
+                                }
+                                return [3 /*break*/, 3];
+                            case 2:
+                                e_2 = _a.sent();
+                                pmReject(e_2);
+                                return [3 /*break*/, 3];
+                            case 3: return [2 /*return*/];
+                        }
+                    });
+                }); })];
+        });
+    });
+}
 //# sourceMappingURL=watch.js.map

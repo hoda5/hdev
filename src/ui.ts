@@ -147,6 +147,10 @@ export function initUi(logMode: boolean) {
 
     const sio = socketIO(httpServer);
 
+    httpServer.on('error', (err) => {
+      utils.exec('/bin/ss', ['-lptn', 'sport = :7777'], { cwd: process.cwd(), title: '' });
+      utils.throw(err.message);
+    });
     httpServer.listen(port, () => {
       // tslint:disable-next-line
       console.log("Listening on *:" + port);

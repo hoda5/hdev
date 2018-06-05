@@ -28,7 +28,7 @@ export interface Defer<T> {
 }
 export interface SpawnedProcess {
     readonly name: string;
-    on(event: 'line', handler: (s: string) => void): void;
+    on(event: 'line' | 'error', handler: (s: string) => void): void;
     on(event: 'exit', handler: (code: number) => void): void;
     restart(): Promise<void>;
     stop(): Promise<void>;
@@ -56,10 +56,11 @@ export declare const utils: {
         cwd: string;
         title: string;
         verbose?: boolean | undefined;
-    }): {
+        throwErrors?: boolean | undefined;
+    }): Promise<{
         out: string;
         err: string;
-    };
+    }>;
     spawn(cmd: string, args: string[], opts: {
         name: string;
         cwd: string;

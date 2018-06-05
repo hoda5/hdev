@@ -14,19 +14,31 @@ function unlistenWatchEvent(event, listenner) {
 exports.unlistenWatchEvent = unlistenWatchEvent;
 function onBuilding(watcher) {
     onReload.cancel();
+    if (utils_1.utils.verbose) {
+        utils_1.utils.debug('emit building', watcher);
+    }
     exports.watchEmitter.emit('building', watcher);
 }
 function onTesting(watcher) {
+    if (utils_1.utils.verbose) {
+        utils_1.utils.debug('emit testing', watcher);
+    }
     exports.watchEmitter.emit('testing', watcher);
     onReload();
 }
 function onFinished(watcher) {
+    if (utils_1.utils.verbose) {
+        utils_1.utils.debug('emit finished', watcher);
+    }
     exports.watchEmitter.emit('finished', watcher);
 }
 var onReload = utils_1.utils.limiteSync({
     ms: 1000,
     bounce: true,
     fn: function () {
+        if (utils_1.utils.verbose) {
+            utils_1.utils.debug('emit reload');
+        }
         exports.watchEmitter.emit('reload');
     },
 });

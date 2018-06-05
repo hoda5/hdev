@@ -35,13 +35,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var fs_1 = require("fs");
 var utils_1 = require("../../utils");
-var path_1 = require("path");
-function projectUsesTypeScript(packageName) {
-    return utils_1.utils.exists(packageName, 'tsconfig.json');
-}
-exports.projectUsesTypeScript = projectUsesTypeScript;
 function buildTypeScript(packageName) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
@@ -51,91 +45,6 @@ function buildTypeScript(packageName) {
     });
 }
 exports.buildTypeScript = buildTypeScript;
-function setupTypeScript(name, withReact) {
-    return __awaiter(this, void 0, void 0, function () {
-        function ajust_packagejson() {
-            var packageJSON = utils_1.utils.getPackageJsonFor(name);
-            if (!packageJSON.scripts) {
-                packageJSON.scripts = {};
-            }
-            packageJSON.scripts.build = 'tsc';
-            packageJSON.scripts.watch = 'tsc -w';
-            packageJSON.scripts.lint = 'tslint --project .';
-            packageJSON.scripts.lintfix = 'tslint --project . --fix';
-            if (packageJSON.dependencies && packageJSON.dependencies.react)
-                withReact = true;
-            packageJSON.jest = {
-                transform: {
-                    '^.+\\.tsx?$': 'ts-jest',
-                },
-                testRegex: '(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$',
-                moduleFileExtensions: [
-                    'ts',
-                    'tsx',
-                    'js',
-                    'jsx',
-                    'json',
-                    'node',
-                ],
-                coveragePathIgnorePatterns: [
-                    '/node_modules/',
-                    '/dist/',
-                ],
-                collectCoverage: true,
-                coverageReporters: [
-                    'json-summary',
-                    'lcov',
-                    'text',
-                ],
-            };
-            fs_1.writeFileSync(utils_1.utils.path(name, 'package.json'), JSON.stringify(packageJSON, null, 2), 'utf-8');
-        }
-        function save_tsconfig() {
-            var tsconfig = JSON.parse(fs_1.readFileSync(path_1.resolve(path_1.join(__dirname, '../../tsconfig.json')), 'utf-8'));
-            if (withReact)
-                tsconfig.compilerOptions.lib.push('dom');
-            fs_1.writeFileSync(utils_1.utils.path(name, 'tsconfig.json'), JSON.stringify(tsconfig, null, 2), 'utf-8');
-        }
-        function save_tslint() {
-            var tslint = JSON.parse(fs_1.readFileSync(path_1.resolve(path_1.join(__dirname, '../../tslint.json')), 'utf-8'));
-            fs_1.writeFileSync(utils_1.utils.path(name, 'tslint.json'), JSON.stringify(tslint, null, 2), 'utf-8');
-        }
-        function install_pkgs() {
-            var argsDeps = [];
-            if (!/^@hoda5\/(hdev|h5global)$/g.test(name)) {
-                argsDeps.push('@hoda5/h5global@latest');
-            }
-            var argsDevs = [
-                'typescript@latest',
-                'tslint@latest',
-                'jest@latest',
-                'ts-jest@latest',
-                '@types/jest@latest',
-            ];
-            if (!/^@hoda5\/(hdev)$/g.test(name)) {
-                argsDevs.push('@hoda5/h5dev@latest');
-            }
-            if (withReact) {
-                argsDeps.push('react@latest');
-                argsDevs.push('@types/react@latest');
-            }
-            if (argsDeps.length) {
-                utils_1.utils.exec('npm', ['install', '--save'].concat(argsDeps), { cwd: utils_1.utils.path(name), title: '' });
-            }
-            if (argsDevs.length) {
-                utils_1.utils.exec('npm', ['install', '--save-dev'].concat(argsDevs), { cwd: utils_1.utils.path(name), title: '' });
-            }
-        }
-        return __generator(this, function (_a) {
-            ajust_packagejson();
-            save_tsconfig();
-            save_tslint();
-            install_pkgs();
-            return [2 /*return*/];
-        });
-    });
-}
-exports.setupTypeScript = setupTypeScript;
 // export async function buildTypeScript(name: string) {
 //     if (!utils.exists(name, 'tsconfig.json')) return;
 //     let allDiagnostics: Diagnostic[] = [];

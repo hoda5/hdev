@@ -1,4 +1,4 @@
-import { setupTypeScript } from './build/ts/build';
+import { setupTypeScript } from './build/ts/setup';
 import { utils } from './utils';
 
 export async function cmd_setup(args: any): Promise<boolean> {

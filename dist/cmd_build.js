@@ -35,6 +35,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+var setup_1 = require("./build/ts/setup");
 var build_1 = require("./build/ts/build");
 var utils_1 = require("./utils");
 function cmd_build(args) {
@@ -47,7 +48,7 @@ function cmd_build(args) {
                     name = args.packageName;
                     ok = false;
                     if (!name) return [3 /*break*/, 3];
-                    if (!build_1.projectUsesTypeScript(name)) return [3 /*break*/, 2];
+                    if (!setup_1.projectUsesTypeScript(name)) return [3 /*break*/, 2];
                     return [4 /*yield*/, build_1.buildTypeScript(name)];
                 case 1:
                     _a.sent();

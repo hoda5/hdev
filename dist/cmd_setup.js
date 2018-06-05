@@ -35,7 +35,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var build_1 = require("./build/ts/build");
+var setup_1 = require("./build/ts/setup");
 var utils_1 = require("./utils");
 function cmd_setup(args) {
     return __awaiter(this, void 0, void 0, function () {
@@ -46,11 +46,11 @@ function cmd_setup(args) {
             utils_1.utils.getPackageJsonFor(packageName);
             utils_1.utils.add_to_git_ignore(packageName, 'dist/**/*.test.*', 'dist/**/__tests__');
             if (tipo === 'typescript') {
-                build_1.setupTypeScript(packageName, false);
+                setup_1.setupTypeScript(packageName, false);
                 return [2 /*return*/, true];
             }
             else if (tipo === 'react') {
-                build_1.setupTypeScript(packageName, true);
+                setup_1.setupTypeScript(packageName, true);
                 return [2 /*return*/, true];
             }
             return [2 /*return*/, false];
