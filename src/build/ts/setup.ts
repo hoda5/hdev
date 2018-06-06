@@ -11,8 +11,8 @@ export async function setupTypeScript(name: string, withReact: boolean) {
   save_tsconfig();
   save_tslint();
   install_pkgs();
-  function ajust_packagejson() {
-    const packageJSON = utils.getPackageJsonFor(name);
+  async function ajust_packagejson() {
+    const packageJSON = await utils.getPackageJsonFor(name);
     if (!packageJSON.scripts) {
       packageJSON.scripts = {};
     }

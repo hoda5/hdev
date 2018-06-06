@@ -45,41 +45,51 @@ exports.projectUsesTypeScript = projectUsesTypeScript;
 function setupTypeScript(name, withReact) {
     return __awaiter(this, void 0, void 0, function () {
         function ajust_packagejson() {
-            var packageJSON = utils_1.utils.getPackageJsonFor(name);
-            if (!packageJSON.scripts) {
-                packageJSON.scripts = {};
-            }
-            packageJSON.scripts.build = 'tsc';
-            packageJSON.scripts.watch = 'tsc -w';
-            packageJSON.scripts.lint = 'tslint --project .';
-            packageJSON.scripts.lintfix = 'tslint --project . --fix';
-            if (packageJSON.dependencies && packageJSON.dependencies.react)
-                withReact = true;
-            packageJSON.jest = {
-                transform: {
-                    '^.+\\.tsx?$': 'ts-jest',
-                },
-                testRegex: '(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$',
-                moduleFileExtensions: [
-                    'ts',
-                    'tsx',
-                    'js',
-                    'jsx',
-                    'json',
-                    'node',
-                ],
-                coveragePathIgnorePatterns: [
-                    '/node_modules/',
-                    '/dist/',
-                ],
-                collectCoverage: true,
-                coverageReporters: [
-                    'json-summary',
-                    'lcov',
-                    'text',
-                ],
-            };
-            fs_1.writeFileSync(utils_1.utils.path(name, 'package.json'), JSON.stringify(packageJSON, null, 2), 'utf-8');
+            return __awaiter(this, void 0, void 0, function () {
+                var packageJSON;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0: return [4 /*yield*/, utils_1.utils.getPackageJsonFor(name)];
+                        case 1:
+                            packageJSON = _a.sent();
+                            if (!packageJSON.scripts) {
+                                packageJSON.scripts = {};
+                            }
+                            packageJSON.scripts.build = 'tsc';
+                            packageJSON.scripts.watch = 'tsc -w';
+                            packageJSON.scripts.lint = 'tslint --project .';
+                            packageJSON.scripts.lintfix = 'tslint --project . --fix';
+                            if (packageJSON.dependencies && packageJSON.dependencies.react)
+                                withReact = true;
+                            packageJSON.jest = {
+                                transform: {
+                                    '^.+\\.tsx?$': 'ts-jest',
+                                },
+                                testRegex: '(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$',
+                                moduleFileExtensions: [
+                                    'ts',
+                                    'tsx',
+                                    'js',
+                                    'jsx',
+                                    'json',
+                                    'node',
+                                ],
+                                coveragePathIgnorePatterns: [
+                                    '/node_modules/',
+                                    '/dist/',
+                                ],
+                                collectCoverage: true,
+                                coverageReporters: [
+                                    'json-summary',
+                                    'lcov',
+                                    'text',
+                                ],
+                            };
+                            fs_1.writeFileSync(utils_1.utils.path(name, 'package.json'), JSON.stringify(packageJSON, null, 2), 'utf-8');
+                            return [2 /*return*/];
+                    }
+                });
+            });
         }
         function save_tsconfig() {
             var tsconfig = JSON.parse(fs_1.readFileSync(path_1.resolve(path_1.join(__dirname, '../../tsconfig.json')), 'utf-8'));

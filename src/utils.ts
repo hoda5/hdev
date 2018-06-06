@@ -1,7 +1,7 @@
 import { wrap } from 'bash-color';
 import { spawn, SpawnOptions, spawnSync, ChildProcess } from 'child_process';
 import { EventEmitter } from 'events';
-import { existsSync, readdirSync, readFileSync, writeFileSync } from 'fs';
+import { existsSync, readdirSync, readFileSync, writeFileSync, unlink } from 'fs';
 import { basename, dirname, join } from 'path';
 
 export interface PackageJSON {
@@ -53,29 +53,8 @@ export interface TestResults {
   errors: SrcMessage[],
   warnings: SrcMessage[],
 }
-const nodify: {
-  nodify(fn: (cb: (err: Error) => any) => any): Promise<void>
-  nodify<R>(fn: (cb: (err: Error, res: R) => any) => any): Promise<R>
-  nodify<A1>(fn: (a1: A1, cb: (err: Error) => any) => any, a1: A1): Promise<void>;
-  nodify<A1, R>(fn: (a1: A1, cb: (err: Error, res: R) => any) => any, a1: A1): Promise<R>;
-  nodify<A1, A2>(fn: (a1: A1, a2: A2, cb: (err: Error) => any) => any, a1: A2, a2: A2): Promise<void>;
-  nodify<A1, A2, R>(fn: (a1: A1, a2: A2, cb: (err: Error, res: R) => any) => any, a1: A2, a2: A2): Promise<R>;
-  nodify<A1, A2, A3>(
-    fn: (a1: A1, a2: A2, a3: A3, cb: (err: Error) => any) => any,
-    a1: A2, a2: A2, a3: A3): Promise<void>;
-  nodify<A1, A2, A3, R>(
-    fn: (a1: A1, a2: A2, a3: A3, cb: (err: Error, res: R) => any) => any,
-    a1: A2, a2: A2, a3: A3): Promise<R>;
-} = {
-    nodify(fn: any, ...args: any[]): Promise<any> {
-      return new Promise((pmResolve, pmReject) => {
-        fn.apply(null, [...args, (err: any, res: any) => {
-          if (err) pmReject(err);
-          else pmResolve(res);
-        }]);
-      });
-    },
-  }
+
+
 
 export const utils = {
   verbose: false,
@@ -420,6 +399,16 @@ export const utils = {
       });
     return limiter;
   },
+  async removeFiles(filenames: string[]) {
+    await Promise.all(filenames.map(async (fn) => {
+      return new Promise((pmResolve, pmReject) => {
+        unlink(fn, (err) => {
+          if (err) pmReject(err);
+          else pmResolve();
+        });
+      });
+    }));
+  },
   loc(m: SrcMessage) {
     if (m.stack) {
       const test = m.stack.filter((s) => /\.test\.ts$/g.test(s.file));
@@ -438,8 +427,8 @@ export const utils = {
       ].join(' '),
     );
   },
-  ...nodify
 };
+
 const root = findRoot(process.cwd());
 
 function findRoot(folder: string) {

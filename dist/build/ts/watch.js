@@ -53,14 +53,13 @@ function watchTypeScript(packageName) {
                             _a.label = 2;
                         case 2:
                             _a.trys.push([2, 6, 7, 8]);
-                            return [4 /*yield*/, utils_1.utils.pipe('npm', ['test'], {
-                                    title: procName + '_tst',
-                                    cwd: utils_1.utils.path(packageName),
-                                    verbose: false,
-                                    throwErrors: true,
+                            return [4 /*yield*/, utils_1.utils.spawn('npm', ['test'], {
+                                    name: procName + '_tst',
+                                    cwd: utils_1.utils.path(packageName)
                                 })];
                         case 3:
-                            _a.sent();
+                            procTest = _a.sent();
+                            console.log('processTestResult');
                             return [4 /*yield*/, processTestResult()];
                         case 4:
                             _a.sent();
@@ -77,7 +76,6 @@ function watchTypeScript(packageName) {
                             if (events) {
                                 events.onFinished(watcher);
                             }
-                            console.log('finished');
                             return [7 /*endfinally*/];
                         case 8: return [2 /*return*/];
                     }
@@ -102,6 +100,7 @@ function watchTypeScript(packageName) {
                 var summary;
                 return __generator(this, function (_a) {
                     summary = utils_1.utils.readTestResult(packageName);
+                    console.dir({ summary: summary });
                     if (summary) {
                         errors.push.apply(errors, summary.errors);
                         warnings.push.apply(warnings, summary.warnings);

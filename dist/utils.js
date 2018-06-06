@@ -1,12 +1,4 @@
 "use strict";
-var __assign = (this && this.__assign) || Object.assign || function(t) {
-    for (var s, i = 1, n = arguments.length; i < n; i++) {
-        s = arguments[i];
-        for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-            t[p] = s[p];
-    }
-    return t;
-};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -48,23 +40,9 @@ var child_process_1 = require("child_process");
 var events_1 = require("events");
 var fs_1 = require("fs");
 var path_1 = require("path");
-var nodify = {
-    nodify: function (fn) {
-        var args = [];
-        for (var _i = 1; _i < arguments.length; _i++) {
-            args[_i - 1] = arguments[_i];
-        }
-        return new Promise(function (pmResolve, pmReject) {
-            fn.apply(null, args.concat([function (err, res) {
-                    if (err)
-                        pmReject(err);
-                    else
-                        pmResolve(res);
-                }]));
-        });
-    },
-};
-exports.utils = __assign({ verbose: false, get root() {
+exports.utils = {
+    verbose: false,
+    get root() {
         return root;
     },
     get workspaceFile() {
@@ -438,6 +416,30 @@ exports.utils = __assign({ verbose: false, get root() {
         });
         return limiter;
     },
+    removeFiles: function (filenames) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _this = this;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, Promise.all(filenames.map(function (fn) { return __awaiter(_this, void 0, void 0, function () {
+                            return __generator(this, function (_a) {
+                                return [2 /*return*/, new Promise(function (pmResolve, pmReject) {
+                                        fs_1.unlink(fn, function (err) {
+                                            if (err)
+                                                pmReject(err);
+                                            else
+                                                pmResolve();
+                                        });
+                                    })];
+                            });
+                        }); }))];
+                    case 1:
+                        _a.sent();
+                        return [2 /*return*/];
+                }
+            });
+        });
+    },
     loc: function (m) {
         if (m.stack) {
             var test_1 = m.stack.filter(function (s) { return /\.test\.ts$/g.test(s.file); });
@@ -458,7 +460,8 @@ exports.utils = __assign({ verbose: false, get root() {
         console.log([
             bash_color_1.wrap(title + ': ', 'PURPLE', 'background')
         ].concat(args.map(function (a) { return bash_color_1.wrap(JSON.stringify(a), 'BLUE', 'background'); })).join(' '));
-    } }, nodify);
+    },
+};
 var root = findRoot(process.cwd());
 function findRoot(folder) {
     var _loop_1 = function () {

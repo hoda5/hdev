@@ -167,40 +167,58 @@ function testTypeScript(packageName, failOnWarnings) {
                 });
             });
         }
-        var pkgPath, mocha, mapCache, warnings, errors, result;
+        var pkgPath, e_2, mocha, mapCache, warnings, errors, result;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     pkgPath = utils_1.utils.path(packageName);
-                    return [4 /*yield*/, utils_1.utils.pipe('node', [
-                            pkgPath + '/node_modules/@hoda5/hdev/node_modules/nyc/bin/nyc.js',
-                            '--reporter=html', '--reporter=json-summary',
-                            pkgPath + '/node_modules/@hoda5/hdev/node_modules/mocha/bin/mocha',
-                            // s + '/mocha/bin/mocha',
-                            '--reporter=json',
-                            '--timeout=5000',
-                            pkgPath + '/dist/**/*.test.js',
-                        ], {
-                            cwd: utils_1.utils.path(packageName),
-                            title: '',
-                        })];
+                    _a.label = 1;
                 case 1:
+                    _a.trys.push([1, 3, , 4]);
+                    return [4 /*yield*/, utils_1.utils.removeFiles([
+                            utils_1.utils.path('coverage/h5-test-report.json'),
+                            utils_1.utils.path('coverage/coverage-summary.json')
+                        ])];
+                case 2:
+                    _a.sent();
+                    return [3 /*break*/, 4];
+                case 3:
+                    e_2 = _a.sent();
+                    return [3 /*break*/, 4];
+                case 4: return [4 /*yield*/, utils_1.utils.pipe('node', [
+                        pkgPath + '/node_modules/@hoda5/hdev/node_modules/nyc/bin/nyc.js',
+                        '--reporter=html', '--reporter=json-summary',
+                        pkgPath + '/node_modules/@hoda5/hdev/node_modules/mocha/bin/mocha',
+                        // s + '/mocha/bin/mocha',
+                        '--reporter=json',
+                        '--timeout=5000',
+                        pkgPath + '/dist/**/*.test.js',
+                    ], {
+                        cwd: utils_1.utils.path(packageName),
+                        title: '',
+                    })];
+                case 5:
                     mocha = _a.sent();
                     mapCache = {};
                     warnings = [];
                     errors = [];
                     return [4 /*yield*/, parseTestResult(mocha.out)];
-                case 2:
+                case 6:
                     _a.sent();
                     result = {
                         packageName: packageName,
                         warnings: warnings,
                         errors: errors,
                     };
-                    return [4 /*yield*/, utils_1.utils.nodify(fs_1.writeFile, pkgPath + '/coverage/h5-test-report.json', JSON.stringify(result), {
-                            encoding: 'utf8',
+                    return [4 /*yield*/, new Promise(function (pmResolve, pmReject) {
+                            fs_1.writeFile(pkgPath + '/coverage/h5-test-report.json', JSON.stringify(result), function (err) {
+                                if (err)
+                                    pmReject(err);
+                                else
+                                    pmResolve();
+                            });
                         })];
-                case 3:
+                case 7:
                     _a.sent();
                     if (errors.length) {
                         utils_1.utils.debug(packageName, errors.map(function (err) {

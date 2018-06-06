@@ -57,14 +57,14 @@ export function initUi(logMode: boolean) {
         w.errors.forEach((m) => {
           const loc = utils.loc(m);
           contentScreen.push([
-            loc ? (
+            (loc ? 
               loc.file +
               '(' +
               loc.row +
               ',' +
               loc.col +
               ') '
-            ) : '',
+             : ''),
             w.packageName,
             '\n  ',
             m.msg,

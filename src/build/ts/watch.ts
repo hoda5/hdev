@@ -81,7 +81,7 @@ export async function watchTypeScript(packageName: string): Promise<Watcher | un
     },
     stop() {
       warnings = [];
-      errors = [{msg: 'stopped' }];
+      errors = [{ msg: 'stopped' }];
       return procBuild.stop();
     },
   };
@@ -91,14 +91,12 @@ export async function watchTypeScript(packageName: string): Promise<Watcher | un
     coverage = undefined;
     await abortTesting();
     testing = true;
-    try {
-      await utils.pipe('npm', ['test'], {
-        title: procName + '_tst',
-        cwd: utils.path(packageName),
-        verbose: false,
-        throwErrors: true,
+    try {       
+      procTest = await utils.spawn('npm', ['test'], {
+        name: procName + '_tst',
+        cwd: utils.path(packageName)
       });
-
+      console.log('processTestResult')
       await processTestResult();
       await processCoverageResult();
     } catch (e) {
@@ -108,7 +106,6 @@ export async function watchTypeScript(packageName: string): Promise<Watcher | un
     } finally {
       testing = false;
       if (events) { events.onFinished(watcher); }
-      console.log('finished')
     }
   }
   async function abortTesting() {
@@ -119,6 +116,7 @@ export async function watchTypeScript(packageName: string): Promise<Watcher | un
   }
   async function processTestResult() {
     const summary = utils.readTestResult(packageName);
+    console.dir({ summary })
     if (summary) {
       errors.push(...summary.errors);
       warnings.push(...summary.warnings);

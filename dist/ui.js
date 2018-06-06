@@ -54,12 +54,14 @@ function initUi(logMode) {
                 w.errors.forEach(function (m) {
                     var loc = utils_1.utils.loc(m);
                     contentScreen.push([
-                        loc ? (loc.file +
-                            '(' +
-                            loc.row +
-                            ',' +
-                            loc.col +
-                            ') ') : '',
+                        (loc ?
+                            loc.file +
+                                '(' +
+                                loc.row +
+                                ',' +
+                                loc.col +
+                                ') '
+                            : ''),
                         w.packageName,
                         '\n  ',
                         m.msg,

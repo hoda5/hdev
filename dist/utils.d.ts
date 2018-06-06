@@ -48,17 +48,9 @@ export interface TestResults {
     warnings: SrcMessage[];
 }
 export declare const utils: {
-    nodify(fn: (cb: (err: Error) => any) => any): Promise<void>;
-    nodify<R>(fn: (cb: (err: Error, res: R) => any) => any): Promise<R>;
-    nodify<A1>(fn: (a1: A1, cb: (err: Error) => any) => any, a1: A1): Promise<void>;
-    nodify<A1, R>(fn: (a1: A1, cb: (err: Error, res: R) => any) => any, a1: A1): Promise<R>;
-    nodify<A1, A2>(fn: (a1: A1, a2: A2, cb: (err: Error) => any) => any, a1: A2, a2: A2): Promise<void>;
-    nodify<A1, A2, R>(fn: (a1: A1, a2: A2, cb: (err: Error, res: R) => any) => any, a1: A2, a2: A2): Promise<R>;
-    nodify<A1, A2, A3>(fn: (a1: A1, a2: A2, a3: A3, cb: (err: Error) => any) => any, a1: A2, a2: A2, a3: A3): Promise<void>;
-    nodify<A1, A2, A3, R>(fn: (a1: A1, a2: A2, a3: A3, cb: (err: Error, res: R) => any) => any, a1: A2, a2: A2, a3: A3): Promise<R>;
     verbose: boolean;
-    root: string;
-    workspaceFile: string;
+    readonly root: string;
+    readonly workspaceFile: string;
     displayFolderName(packageName: string): string;
     listPackages(): string[];
     forEachPackage(fn: (packageName: string, folder: string) => Promise<void>): Promise<boolean>;
@@ -110,6 +102,7 @@ export declare const utils: {
         pending: boolean;
         cancel(): void;
     };
+    removeFiles(filenames: string[]): Promise<void>;
     loc(m: SrcMessage): SrcMessageLoc | undefined;
     debug(title: string, ...args: any[]): void;
 };

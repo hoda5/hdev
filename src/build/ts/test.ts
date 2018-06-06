@@ -1,13 +1,21 @@
 // import * as NYC from 'nyc';
 // import * as Mocha from 'mocha';
 import { utils, SrcMessage, TestResults } from '../../utils';
-import { writeFile } from 'fs';
+import { writeFile, unlink } from 'fs';
 import { ErrorFailure, getSourceMapConsumer } from '../sourcemap';
 import * as ErrorStackParser from 'error-stack-parser';
 import { BasicSourceMapConsumer } from 'source-map/source-map';
 
 export async function testTypeScript(packageName: string, failOnWarnings: boolean): Promise<number> {
   const pkgPath = utils.path(packageName);
+  try {
+    await utils.removeFiles(
+      [
+        utils.path('coverage/h5-test-report.json'),
+        utils.path('coverage/coverage-summary.json')
+      ]
+    );
+  } catch (e) { }
   const mocha = await utils.pipe('node',
     [
       pkgPath + '/node_modules/@hoda5/hdev/node_modules/nyc/bin/nyc.js',
@@ -34,12 +42,16 @@ export async function testTypeScript(packageName: string, failOnWarnings: boolea
     errors,
   };
 
-  await utils.nodify(
-    writeFile,
-    pkgPath + '/coverage/h5-test-report.json',
-    JSON.stringify(result), {
-      encoding: 'utf8',
-    });
+  await new Promise((pmResolve, pmReject) => {
+    writeFile(
+      pkgPath + '/coverage/h5-test-report.json',
+      JSON.stringify(result),
+      (err) => {
+        if (err) pmReject(err)
+        else pmResolve();
+      }
+    );
+  });
 
   if (errors.length) {
     utils.debug(packageName,
