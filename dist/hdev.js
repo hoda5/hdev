@@ -146,7 +146,7 @@ function cmd(fn, showrep, validrep, validPkg) {
             console.log(bash_color_1.wrap('repositorio: ', 'GREEN', 'background') +
                 bash_color_1.wrap(utils_1.utils.root, 'GREEN', 'background'));
         }
-        if (validPkg && validrep) {
+        if (validPkg) {
             args.packageName = completPackageName(args.packageName);
             if (utils_1.utils.verbose)
                 utils_1.utils.debug('packageName', args.packageName);
@@ -168,6 +168,8 @@ function completeWithPackageName() {
 }
 function completPackageName(s) {
     if (!s) {
+        if (utils_1.utils.verbose)
+            utils_1.utils.debug('cwd', process.cwd());
         s = process.cwd().substr((utils_1.utils.root + '/packages/').length);
     }
     if (utils_1.utils.listPackages().indexOf(s) > -1)

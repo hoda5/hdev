@@ -1,1 +1,1 @@
-{"version":3,"file":"hdevlib.js","sourceRoot":"","sources":["../src/hdevlib.ts"],"names":[],"mappings":";;AAAA,+BAAqC;AAG5B,mBAHA,gBAAQ,CAGA;AAAE,aAHA,UAAE,CAGA;AAFrB,6BAA8B;AAEP,iBAFd,aAAM,CAEc;AAE7B,mBAAmB"}
+{"version":3,"file":"hdevlib.js","sourceRoot":"","sources":["../src/hdevlib.ts"],"names":[],"mappings":";;AAAA,6BAA+B;AAQ3B,sBAAK;AAPT,6BAA0C;AAIzC,MAAc,CAAC,MAAM,GAAG,aAAQ,CAAC;AAMlC,4CAA4C;AAC5C,0BAA0B;AAC1B,qDAAqD;AACrD,WAAW;AACX,gBAAgB;AAChB,UAAU;AACV,aAAa;AACb,KAAK;AAEL,mBAAmB"}

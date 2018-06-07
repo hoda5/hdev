@@ -129,7 +129,7 @@ function cmd(fn: ActionCallback, showrep = true, validrep = true, validPkg: bool
                 wrap(utils.root, 'GREEN', 'background'),
             );
         }
-        if (validPkg && validrep) {
+        if (validPkg) {
             args.packageName = completPackageName(args.packageName);
             if (utils.verbose) utils.debug('packageName', args.packageName);
         }
@@ -147,6 +147,7 @@ async function completeWithPackageName() {
 
 function completPackageName(s: string) {
     if (!s) {
+        if (utils.verbose) utils.debug('cwd', process.cwd());
         s = process.cwd().substr((utils.root + '/packages/').length);
     }
     if (utils.listPackages().indexOf(s) > -1) return s;

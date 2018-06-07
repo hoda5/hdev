@@ -16,10 +16,10 @@ export async function testTypeScript(packageName: string, failOnWarnings: boolea
       ]
     );
   } catch (e) { }
-  const mocha = await utils.pipe('node',
+  const mocha = await utils.pipe('npx',
     [
       //pkgPath + '/node_modules/@hoda5/hdev/node_modules/nyc/bin/nyc.js',
-      'npx nyc',
+      'nyc',
       '--reporter=html', '--reporter=json-summary',
       //pkgPath + '/node_modules/@hoda5/hdev/node_modules/mocha/bin/mocha',
       'mocha',
@@ -34,6 +34,7 @@ export async function testTypeScript(packageName: string, failOnWarnings: boolea
       title: '',
     },
   );
+  if (utils.verbose) utils.debug('mocha out', mocha.err, mocha.out);
   let mapCache: { [name: string]: BasicSourceMapConsumer } = {};
   const warnings: SrcMessage[] = [];
   const errors: SrcMessage[] = [];
@@ -66,6 +67,14 @@ export async function testTypeScript(packageName: string, failOnWarnings: boolea
     );
     return 1;
   }
+  else {
+    console.log('testes: OK');
+  }
+  const coverage = utils.readCoverageSummary(packageName);
+  if (coverage)
+    console.log('Cobertura: ' + coverage.lines.pct + '%');
+  else
+    console.log('Cobertura: SEM INFORMAÇÕES SOBRE COBERTURA DE TESTES');
   if (failOnWarnings && warnings.length) return 2;
   return 0;
 

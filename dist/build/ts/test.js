@@ -167,7 +167,7 @@ function testTypeScript(packageName, failOnWarnings) {
                 });
             });
         }
-        var pkgPath, e_2, mocha, mapCache, warnings, errors, result;
+        var pkgPath, e_2, mocha, mapCache, warnings, errors, result, coverage;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -185,9 +185,9 @@ function testTypeScript(packageName, failOnWarnings) {
                 case 3:
                     e_2 = _a.sent();
                     return [3 /*break*/, 4];
-                case 4: return [4 /*yield*/, utils_1.utils.pipe('node', [
+                case 4: return [4 /*yield*/, utils_1.utils.pipe('npx', [
                         //pkgPath + '/node_modules/@hoda5/hdev/node_modules/nyc/bin/nyc.js',
-                        'npx nyc',
+                        'nyc',
                         '--reporter=html', '--reporter=json-summary',
                         //pkgPath + '/node_modules/@hoda5/hdev/node_modules/mocha/bin/mocha',
                         'mocha',
@@ -202,6 +202,8 @@ function testTypeScript(packageName, failOnWarnings) {
                     })];
                 case 5:
                     mocha = _a.sent();
+                    if (utils_1.utils.verbose)
+                        utils_1.utils.debug('mocha out', mocha.err, mocha.out);
                     mapCache = {};
                     warnings = [];
                     errors = [];
@@ -231,6 +233,14 @@ function testTypeScript(packageName, failOnWarnings) {
                         }));
                         return [2 /*return*/, 1];
                     }
+                    else {
+                        console.log('testes: OK');
+                    }
+                    coverage = utils_1.utils.readCoverageSummary(packageName);
+                    if (coverage)
+                        console.log('Cobertura: ' + coverage.lines.pct + '%');
+                    else
+                        console.log('Cobertura: SEM INFORMAÇÕES SOBRE COBERTURA DE TESTES');
                     if (failOnWarnings && warnings.length)
                         return [2 /*return*/, 2];
                     return [2 /*return*/, 0];
