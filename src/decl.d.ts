@@ -91,3 +91,5 @@ declare module "nyc" {
 
     export = NYC;
 }
+
+

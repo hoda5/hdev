@@ -177,7 +177,7 @@ function testTypeScript(packageName, failOnWarnings) {
                     _a.trys.push([1, 3, , 4]);
                     return [4 /*yield*/, utils_1.utils.removeFiles([
                             utils_1.utils.path('coverage/h5-test-report.json'),
-                            utils_1.utils.path('coverage/coverage-summary.json')
+                            utils_1.utils.path('coverage/coverage-summary.json'),
                         ])];
                 case 2:
                     _a.sent();
@@ -192,6 +192,7 @@ function testTypeScript(packageName, failOnWarnings) {
                         // s + '/mocha/bin/mocha',
                         '--reporter=json',
                         '--timeout=5000',
+                        '--inline-diffs',
                         pkgPath + '/dist/**/*.test.js',
                     ], {
                         cwd: utils_1.utils.path(packageName),
