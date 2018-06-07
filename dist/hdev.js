@@ -62,7 +62,7 @@ prog.command('status', 'Status dos repositorios')
 prog.command('clone', 'Adiciona um repositorio')
     .argument('<url>', 'repositório git')
     .argument('[package name]', 'Nome do pacote')
-    .action(cmd(cmd_clone_1.cmd_clone));
+    .action(cmd(cmd_clone_1.cmd_clone, true, true, false));
 prog.command('remove', 'Remove um repositorio')
     .argument('[package name]', 'Nome do pacote')
     .complete(completeWithPackageName)
@@ -121,9 +121,10 @@ prog.command('run', 'executa um comando na pasta do pacote')
 prog.command('setup-environment', 'Configura o hdev no computador')
     .action(cmd_setup_environment_1.cmd_setup_environment);
 prog.parse(process.argv);
-function cmd(fn, showrep, validrep) {
+function cmd(fn, showrep, validrep, validPkg) {
     if (showrep === void 0) { showrep = true; }
     if (validrep === void 0) { validrep = true; }
+    if (validPkg === void 0) { validPkg = true; }
     return function (args, options) {
         if (!cmd_setup_environment_1.check_environment()) {
             // tslint:disable-next-line:no-console
@@ -145,7 +146,8 @@ function cmd(fn, showrep, validrep) {
             console.log(bash_color_1.wrap('repositorio: ', 'GREEN', 'background') +
                 bash_color_1.wrap(utils_1.utils.root, 'GREEN', 'background'));
         }
-        args.packageName = completPackageName(args.packageName);
+        if (validPkg && validrep)
+            args.packageName = completPackageName(args.packageName);
         fn(args, options).then(function (ok) {
             if (!ok)
                 prog.help('hdev');

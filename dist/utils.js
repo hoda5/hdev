@@ -124,6 +124,8 @@ exports.utils = {
         return fs_1.readFileSync(exports.utils.path(packageName, filename), { encoding: 'utf-8' });
     },
     readJSON: function (packageName, filename) {
+        if (exports.utils.verbose)
+            exports.utils.debug('readJSON: ' + packageName, filename);
         return JSON.parse(exports.utils.readText(packageName, filename));
     },
     readTestResult: function (packageName) {
@@ -165,7 +167,7 @@ exports.utils = {
     },
     pipe: function (cmd, args, opts) {
         return new Promise(function (pmResolve, pmReject) {
-            if (opts.verbose) {
+            if (opts.verbose || exports.utils.verbose) {
                 if (opts.title) {
                     // tslint:disable-next-line
                     console.log(bash_color_1.wrap(opts.title, 'RED', 'background'));

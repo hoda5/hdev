@@ -30,7 +30,7 @@ prog.command('status', 'Status dos repositorios')
 prog.command('clone', 'Adiciona um repositorio')
     .argument('<url>', 'repositório git')
     .argument('[package name]', 'Nome do pacote')
-    .action(cmd(cmd_clone));
+    .action(cmd(cmd_clone, true, true, false));
 
 prog.command('remove', 'Remove um repositorio')
     .argument('[package name]', 'Nome do pacote')
@@ -101,7 +101,7 @@ prog.command('setup-environment', 'Configura o hdev no computador')
 prog.parse(process.argv);
 
 type ActionCallback = (args: any, options: any) => Promise<boolean>;
-function cmd(fn: ActionCallback, showrep = true, validrep = true) {
+function cmd(fn: ActionCallback, showrep = true, validrep = true, validPkg: boolean = true) {
     return (args: any, options: any) => {
 
         if (!check_environment()) {
@@ -129,7 +129,8 @@ function cmd(fn: ActionCallback, showrep = true, validrep = true) {
                 wrap(utils.root, 'GREEN', 'background'),
             );
         }
-        args.packageName = completPackageName(args.packageName);
+        if (validPkg && validrep)
+            args.packageName = completPackageName(args.packageName);
         fn(args, options).then((ok: boolean) => {
             if (!ok) prog.help('hdev');
         }, console.log);

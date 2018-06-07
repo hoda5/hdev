@@ -125,6 +125,7 @@ export const utils = {
     );
   },
   readJSON<T>(packageName: string, filename: string): T {
+    if (utils.verbose) utils.debug('readJSON: '+packageName, filename);
     return JSON.parse(utils.readText(packageName, filename)) as T;
   },
   readTestResult(packageName: string): TestResults | undefined {
@@ -175,7 +176,7 @@ export const utils = {
     args: string[],
     opts: { cwd: string, title: string, verbose?: boolean, throwErrors?: boolean }) {
     return new Promise<{ out: string, err: string }>((pmResolve, pmReject) => {
-      if (opts.verbose) {
+      if (opts.verbose || utils.verbose) {
         if (opts.title) {
           // tslint:disable-next-line
           console.log(
