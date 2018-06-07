@@ -18,9 +18,11 @@ export async function testTypeScript(packageName: string, failOnWarnings: boolea
   } catch (e) { }
   const mocha = await utils.pipe('node',
     [
-      pkgPath + '/node_modules/@hoda5/hdev/node_modules/nyc/bin/nyc.js',
+      //pkgPath + '/node_modules/@hoda5/hdev/node_modules/nyc/bin/nyc.js',
+      'npx nyc',
       '--reporter=html', '--reporter=json-summary',
-      pkgPath + '/node_modules/@hoda5/hdev/node_modules/mocha/bin/mocha',
+      //pkgPath + '/node_modules/@hoda5/hdev/node_modules/mocha/bin/mocha',
+      'mocha',
       // s + '/mocha/bin/mocha',
       '--reporter=json',
       '--timeout=5000',

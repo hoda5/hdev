@@ -40,7 +40,6 @@ var setup_1 = require("./build/ts/setup");
 var test_1 = require("./build/ts/test");
 function cmd_test(args) {
     return __awaiter(this, void 0, void 0, function () {
-        var _this = this;
         var name, failOnWarning, ok, code, _a;
         return __generator(this, function (_b) {
             switch (_b.label) {
@@ -57,25 +56,11 @@ function cmd_test(args) {
                     code = _a + _b.sent();
                     ok = true;
                     _b.label = 2;
-                case 2: return [3 /*break*/, 5];
-                case 3: return [4 /*yield*/, utils_1.utils.forEachPackage(function (pkg) { return __awaiter(_this, void 0, void 0, function () {
-                        var _a;
-                        return __generator(this, function (_b) {
-                            switch (_b.label) {
-                                case 0:
-                                    _a = code;
-                                    return [4 /*yield*/, test_1.testTypeScript(pkg, failOnWarning)];
-                                case 1:
-                                    code = _a + _b.sent();
-                                    ok = true;
-                                    return [2 /*return*/];
-                            }
-                        });
-                    }); })];
+                case 2: return [3 /*break*/, 4];
+                case 3:
+                    utils_1.utils.throw('invalid package name');
+                    _b.label = 4;
                 case 4:
-                    _b.sent();
-                    _b.label = 5;
-                case 5:
                     if (code)
                         process.exit(code);
                     return [2 /*return*/, ok];

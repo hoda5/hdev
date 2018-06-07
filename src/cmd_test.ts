@@ -13,10 +13,11 @@ export async function cmd_test(args: any): Promise<boolean> {
       ok = true;
     }
   } else {
-    await utils.forEachPackage(async (pkg) => {
-      code += await testTypeScript(pkg, failOnWarning);
-      ok = true;
-    });
+    utils.throw('invalid package name');
+    // await utils.forEachPackage(async (pkg) => {
+    //   code += await testTypeScript(pkg, failOnWarning);
+    //   ok = true;
+    // });
   }
   if (code) process.exit(code);
   return ok;

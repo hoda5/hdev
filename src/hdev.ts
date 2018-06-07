@@ -122,15 +122,17 @@ function cmd(fn: ActionCallback, showrep = true, validrep = true, validPkg: bool
         const lv = cap && cap.level;
         // console.dir({ l, ts, cap, lv })
         utils.verbose = lv === 'debug';
-        if (showrep) {
+        if (showrep || utils.verbose) {
             // tslint:disable-next-line
             console.log(
                 wrap('repositorio: ', 'GREEN', 'background') +
                 wrap(utils.root, 'GREEN', 'background'),
             );
         }
-        if (validPkg && validrep)
+        if (validPkg && validrep) {
             args.packageName = completPackageName(args.packageName);
+            if (utils.verbose) utils.debug('packageName', args.packageName);
+        }
         fn(args, options).then((ok: boolean) => {
             if (!ok) prog.help('hdev');
         }, console.log);

@@ -186,9 +186,11 @@ function testTypeScript(packageName, failOnWarnings) {
                     e_2 = _a.sent();
                     return [3 /*break*/, 4];
                 case 4: return [4 /*yield*/, utils_1.utils.pipe('node', [
-                        pkgPath + '/node_modules/@hoda5/hdev/node_modules/nyc/bin/nyc.js',
+                        //pkgPath + '/node_modules/@hoda5/hdev/node_modules/nyc/bin/nyc.js',
+                        'npx nyc',
                         '--reporter=html', '--reporter=json-summary',
-                        pkgPath + '/node_modules/@hoda5/hdev/node_modules/mocha/bin/mocha',
+                        //pkgPath + '/node_modules/@hoda5/hdev/node_modules/mocha/bin/mocha',
+                        'mocha',
                         // s + '/mocha/bin/mocha',
                         '--reporter=json',
                         '--timeout=5000',

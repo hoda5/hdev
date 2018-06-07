@@ -141,13 +141,16 @@ function cmd(fn, showrep, validrep, validPkg) {
         var lv = cap && cap.level;
         // console.dir({ l, ts, cap, lv })
         utils_1.utils.verbose = lv === 'debug';
-        if (showrep) {
+        if (showrep || utils_1.utils.verbose) {
             // tslint:disable-next-line
             console.log(bash_color_1.wrap('repositorio: ', 'GREEN', 'background') +
                 bash_color_1.wrap(utils_1.utils.root, 'GREEN', 'background'));
         }
-        if (validPkg && validrep)
+        if (validPkg && validrep) {
             args.packageName = completPackageName(args.packageName);
+            if (utils_1.utils.verbose)
+                utils_1.utils.debug('packageName', args.packageName);
+        }
         fn(args, options).then(function (ok) {
             if (!ok)
                 prog.help('hdev');
