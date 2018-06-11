@@ -45,6 +45,7 @@ var cmd_init_1 = require("./cmd_init");
 var cmd_login_1 = require("./cmd_login");
 var cmd_rm_1 = require("./cmd_rm");
 var cmd_run_1 = require("./cmd_run");
+var cmd_link_1 = require("./cmd_link");
 var cmd_setup_1 = require("./cmd_setup");
 var cmd_start_1 = require("./cmd_start");
 var cmd_status_1 = require("./cmd_status");
@@ -109,8 +110,8 @@ prog.command('login', 'configura login do git/github')
 //     .action(cmd(todo));
 // prog.command('upgrade')
 //     .action(cmd(todo));
-// prog.command('link')
-//     .action(cmd(cmd_link));
+prog.command('link')
+    .action(cmd(cmd_link_1.cmd_link));
 prog.command('init', 'Inicializa na pasta atual como area de trabalho')
     .option('--subws', 'usado apenas para teste')
     .action(cmd(cmd_init_1.cmd_init, false, false));
