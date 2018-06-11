@@ -1,6 +1,6 @@
 import { utils } from './utils';
 
-export function cmd_link() {
+export async function cmd_link(args: any): Promise<boolean>{
   const allpackages: string[] = [];
   utils.forEachPackage(enable_link);
   utils.forEachPackage(link_packages);
@@ -39,4 +39,5 @@ export function cmd_link() {
         }
     });
   }
+  return true
 }

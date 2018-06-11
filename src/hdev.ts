@@ -9,6 +9,7 @@ import { cmd_init } from './cmd_init';
 import { cmd_login } from './cmd_login';
 import { cmd_rm } from './cmd_rm';
 import { cmd_run } from './cmd_run';
+import { cmd_link } from './cmd_link';
 import { cmd_setup } from './cmd_setup';
 import { cmd_start } from './cmd_start';
 import { cmd_status } from './cmd_status';
@@ -83,8 +84,8 @@ prog.command('login', 'configura login do git/github')
 //     .action(cmd(todo));
 // prog.command('upgrade')
 //     .action(cmd(todo));
-// prog.command('link')
-//     .action(cmd(cmd_link));
+prog.command('link', 'Constroi o link de toda arvore de dependencias do pacote')
+    .action(cmd(cmd_link));
 
 prog.command('init', 'Inicializa na pasta atual como area de trabalho')
     .option('--subws', 'usado apenas para teste')

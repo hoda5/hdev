@@ -110,7 +110,7 @@ prog.command('login', 'configura login do git/github')
 //     .action(cmd(todo));
 // prog.command('upgrade')
 //     .action(cmd(todo));
-prog.command('link')
+prog.command('link', 'Constroi o link de toda arvore de dependencias do pacote')
     .action(cmd(cmd_link_1.cmd_link));
 prog.command('init', 'Inicializa na pasta atual como area de trabalho')
     .option('--subws', 'usado apenas para teste')
