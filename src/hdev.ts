@@ -68,7 +68,7 @@ prog.command('stop', 'para o servidor de desenvolvimento')
     }, false));
 
 prog.command('login', 'configura login do git/github')
-    .argument('[package name]', 'Nome de usuario no servidor')
+    .argument('<usuario>', 'Nome de usuario no servidor')
     .argument('<email>', 'email')
     .action(cmd(cmd_login, false));
 

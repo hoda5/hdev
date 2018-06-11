@@ -2,7 +2,7 @@
 import { utils } from './utils';
 
 export async function cmd_login(args: any): Promise<boolean> {
-  const name: string = args.packageName;
+  const name: string = args.usuario;
   const email: string = args.email;
   utils.exec(
         'git', [
